@@ -40,6 +40,13 @@ Mehr: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 [`docs/EDITIONS.md`](docs/EDITIONS.md) ·
 [`docs/DEPLOY.md`](docs/DEPLOY.md)
 
+## Sicherheits-Schulden
+
+Bekannte, noch nicht behobene Findings stehen in
+[`docs/security-todos.md`](docs/security-todos.md). Aktuell: ein
+Critical-Finding (hardcoded DB-Credentials in `server/calendar_module.py`).
+Wird nach der Migration in einem eigenen Sprint behoben.
+
 ## Lizenz
 
 MIT — siehe [`LICENSE.md`](LICENSE.md).
