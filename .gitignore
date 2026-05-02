@@ -45,6 +45,14 @@ anthropic_key*
 *.log
 logs/
 
+# Marketing-Pool — generierte Bilder (Firefly via Cron-Importer).
+# Bilder gehören perspektivisch in S3-kompatiblen Object-Store oder Git LFS,
+# nicht ins Repo. Pfad bleibt im Tree, Inhalt nicht.
+marketing_assets/pool/**/*.jpg
+marketing_assets/pool/**/*.jpeg
+marketing_assets/pool/**/*.png
+marketing_assets/pool/**/*.webp
+
 # Editor / OS
 .vscode/
 .idea/
