@@ -48,11 +48,15 @@ Mehr: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 
 ## Tech-Schulden
 
-Bekannte, noch nicht behobene Findings stehen in
-[`docs/tech-debt.md`](docs/tech-debt.md). Zwei Kategorien:
-**Critical Security Debt** (hardcoded DB-Credentials in `server/calendar_module.py`)
-und **Unfinished Refactors** (Document-Compression-Split). Beide bekommen
-eigene Mini-Sprints nach Phase 6.
+Bekannte Findings stehen in [`docs/tech-debt.md`](docs/tech-debt.md).
+Stand: das ehemalige **Critical Security Debt** (hardcoded DB-Credentials)
+ist code-seitig in Phase 7 aufgelöst — alle Connection-Strings laufen
+jetzt über `DATABASE_URL` mit Hard-Fail-Pattern in `server/database.py`.
+Server-seitige Passwort-Rotation und Cron-ENV-Setup folgen unmittelbar
+danach.
+
+Noch offen: ein **Unfinished Refactor** (Document-Compression-Split,
+nicht Service-kritisch).
 
 ## Lizenz
 

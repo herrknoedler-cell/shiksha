@@ -83,12 +83,60 @@ Synct nur `server/marketing_templates/` und `server/ui/`.
 
 ---
 
-## Secrets
+## Required Environment Variables
 
-**Nichts davon gehört ins Repo.** `.gitignore` hat `secrets/`, `*.pem`,
-`*.key`, `vapid_*.json`, `anthropic_key*` schon abgedeckt.
+Alle Secrets und Konfigurations-Variablen leben außerhalb des Repos —
+in Production über systemd-Drop-Ins, lokal über `.env`-Datei (kanonische
+Vorlage: [`.env.example`](../.env.example) im Repo-Root). `server/database.py`
+liest beim Import zentral, fehlt eine Pflicht-Variable: hard-fail mit
+RuntimeError, die direkt auf die richtige Doku-Stelle zeigt.
 
-### ANTHROPIC_API_KEY
+| Name | Pflicht | Wo gesetzt | Hinweis |
+|---|---|---|---|
+| `DATABASE_URL` | **ja** | `database.conf` | `postgresql://shiksha:<pass>@localhost/shiksha` |
+| `ANTHROPIC_API_KEY` | für `/marketing/generate`, `/kita/ai/*` | `anthropic.conf` | `sk-ant-...` aus Anthropic Console |
+| `VAPID_PRIVATE_KEY` | für Web-Push | `vapid.conf` | absoluter Pfad zur `.pem`-Datei |
+| `VAPID_PUBLIC_KEY` | für Web-Push | `vapid.conf` | base64-string aus `vapid_setup.sh` |
+| `VAPID_SUBJECT` | für Web-Push | `vapid.conf` | `mailto:thomas@shiksha.tun.zone` |
+| `KITA_MAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `KITA_LEITUNG_EMAIL` | optional | bisher kein eigenes Drop-In | wenn nicht gesetzt: Mail-Versand fällt auf Log-Eintrag zurück |
+| `LEGACY_SQLITE_PATH` | nur für `scripts/migrate-kita-legacy/migrate_sqlite_to_pg.py` | shell-export | Default `/opt/shiksha-kita/shiksha_kita.db` |
+
+Drop-Ins liegen alle unter `/etc/systemd/system/shiksha.service.d/<name>.conf`.
+Nach Änderung **immer**:
+
+```bash
+systemctl daemon-reload && systemctl restart shiksha
+```
+
+`.gitignore` deckt `secrets/`, `*.pem`, `*.key`, `vapid_*.json`,
+`anthropic_key*`, `.env`, `.env.*` ab — Ausnahme `!.env.example` darf rein.
+
+### `DATABASE_URL`
+
+systemd-Drop-In: `/etc/systemd/system/shiksha.service.d/database.conf`
+
+```ini
+[Service]
+Environment="DATABASE_URL=postgresql://shiksha:<password>@localhost/shiksha"
+```
+
+Code-seitig zentral in `server/database.py`. Importeure (`main.py`,
+`accounting_router.py`, `calendar_module.py`, …) holen `engine` von dort —
+keine eigenen `create_engine()`-Aufrufe mehr im Repo.
+
+**Cron-Jobs** (`shiksha_insights_cron.py`, `marketing_pool_import.py`,
+`fixtures_importer.py`, `safeguarding_cron.py`) brauchen `DATABASE_URL`
+ebenfalls. Sie laufen **nicht** als Teil von `shiksha.service` — das
+systemd-Drop-In wird also nicht automatisch geerbt. Optionen:
+
+- `/etc/cron.d/shiksha-*`: `Environment=`-Zeile vor der Cron-Zeile setzen
+- Oder systemd-Timer + eigene `shiksha-cron-*.service` mit gleichem Drop-In
+- Oder `/opt/shiksha/.env`-Datei + `python-dotenv` (dann liest `database.py`
+  per `load_dotenv()`)
+
+Konkret geregelt im server-seitigen Setup ([Schritt 3 von Phase 7]).
+
+### `ANTHROPIC_API_KEY`
 
 systemd-Drop-In: `/etc/systemd/system/shiksha.service.d/anthropic.conf`
 
@@ -97,27 +145,12 @@ systemd-Drop-In: `/etc/systemd/system/shiksha.service.d/anthropic.conf`
 Environment="ANTHROPIC_API_KEY=sk-ant-..."
 ```
 
-Nach Änderung:
-
-```bash
-systemctl daemon-reload && systemctl restart shiksha
-```
-
 ### VAPID (Web-Push)
 
-VAPID-Keys liegen unter `/opt/shiksha/secrets/.vapid/`. Erst-Setup mit
-`deploy/scripts/vapid_setup.sh` (auf dem Server ausführen). Public-Key
-wird vom Client (`shiksha-push.js`) zum Subscribe gebraucht.
-
-systemd-Drop-In für die Server-seitige Konfig:
-`/etc/systemd/system/shiksha.service.d/vapid.conf`.
-
-### DATABASE_URL
-
-**Aktuell hardcoded** in `server/calendar_module.py` — Critical Security
-Debt, siehe [`tech-debt.md`](tech-debt.md). Ziel: per
-`os.getenv("DATABASE_URL")` aus systemd-Drop-In `database.conf`. Eigener
-Mini-Sprint nach Phase 6.
+VAPID-Keys liegen unter `/opt/shiksha/secrets/.vapid/`. Erst-Setup auf
+dem Server: `bash deploy/scripts/vapid_setup.sh` — generiert das Key-Paar
+und schreibt das Drop-In `/etc/systemd/system/shiksha.service.d/vapid.conf`.
+Public-Key wird vom Client (`shiksha-push.js`) zum Subscribe gebraucht.
 
 ---
 

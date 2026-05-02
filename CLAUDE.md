@@ -76,6 +76,13 @@ Vollständige Modul-Übersicht: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
    Datum allein reicht nicht — siehe Phase-4-Recovery in
    `docs/tech-debt.md` (compression.py-Refactor war Draft, brach den
    Service beim Overlay).
+7. **Keine hardcoded Credentials, Connection-Strings oder API-Keys.**
+   Alle Secrets über systemd-Drop-Ins (Production) oder `.env` (lokal,
+   `python-dotenv`). `server/database.py` ist die zentrale Stelle für
+   `DATABASE_URL` — andere Module importieren `engine` von dort, niemand
+   ruft `create_engine()` mit Klartext-URL auf. Pflicht-ENVs sind in
+   [`docs/DEPLOY.md`](docs/DEPLOY.md#required-environment-variables)
+   tabelliert; `.env.example` im Repo-Root ist die kanonische Vorlage.
 
 ## Häufige Operationen
 

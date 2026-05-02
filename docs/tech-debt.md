@@ -14,13 +14,29 @@ zur Audit-Spur.
 
 ## Critical Security Debt
 
-### Hardcoded DB-Credentials in `server/calendar_module.py`
+### ~~Hardcoded DB-Credentials in `server/calendar_module.py`~~
+
+> ✅ **Code-Refactor erledigt am 2026-05-02 in Phase 7** — Commit
+> [`0c4864a`](../../../commit/0c4864a). Der Audit hat **9 Files** mit
+> hardcoded `postgresql://shiksha:shiksha2026@…` aufgedeckt (nicht nur
+> `calendar_module.py`); alle wurden auf zentrale env-driven Engine in
+> `server/database.py` umgestellt, mit Hard-Fail-Pattern bei fehlender
+> `DATABASE_URL`. Plus Vereinheitlichung der psycopg-Scripts auf dieselbe
+> Konvention (`SHIKSHA_DB_*` → `DATABASE_URL`). Setup-Doku in
+> [`DEPLOY.md`](DEPLOY.md#required-environment-variables).
+>
+> **Noch offen (Phase 7 Schritte 3 + 4):** server-seitige `database.conf`
+> anlegen, Cron-Job-Aufrufpfad bestätigen, DB-Passwort rotieren. Dieser
+> Eintrag wird beim finalen Phase-7-Commit komplett entfernt.
+
+<details>
+<summary>Original-Eintrag (historisch, durchgestrichen)</summary>
 
 |              |                                                          |
 | ------------ | -------------------------------------------------------- |
 | **Severity** | Critical                                                 |
 | **Found**    | 2026-05-02 (Phase-2-Migration, A.5 Kalender)             |
-| **File**     | `server/calendar_module.py:33`                           |
+| **File**     | `server/calendar_module.py:33` (plus 8 weitere, beim Audit aufgedeckt) |
 
 **Befund:**
 
@@ -29,32 +45,22 @@ def _engine():
     return sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
 ```
 
-DB-User, Passwort, Host und Datenbankname stehen im Klartext im Quellcode.
-Solange das Repo privat bleibt, ist die Exposition begrenzt; sobald es
-öffentlich wird (geplant für Phase 6), ist das Passwort kompromittiert —
-und auch nach späterer Rotation bleibt der alte Wert in der Git-History
-sichtbar.
+DB-User, Passwort, Host und Datenbankname standen im Klartext im
+Quellcode. Mehrfach repliziert in `database.py`, `main.py` (4×),
+`accounting_router.py`, `accounting_module.py`, `documents_endpoint.py`,
+`document_module.py`, plus Migrations-Skript.
 
-**Sekundäre Risiken:** dasselbe Pattern könnte in weiteren Files lauern
-(`database.py`, `document_module.py`, `accounting_module.py`, …) — beim
-Fix systematisch suchen.
+**Fix-Pfad (umgesetzt):**
 
-**Fix-Pfad:**
-
-1. Passwort auf der Production-DB **zuerst** rotieren — neue Credentials
-   nur in `/etc/systemd/system/shiksha.service.d/database.conf` als
-   `Environment=DATABASE_URL=postgresql://…`.
-2. `calendar_module.py` (und andere Funde) so umstellen, dass die
-   Connection-URL aus `os.getenv("DATABASE_URL")` kommt — ohne
-   Klartext-Default, harter Fail bei Abwesenheit.
-3. Git-History des alten Passworts wird **nicht** rewritten — Rotation
-   in (1) macht das alte Passwort kraftlos.
+1. ~~Passwort rotieren~~ → Phase 7 Schritt 4.
+2. ✓ Code: `database.py` zentral, env-driven, hard-fail bei fehlender
+   `DATABASE_URL`. Alle Caller importieren `engine` von dort.
+3. Git-History des alten Passworts wurde **nicht** rewritten — Rotation
+   macht den alten Wert kraftlos. Repo bleibt privat bis Rotation läuft.
 4. Pre-Commit-Hook für Secret-Detection (z.B. `gitleaks`, `trufflehog`)
-   einrichten, damit Wiederholung früh auffällt.
+   bleibt offen — eigener kleiner Folge-Sprint.
 
-**Plan:** Eigener Mini-Sprint nach Phase 6 — Titel-Vorschlag
-`feat: env-driven config + secret rotation`. Geschätzt ~30 Min Arbeit
-plus Server-Reload.
+</details>
 
 ---
 
