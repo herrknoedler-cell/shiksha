@@ -1,0 +1,169 @@
+{
+  "_meta": {
+    "fixture_name": "Camping Allweglehen — Berchtesgaden",
+    "fixture_id": "campsite_allweglehen_001",
+    "edition": "camping.shiksha",
+    "stand": "25. April 2026",
+    "purpose": "Vollständig fiktiver Familien-Campingplatz für Edition-Validierung. Adressen, Personen, Bankdaten frei erfunden.",
+    "kennzeichen": "FIKTIV"
+  },
+
+  "campsite": {
+    "id": "campsite_allweglehen_001",
+    "name": "Camping Allweglehen",
+    "edition": "camping.shiksha",
+    "type": "family + glamping",
+    "primary_address": {
+      "street": "Allweggasse 17",
+      "postal_code": "83471",
+      "city": "Berchtesgaden",
+      "country": "DE",
+      "region": "Bayern"
+    },
+    "contact": {
+      "geschaeftsfuehrerin": "Maria Allweger",
+      "co_inhaber": "Florian Allweger",
+      "email": "info@camping-allweglehen.de",
+      "phone": "+49 8652 451 220",
+      "web": "camping-allweglehen.de"
+    },
+    "tax_number": "DE 145 678 902",
+    "reg_number": "HRB 4458 Traunstein",
+    "bank_account": {
+      "iban": "DE25 7105 0000 0123 4567 89",
+      "bic": "BYLADEM1BGL",
+      "bank": "Sparkasse Berchtesgadener Land",
+      "holder": "Camping Allweglehen GbR"
+    },
+    "season": {
+      "main": "01.04.–31.10.",
+      "winter": "20.12.–28.02. (Wintercamping reduziert)",
+      "off": "ganzjährig Anfragen + Reservierungs-Annahme"
+    },
+    "capacities": {
+      "pitches": 120,
+      "mobile_homes": 8,
+      "glamping_tents": 4
+    },
+    "infrastructure": ["pool_outdoor", "spielplatz", "restaurant", "shop", "wifi", "wash_room", "trockenraum", "spuelraum", "hund_pflegeplatz"],
+    "weather_dependent": true,
+    "has_minors": true,
+    "has_pool": true,
+    "has_playground": true,
+    "insurance_info": {
+      "provider": "Bayerische Versicherungskammer",
+      "policy_number": "BHV-FAM-2026-7711",
+      "valid_until": "2026-12-31"
+    },
+    "behoerden_auflagen": [
+      "Bayer. Wassergesetz §17 — Pool-Hygiene-Wochen­prüfung",
+      "BImSchG — Lärm-Auflage 22-7 Uhr",
+      "Bayerischer Tourismusverband — Kurtaxe-Erfassung",
+      "Gewerbeaufsicht Traunstein — jährliche Inspektion"
+    ],
+    "tags": ["bayern", "berchtesgaden", "familien", "alpennah", "wintercamping", "ganzjaehrig"]
+  },
+
+  "pitches": [
+    {"id": "pitch_a01", "label": "A01", "category": "komfort", "size_m2": 110, "electricity_amp": 16, "water": true, "drain": true, "shadow": "halb", "dog_allowed": false, "view": "berge", "_pattern_hint": "Premium, häufig Stamm­gäste"},
+    {"id": "pitch_a02", "label": "A02", "category": "komfort", "size_m2": 105, "electricity_amp": 16, "water": true, "drain": true, "shadow": "halb", "dog_allowed": false},
+    {"id": "pitch_a03", "label": "A03", "category": "komfort", "size_m2": 110, "electricity_amp": 16, "water": true, "drain": true, "shadow": "voll", "dog_allowed": false},
+    {"id": "pitch_b07", "label": "B07", "category": "standard", "size_m2": 85, "electricity_amp": 10, "water": false, "drain": false, "shadow": "kein", "dog_allowed": true, "_pattern_hint": "Strom-Anomalie diese Woche, prüfen!"},
+    {"id": "pitch_b08", "label": "B08", "category": "standard", "size_m2": 80, "electricity_amp": 10, "water": false, "drain": false, "shadow": "kein", "dog_allowed": true},
+    {"id": "pitch_c03", "label": "C03", "category": "naturplatz", "size_m2": 130, "electricity_amp": 0, "water": false, "drain": false, "shadow": "voll", "dog_allowed": true, "_pattern_hint": "Wartung saisonal überfällig — siehe ai_documents/camping_lieferschein_schreiner.md"},
+    {"id": "pitch_c04", "label": "C04", "category": "naturplatz", "size_m2": 125, "electricity_amp": 0, "water": false, "drain": false, "shadow": "voll", "dog_allowed": true},
+    {"id": "pitch_d01", "label": "D01", "category": "service", "size_m2": 140, "electricity_amp": 16, "water": true, "drain": true, "shadow": "halb", "dog_allowed": false, "_pattern_hint": "Kombiniert mit eigener Sanitär-Hütte — Premium-Premium"}
+  ],
+
+  "accommodations": [
+    {"id": "mh_01", "type": "mobile_home", "name": "Watzmann", "size_m2": 38, "beds": 6, "amenities": ["küche", "bad", "tv", "terrasse"], "weekly_high": 980, "weekly_low": 540},
+    {"id": "mh_02", "type": "mobile_home", "name": "Jenner", "size_m2": 35, "beds": 4, "amenities": ["küche", "bad", "tv", "terrasse"], "weekly_high": 780, "weekly_low": 420},
+    {"id": "gl_01", "type": "glamping_tent", "name": "Berg-Yurte 1", "size_m2": 28, "beds": 4, "amenities": ["heizung", "kingsize", "frühstück_inkl"], "weekly_high": 1190, "weekly_low": 660},
+    {"id": "gl_02", "type": "glamping_tent", "name": "Berg-Yurte 2", "size_m2": 28, "beds": 4, "amenities": ["heizung", "kingsize", "frühstück_inkl"], "weekly_high": 1190, "weekly_low": 660}
+  ],
+
+  "guardians_camping": [
+    {"id": "gd_camp_001", "full_name": "Stefan Schmidt", "contact": {"phone": "+49 171 332 1144", "email": "stefan.schmidt@gmail.com"}, "related_minors": ["guest_minor_001", "guest_minor_002"]},
+    {"id": "gd_camp_002", "full_name": "Hannah Vogel", "contact": {"phone": "+49 162 778 9911", "email": "h.vogel@web.de"}, "related_minors": ["guest_minor_003"]},
+    {"id": "gd_camp_003", "full_name": "Pieter Janssen", "contact": {"phone": "+31 6 87654321", "email": "p.janssen@xs4all.nl"}, "related_minors": ["guest_minor_004"]}
+  ],
+
+  "guests": [
+    {"id": "guest_001", "full_name": "Familie Schmidt (Stefan + Anna + 2 Kinder)", "primary_adult": "Stefan Schmidt", "address": {"street": "Marienplatz 4", "postal_code": "82335", "city": "Berg", "country": "DE"}, "contact": {"phone": "+49 171 332 1144", "email": "stefan.schmidt@gmail.com"}, "language": "de", "vehicle_plate": "STA-SC 421", "_pattern_hint": "Dritter Sommer in Folge — Stammkundenstatus möglich", "first_visit": "2024-07-08"},
+    {"id": "guest_002", "full_name": "Familie Berger (Markus + Petra)", "primary_adult": "Markus Berger", "address": {"street": "Lerchenstr. 88", "postal_code": "80807", "city": "München", "country": "DE"}, "contact": {"phone": "+49 162 234 5566", "email": "berger.fam@protonmail.com"}, "language": "de", "vehicle_plate": "M-BG 7742", "_pattern_hint": "Reservierung mit offener Anzahlung", "first_visit": "2026-04-12"},
+    {"id": "guest_003", "full_name": "Familie Vogel (Marc + Hannah + Sohn Theo)", "primary_adult": "Hannah Vogel", "address": {"street": "Am Wald 12", "postal_code": "70439", "city": "Stuttgart", "country": "DE"}, "contact": {"phone": "+49 162 778 9911", "email": "h.vogel@web.de"}, "language": "de", "vehicle_plate": "S-VG 2310", "first_visit": "2025-08-04"},
+    {"id": "guest_004", "full_name": "Familie Janssen (Pieter + Sanne + Tochter Lotte)", "primary_adult": "Pieter Janssen", "address": {"street": "Voorstraat 17", "postal_code": "3512AA", "city": "Utrecht", "country": "NL"}, "contact": {"phone": "+31 6 87654321", "email": "p.janssen@xs4all.nl"}, "language": "nl", "vehicle_plate": "NL-43-LBM-1", "first_visit": "2025-07-16"},
+    {"id": "guest_005", "full_name": "Klaus Henning + Inge Henning", "primary_adult": "Klaus Henning", "address": {"street": "Mühlenweg 3", "postal_code": "33602", "city": "Bielefeld", "country": "DE"}, "contact": {"phone": "+49 521 998 7766", "email": "henning.k@t-online.de"}, "language": "de", "vehicle_plate": "BI-HK 1234", "_pattern_hint": "Senioren-Stamm­gäste, kommen jährlich im Mai", "first_visit": "2018-05-12"},
+    {"id": "guest_006", "full_name": "Familie Bauer (Felix + Lisa + 3 Kinder)", "primary_adult": "Felix Bauer", "address": {"street": "Dorfstraße 22", "postal_code": "5020", "city": "Salzburg", "country": "AT"}, "contact": {"phone": "+43 664 123 4566", "email": "bauer.fam@gmx.at"}, "language": "de", "vehicle_plate": "S-BR 882", "first_visit": "2026-04-15"},
+    {"id": "guest_007", "full_name": "Christoph Becker", "primary_adult": "Christoph Becker", "address": {"street": "Königstr. 41", "postal_code": "70173", "city": "Stuttgart", "country": "DE"}, "contact": {"phone": "+49 178 567 8899", "email": "ch.becker@hotmail.com"}, "language": "de", "vehicle_plate": "S-CB 998", "_pattern_hint": "Bucht öfter, kommt selten — no_show_pattern Kandidat", "first_visit": "2024-06-22"},
+    {"id": "guest_008", "full_name": "Familie Toscani (Marco + Giulia + Tochter Sofia)", "primary_adult": "Marco Toscani", "address": {"street": "Via Roma 15", "postal_code": "39100", "city": "Bolzano", "country": "IT"}, "contact": {"phone": "+39 320 1234567", "email": "toscani.m@libero.it"}, "language": "it", "vehicle_plate": "BZ-AT 3322", "first_visit": "2025-08-11"},
+    {"id": "guest_minor_001", "full_name": "Lukas Schmidt", "birthdate": "2014-03-15", "is_minor": true, "guardian_ids": ["gd_camp_001"]},
+    {"id": "guest_minor_002", "full_name": "Mia Schmidt", "birthdate": "2017-09-22", "is_minor": true, "guardian_ids": ["gd_camp_001"]},
+    {"id": "guest_minor_003", "full_name": "Theo Vogel", "birthdate": "2010-04-17", "is_minor": true, "guardian_ids": ["gd_camp_002"]},
+    {"id": "guest_minor_004", "full_name": "Lotte Janssen", "birthdate": "2013-11-08", "is_minor": true, "guardian_ids": ["gd_camp_003"]}
+  ],
+
+  "reservations": [
+    {"id": "res_001", "guest_id": "guest_001", "pitch_id": "pitch_a01", "from_date": "2026-07-12", "to_date": "2026-07-26", "persons": 4, "minors_count": 2, "status": "confirmed", "deposit_paid": true, "total_amount": 1287.00, "_signal": "journey.repeat_pattern (3. Sommer)"},
+    {"id": "res_002", "guest_id": "guest_002", "pitch_id": "pitch_a02", "from_date": "2026-05-15", "to_date": "2026-05-22", "persons": 2, "minors_count": 0, "status": "pending_payment", "deposit_paid": false, "total_amount": 462.00, "deposit_due": "2026-04-29", "_signal": "reservation.payment_overdue (Anzahlung morgen fällig)"},
+    {"id": "res_003", "guest_id": "guest_003", "pitch_id": "pitch_b07", "from_date": "2026-08-01", "to_date": "2026-08-15", "persons": 3, "minors_count": 1, "status": "confirmed", "deposit_paid": true, "total_amount": 924.00},
+    {"id": "res_004", "guest_id": "guest_004", "accommodation_id": "gl_01", "from_date": "2026-07-19", "to_date": "2026-07-26", "persons": 3, "minors_count": 1, "status": "confirmed", "deposit_paid": true, "total_amount": 1190.00},
+    {"id": "res_005", "guest_id": "guest_005", "pitch_id": "pitch_a03", "from_date": "2026-05-20", "to_date": "2026-05-30", "persons": 2, "minors_count": 0, "status": "confirmed", "deposit_paid": true, "total_amount": 580.00, "_signal": "Senioren-Stamm­gäste, jährlich Mai"},
+    {"id": "res_006", "guest_id": "guest_007", "pitch_id": "pitch_b08", "from_date": "2026-06-10", "to_date": "2026-06-17", "persons": 1, "minors_count": 0, "status": "confirmed", "deposit_paid": true, "total_amount": 280.00, "_signal": "Becker hat in 2024 + 2025 zweimal nicht angereist", "_pattern_hint": "no_show_pattern Verifikations-Bedarf"}
+  ],
+
+  "stays_active": [
+    {"id": "stay_001", "guest_id": "guest_006", "pitch_id": "pitch_d01", "check_in": "2026-04-22", "check_out": "2026-04-28", "persons": 5, "minors_count": 3, "status": "running", "_pattern_hint": "Familie Bauer mit 3 Kindern, Pool-Nutzung intensiv"}
+  ],
+
+  "pricing_periods": [
+    {"id": "pp_low", "label": "Nebensaison", "from_date": "04-01", "to_date": "06-14", "factor": 1.0},
+    {"id": "pp_mid", "label": "Mittelsaison", "from_date": "06-15", "to_date": "07-11", "factor": 1.3},
+    {"id": "pp_high", "label": "Hochsaison", "from_date": "07-12", "to_date": "08-25", "factor": 1.6},
+    {"id": "pp_post", "label": "Spätsaison", "from_date": "08-26", "to_date": "10-31", "factor": 1.1},
+    {"id": "pp_winter", "label": "Wintercamping", "from_date": "12-20", "to_date": "02-28", "factor": 1.4}
+  ],
+
+  "pricing_rules_per_pitch_night_eur_low": {
+    "komfort_2pers": 38.00,
+    "standard_2pers": 28.00,
+    "naturplatz_2pers": 22.00,
+    "service_2pers": 48.00,
+    "extra_person_adult": 8.00,
+    "extra_person_child_4_14": 5.00,
+    "kurtaxe_per_person_per_night": 2.20,
+    "dog_per_night": 4.50,
+    "electricity_per_kwh": 0.65
+  },
+
+  "meters_and_recent_readings": [
+    {"meter_id": "meter_b07", "pitch_id": "pitch_b07", "type": "electricity", "last_reading_kwh": 247.3, "last_reading_at": "2026-04-23", "previous_kwh": 218.4, "previous_at": "2026-04-20", "consumption_3d_kwh": 28.9, "expected_3d_kwh": 12.0, "_signal": "utility.unusual_consumption — 240% des erwartbaren Verbrauchs"},
+    {"meter_id": "meter_a01", "pitch_id": "pitch_a01", "type": "electricity", "last_reading_kwh": 1844.2, "last_reading_at": "2026-04-22"},
+    {"meter_id": "meter_d01", "pitch_id": "pitch_d01", "type": "electricity", "last_reading_kwh": 89.6, "last_reading_at": "2026-04-25", "consumption_3d_kwh": 14.8, "expected_3d_kwh": 16.0}
+  ],
+
+  "suppliers": [
+    {"id": "supp_baeck", "name": "Bäckerei Lechner", "type": "lieferant_food", "products": ["brötchen", "brot", "kuchen"], "address": {"city": "Berchtesgaden"}, "contact": {"phone": "+49 8652 22 11"}, "delivery_pattern": "täglich 06:30 außer Mo", "_pattern_hint": "Kommt verlässlich, Lieferschein als Foto erfasst"},
+    {"id": "supp_metz", "name": "Metzgerei Hofreiter", "type": "lieferant_food", "products": ["wurst", "fleisch"], "delivery_pattern": "Di + Fr 08:00"},
+    {"id": "supp_brennholz", "name": "Holzhandel Loferer", "type": "lieferant_brennholz", "delivery_pattern": "saisonal Mai + Oktober", "contact": {"phone": "+49 8652 33 44"}},
+    {"id": "supp_schreiner", "name": "Schreinerei Maria Brand", "type": "dienstleister", "purpose": "Pitch-Wartung, Holzbau, Spielplatz-Reparatur", "_pattern_hint": "Lieferschein C03 Wartung steht aus — siehe ai_documents"},
+    {"id": "supp_versicherung", "name": "Bayerische Versicherungskammer", "type": "versicherung", "policy_numbers": ["BHV-FAM-2026-7711"]},
+    {"id": "supp_strom", "name": "Stadtwerke Berchtesgaden", "type": "versorger_strom"},
+    {"id": "supp_wasser", "name": "Wasserwerk Berchtesgadener Land", "type": "versorger_wasser"},
+    {"id": "supp_gemeinde", "name": "Markt Berchtesgaden — Tourismus & Ordnungsamt", "type": "behoerde", "purpose": "Kurtaxe-Erfassung + Ordnungsauflagen"},
+    {"id": "supp_gesundh", "name": "Gesundheitsamt Berchtesgadener Land", "type": "behoerde", "purpose": "Pool-Wasser-Hygiene-Inspektion"},
+    {"id": "supp_pool_chem", "name": "Schwimmbad-Service Salzach", "type": "dienstleister_pool", "delivery_pattern": "monatlich Apr–Okt"}
+  ],
+
+  "_pattern_signals_to_emit": [
+    {"signal_key": "camping.reservation.payment_overdue", "params": {"guest": "Familie Berger", "deposit_due_in_hours": 24}, "severity": "high"},
+    {"signal_key": "camping.utility.unusual_consumption", "params": {"pitch": "B07", "consumption_kwh": 28.9, "expected_kwh": 12.0, "factor": 2.4}, "severity": "mid"},
+    {"signal_key": "camping.pitch.maintenance_overdue", "params": {"pitch": "C03", "days_since_request": 18}, "severity": "mid"},
+    {"signal_key": "camping.reservation.no_show_pattern", "params": {"guest": "Christoph Becker", "history": "2x no-show in 24 Monaten"}, "severity": "low"},
+    {"signal_key": "camping.journey.repeat_pattern", "params": {"guest": "Familie Schmidt", "season_count": 3}, "severity": "low", "polarity": "positiv"},
+    {"signal_key": "camping.partnership.delivery_today", "params": {"supplier": "Bäckerei Lechner", "time": "06:30"}, "severity": "info"},
+    {"signal_key": "camping.safeguarding.pool_inspection_due", "params": {"days_left": 3}, "severity": "mid", "_note": "Hinweis vom safeguarding-Modul, cross-edition"},
+    {"signal_key": "camping.weather.storm_warning", "params": {"day": "Donnerstag", "wind_kn": 45}, "severity": "high"},
+    {"signal_key": "camping.behoerde.kurtaxe_overdue", "params": {"month": "März", "amount": 482.40}, "severity": "mid"}
+  ]
+}

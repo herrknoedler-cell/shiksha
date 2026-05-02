@@ -1,0 +1,150 @@
+{
+  "_meta": {
+    "fixture_name": "Camping Inntalblick — Inntal/Tirol",
+    "fixture_id": "campsite_inntalblick_001",
+    "edition": "camping.shiksha",
+    "stand": "25. April 2026",
+    "purpose": "Vollständig fiktiver Outdoor-Campingplatz mit Hund-Erlaubt-Profil und Multi-Sprache.",
+    "kennzeichen": "FIKTIV"
+  },
+
+  "campsite": {
+    "id": "campsite_inntalblick_001",
+    "name": "Camping Inntalblick",
+    "edition": "camping.shiksha",
+    "type": "outdoor + dauer­camper + hund",
+    "primary_address": {
+      "street": "Inntalstraße 142",
+      "postal_code": "6020",
+      "city": "Innsbruck",
+      "country": "AT",
+      "region": "Tirol"
+    },
+    "contact": {
+      "geschaeftsfuehrer": "Andreas Pfeiler",
+      "co_inhaberin": "Christina Pfeiler",
+      "email": "info@inntalblick-camping.at",
+      "phone": "+43 512 887 220",
+      "web": "inntalblick-camping.at"
+    },
+    "uid_number": "ATU 87654321",
+    "reg_number": "FN 88112p",
+    "bank_account": {
+      "iban": "AT34 3600 0000 1188 7654",
+      "bic": "RZTIAT22",
+      "bank": "Raiffeisen-Landesbank Tirol",
+      "holder": "Camping Inntalblick GmbH"
+    },
+    "season": {
+      "main": "01.05.–30.09.",
+      "off": "Vorbestellung ganzjährig"
+    },
+    "capacities": {
+      "pitches": 180,
+      "mobile_homes": 12
+    },
+    "infrastructure": ["bach_zugang", "spielplatz", "minigolf", "shop", "wifi", "wash_room", "hundewiese", "kletterwand_kids", "rad_werkstatt"],
+    "weather_dependent": true,
+    "has_minors": true,
+    "has_pool": false,
+    "has_playground": true,
+    "dog_friendly": true,
+    "languages_supported": ["de", "it", "en"],
+    "insurance_info": {
+      "provider": "UNIQA Versicherung Tirol",
+      "policy_number": "BH-AT-2026-3344",
+      "valid_until": "2026-12-31"
+    },
+    "behoerden_auflagen": [
+      "Tiroler Camping- und Caravanordnung — Pitch-Mindestabstand",
+      "Tourismusabgabe Innsbruck-Stadt + Land",
+      "Tier-Halte-Verordnung — Hundewiese, Anleinpflicht",
+      "Naturschutz-Auflage — Bachufer-Schutzzone Mai/Juni"
+    ],
+    "tags": ["tirol", "innsbruck", "outdoor", "hund_erlaubt", "dauercamper", "multi_sprache"]
+  },
+
+  "pitches": [
+    {"id": "pitch_t_a01", "label": "A01", "category": "premium_inntal", "size_m2": 100, "electricity_amp": 16, "water": true, "view": "berge_inn", "dog_allowed": true, "_pattern_hint": "Stamm­dauer­camper Kremser jährlich"},
+    {"id": "pitch_t_a02", "label": "A02", "category": "premium_inntal", "size_m2": 95, "electricity_amp": 16, "water": true, "view": "berge_inn", "dog_allowed": true},
+    {"id": "pitch_t_b15", "label": "B15", "category": "standard", "size_m2": 75, "electricity_amp": 10, "water": false, "shadow": "halb", "dog_allowed": true},
+    {"id": "pitch_t_b16", "label": "B16", "category": "standard", "size_m2": 75, "electricity_amp": 10, "water": false, "shadow": "halb", "dog_allowed": true, "_pattern_hint": "Konflikt-Pitch — Beschwerde wegen lautem Hund-Nachbar"},
+    {"id": "pitch_t_c10", "label": "C10", "category": "outdoor_naturplatz", "size_m2": 80, "electricity_amp": 0, "water": false, "shadow": "voll", "dog_allowed": true},
+    {"id": "pitch_t_d05", "label": "D05", "category": "dauer­camper", "size_m2": 110, "electricity_amp": 16, "water": true, "drain": true, "dog_allowed": true, "_pattern_hint": "Dauer­vermietung Saison-Pacht"},
+    {"id": "pitch_t_d06", "label": "D06", "category": "dauer­camper", "size_m2": 110, "electricity_amp": 16, "water": true, "drain": true, "dog_allowed": true},
+    {"id": "pitch_t_e01", "label": "E01", "category": "hundewiesen­zone", "size_m2": 90, "electricity_amp": 10, "water": false, "shadow": "halb", "dog_allowed": true, "_note": "an Hundewiese angrenzend, beliebt"}
+  ],
+
+  "accommodations": [
+    {"id": "mh_t_01", "type": "mobile_home", "name": "Karwendel", "size_m2": 32, "beds": 4, "amenities": ["küche", "bad", "tv", "terrasse"], "weekly_high": 740, "weekly_low": 380, "dog_allowed": true},
+    {"id": "mh_t_02", "type": "mobile_home", "name": "Patscherkofel", "size_m2": 32, "beds": 4, "amenities": ["küche", "bad", "tv", "terrasse"], "weekly_high": 740, "weekly_low": 380, "dog_allowed": true},
+    {"id": "mh_t_03", "type": "mobile_home", "name": "Nordkette", "size_m2": 35, "beds": 6, "amenities": ["küche", "bad", "tv", "terrasse", "kinder­ausstattung"], "weekly_high": 920, "weekly_low": 480, "dog_allowed": false}
+  ],
+
+  "guests": [
+    {"id": "guest_t_001", "full_name": "Familie Kremser (Otto + Helga)", "primary_adult": "Otto Kremser", "address": {"street": "Wiener Str. 18", "postal_code": "8010", "city": "Graz", "country": "AT"}, "contact": {"phone": "+43 664 233 4477", "email": "kremser.otto@aon.at"}, "language": "de", "vehicle_plate": "G-OK 1122", "_pattern_hint": "Dauer­camper — pacht Pitch A01 saisonal seit 2019", "first_visit": "2019-05-08"},
+    {"id": "guest_t_002", "full_name": "Familie Bertolini (Luca + Federica + 2 Kinder)", "primary_adult": "Luca Bertolini", "address": {"street": "Via dei Garibaldi 23", "postal_code": "20144", "city": "Milano", "country": "IT"}, "contact": {"phone": "+39 348 1122334", "email": "luca.bertolini@gmail.com"}, "language": "it", "vehicle_plate": "MI-AT 9988", "first_visit": "2025-08-04"},
+    {"id": "guest_t_003", "full_name": "James + Emma Watson", "primary_adult": "James Watson", "address": {"street": "12 Park Road", "postal_code": "BS1 5UH", "city": "Bristol", "country": "GB"}, "contact": {"phone": "+44 7700 234567", "email": "j.watson@gmail.com"}, "language": "en", "vehicle_plate": "GB-WS 2310", "first_visit": "2024-09-12"},
+    {"id": "guest_t_004", "full_name": "Familie Maier mit Hund Bruno (Wolfgang + Sabine)", "primary_adult": "Wolfgang Maier", "address": {"street": "Bachgasse 7", "postal_code": "6850", "city": "Dornbirn", "country": "AT"}, "contact": {"phone": "+43 660 778 1144", "email": "w.maier@a1.net"}, "language": "de", "vehicle_plate": "DO-WM 887", "_pattern_hint": "Hund Bruno — Anleinen-Wiederholungs-Hinweis", "first_visit": "2023-07-15"},
+    {"id": "guest_t_005", "full_name": "Sven Andersson", "primary_adult": "Sven Andersson", "address": {"street": "Kungsgatan 12", "postal_code": "11135", "city": "Stockholm", "country": "SE"}, "contact": {"phone": "+46 70 1234567", "email": "s.andersson@hotmail.com"}, "language": "en", "vehicle_plate": "SE-AB 4422", "first_visit": "2026-04-20", "_pattern_hint": "Solo-Wandern, Vor-Anreise-Frage offen"},
+    {"id": "guest_t_006", "full_name": "Familie Höller (Klaus + Susanne + Tochter Mira)", "primary_adult": "Klaus Höller", "address": {"street": "Ringstr. 33", "postal_code": "6900", "city": "Bregenz", "country": "AT"}, "contact": {"phone": "+43 681 988 7766", "email": "k.hoeller@protonmail.com"}, "language": "de", "vehicle_plate": "B-KH 3344", "first_visit": "2025-08-22"},
+    {"id": "guest_t_007", "full_name": "Familie Beneš (Tomáš + Pavla)", "primary_adult": "Tomáš Beneš", "address": {"street": "Národní 12", "postal_code": "11000", "city": "Praha", "country": "CZ"}, "contact": {"phone": "+420 731 234 567", "email": "t.benes@seznam.cz"}, "language": "en", "vehicle_plate": "CZ-PR 7811", "first_visit": "2025-07-04"}
+  ],
+
+  "reservations": [
+    {"id": "res_t_001", "guest_id": "guest_t_001", "pitch_id": "pitch_t_a01", "from_date": "2026-05-01", "to_date": "2026-09-30", "persons": 2, "minors_count": 0, "status": "confirmed", "deposit_paid": true, "total_amount": 4380.00, "type": "saisonpacht", "_signal": "Dauer­camper-Saison startet"},
+    {"id": "res_t_002", "guest_id": "guest_t_002", "pitch_id": "pitch_t_a02", "from_date": "2026-08-08", "to_date": "2026-08-22", "persons": 4, "minors_count": 2, "status": "confirmed", "deposit_paid": true, "total_amount": 988.00},
+    {"id": "res_t_003", "guest_id": "guest_t_003", "accommodation_id": "mh_t_01", "from_date": "2026-07-12", "to_date": "2026-07-19", "persons": 2, "minors_count": 0, "status": "confirmed", "deposit_paid": true, "total_amount": 740.00},
+    {"id": "res_t_004", "guest_id": "guest_t_004", "pitch_id": "pitch_t_e01", "from_date": "2026-06-20", "to_date": "2026-06-27", "persons": 2, "minors_count": 0, "dog": "Bruno (groß)", "status": "confirmed", "deposit_paid": true, "total_amount": 322.00, "_signal_hint": "Anleinen-Hinweis: dritte Saison"},
+    {"id": "res_t_005", "guest_id": "guest_t_005", "pitch_id": "pitch_t_c10", "from_date": "2026-04-26", "to_date": "2026-05-03", "persons": 1, "minors_count": 0, "status": "confirmed", "deposit_paid": true, "total_amount": 198.00, "_signal": "Anreise heute, Pre-Stay-Frage offen"}
+  ],
+
+  "stays_active": [
+    {"id": "stay_t_001", "guest_id": "guest_t_004", "pitch_id": "pitch_t_e01", "check_in": "2026-04-22", "check_out": "2026-04-28", "persons": 2, "dog": "Bruno", "status": "running", "_pattern_hint": "Vorgestern Beschwerde Nachbarpitch B16 wegen lautem Bellen"}
+  ],
+
+  "pricing_periods": [
+    {"id": "pp_t_low", "label": "Vor-/Nachsaison", "from_date": "05-01", "to_date": "06-14", "factor": 1.0},
+    {"id": "pp_t_mid", "label": "Mittelsaison", "from_date": "06-15", "to_date": "07-11", "factor": 1.25},
+    {"id": "pp_t_high", "label": "Hochsaison", "from_date": "07-12", "to_date": "08-25", "factor": 1.55},
+    {"id": "pp_t_post", "label": "Spätsaison", "from_date": "08-26", "to_date": "09-30", "factor": 1.05}
+  ],
+
+  "pricing_rules_per_pitch_night_eur_low": {
+    "premium_inntal_2pers": 32.00,
+    "standard_2pers": 24.00,
+    "naturplatz_2pers": 18.00,
+    "dauercamper_saisonpacht": 4380.00,
+    "extra_person_adult": 7.50,
+    "extra_person_child_4_14": 4.50,
+    "tourismusabgabe_per_person_per_night": 1.85,
+    "dog_per_night": 4.00,
+    "electricity_per_kwh": 0.55
+  },
+
+  "meters_and_recent_readings": [
+    {"meter_id": "meter_t_a01", "pitch_id": "pitch_t_a01", "type": "electricity", "last_reading_kwh": 5882.4, "last_reading_at": "2026-04-25", "previous_kwh": 5840.1, "previous_at": "2026-04-22", "consumption_3d_kwh": 42.3, "expected_3d_kwh": 14.0, "_signal": "utility.unusual_consumption — vermutlich Heizung im Wohnwagen, Otto fragen"},
+    {"meter_id": "meter_t_e01", "pitch_id": "pitch_t_e01", "type": "electricity", "last_reading_kwh": 88.1, "last_reading_at": "2026-04-25"}
+  ],
+
+  "suppliers": [
+    {"id": "supp_t_baeck", "name": "Bäckerei Tiefenbach", "type": "lieferant_food", "products": ["brötchen", "kuchen"], "delivery_pattern": "täglich 06:30 außer So"},
+    {"id": "supp_t_metz", "name": "Metzgerei Egger", "type": "lieferant_food", "delivery_pattern": "Di + Fr 07:30"},
+    {"id": "supp_t_tourism", "name": "Tourismusverband Innsbruck-Land", "type": "behoerde", "purpose": "Tourismusabgabe-Abrechnung monatlich"},
+    {"id": "supp_t_uniqa", "name": "UNIQA Versicherung Tirol", "type": "versicherung", "policy_numbers": ["BH-AT-2026-3344"]},
+    {"id": "supp_t_strom", "name": "TIWAG Tiroler Wasserkraft AG", "type": "versorger_strom"},
+    {"id": "supp_t_wasser", "name": "Innsbrucker Kommunalbetriebe AG", "type": "versorger_wasser"},
+    {"id": "supp_t_naturschutz", "name": "Land Tirol — Abt. Naturschutz", "type": "behoerde", "purpose": "Bachufer-Schutzzone Mai/Juni"},
+    {"id": "supp_t_rad", "name": "Rad-Werkstatt Inntal", "type": "dienstleister", "purpose": "Saisonale Wartung Leihräder + Reparaturen"}
+  ],
+
+  "_pattern_signals_to_emit": [
+    {"signal_key": "camping.utility.unusual_consumption", "params": {"pitch": "A01", "consumption_kwh": 42.3, "expected_kwh": 14.0, "factor": 3.0}, "severity": "mid", "_note": "Otto Kremser: Heizung im Wohnwagen vermutlich Standby — kurz fragen"},
+    {"signal_key": "camping.guest.silent_during_stay", "params": {"guest": "Sven Andersson", "days": 3, "first_stay": true}, "severity": "mid"},
+    {"signal_key": "camping.safeguarding.dog_repeat_complaint", "params": {"guest": "Familie Maier", "dog": "Bruno", "complaint_count": 2}, "severity": "mid", "_note": "cross-edition: safeguarding-Modul"},
+    {"signal_key": "camping.partnership.delivery_today", "params": {"supplier": "Bäckerei Tiefenbach", "time": "06:30"}, "severity": "info"},
+    {"signal_key": "camping.behoerde.tourismusabgabe_due", "params": {"month": "März", "amount": 1284.50}, "severity": "low"},
+    {"signal_key": "camping.journey.repeat_pattern", "params": {"guest": "Familie Bertolini", "season_count": 2}, "severity": "low", "polarity": "positiv"},
+    {"signal_key": "camping.weather.rain_window", "params": {"day": "Mittwoch", "type": "Dauerregen"}, "severity": "low"}
+  ]
+}
