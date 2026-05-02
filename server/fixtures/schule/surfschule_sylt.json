@@ -1,0 +1,293 @@
+{
+  "_meta": {
+    "fixture_name": "Inselwellen Sylt — Surfschule",
+    "fixture_id": "school_surf_sylt_001",
+    "edition": "schule.shiksha",
+    "type": "surf",
+    "stand": "25. April 2026",
+    "purpose": "Vollständig fiktive Surfschule für Edition-Validierung mit Wetter-Komplexität, Saison-Lehrer-Logik und Multi-Sprache.",
+    "kennzeichen": "FIKTIV — keine reale Person oder Firma"
+  },
+
+  "school": {
+    "id": "school_surf_sylt_001",
+    "name": "Inselwellen Sylt",
+    "type": "surf",
+    "edition": "schule.shiksha",
+    "primary_address": {
+      "street": "Brandenburger Strand 4",
+      "postal_code": "25980",
+      "city": "Westerland (Sylt)",
+      "country": "DE"
+    },
+    "secondary_locations": [
+      {"name": "Spot Buhne 16", "coordinates": [54.9347, 8.2961], "purpose": "Fortgeschrittenen-Spot, größere Wellen"},
+      {"name": "Lager Westerland", "street": "Strandstraße 17", "postal_code": "25980", "city": "Westerland", "purpose": "Equipment-Lager + Theorie-Raum"}
+    ],
+    "contact": {
+      "geschaeftsfuehrer": "Lars Möbius",
+      "email": "info@inselwellen-sylt.de",
+      "phone": "+49 4651 887766",
+      "web": "inselwellen-sylt.de"
+    },
+    "tax_number": "DE 287654321",
+    "reg_number": "HRB 12345 Flensburg",
+    "bank_account": {
+      "iban": "DE89 2175 0000 0123 4567 89",
+      "bic": "NOLADE21NOS",
+      "bank": "Nord-Ostsee Sparkasse",
+      "holder": "Inselwellen GmbH"
+    },
+    "business_hours": {
+      "season": "01.05.–15.10., täglich 08:00–19:00",
+      "off_season": "geschlossen, Anfragen via Mail"
+    },
+    "weather_dependent": true,
+    "has_minors": true,
+    "insurance_info": {
+      "provider": "ARAG Sportversicherung",
+      "policy_number": "SP-2026-998877",
+      "valid_until": "2026-12-31",
+      "_pattern_hint": "Mahnung wegen offener Erstrechnung — siehe surf_versicherung_mahnung.md"
+    },
+    "weather_thresholds": {
+      "wind_max_knots_beginner": 25,
+      "wind_max_knots_advanced": 35,
+      "wave_min_height_meters": 0.4,
+      "wave_max_height_meters_beginner": 1.2,
+      "decision_window_hours_before": 18
+    },
+    "tags": ["sylt", "outdoor", "saisonal", "multi-sprache", "wetter-dependent"]
+  },
+
+  "instructors": [
+    {
+      "id": "instructor_sylt_001",
+      "school_id": "school_surf_sylt_001",
+      "full_name": "Lars Möbius",
+      "role": "inhaber + headcoach",
+      "contact": {"email": "lars@inselwellen-sylt.de", "phone": "+49 171 234 5678"},
+      "languages": ["de", "en", "nl"],
+      "licenses": [
+        {"type": "ISA Level 2 — Surf Coach", "valid_until": "2027-04-30", "issued_by": "International Surfing Association"},
+        {"type": "DSV Surfschulen-Zertifikat", "valid_until": "2027-12-31", "issued_by": "Deutscher Surf-Verband"},
+        {"type": "Erste Hilfe + Rettungsschwimmer Silber", "valid_until": "2026-09-15", "issued_by": "DLRG"}
+      ],
+      "background_check": {"valid_until": "2027-01-20", "type": "Erweitertes Führungszeugnis"},
+      "specialties": ["anfänger", "fortgeschrittene", "kinder"],
+      "availability": {"weekly": "Mai–Oktober täglich, ganzjährige Stelle"},
+      "since": "2017-05-01"
+    },
+    {
+      "id": "instructor_sylt_002",
+      "school_id": "school_surf_sylt_001",
+      "full_name": "Pia Reinhart",
+      "role": "saison-lehrerin",
+      "contact": {"email": "pia.reinhart@gmail.com", "phone": "+49 162 345 6789"},
+      "languages": ["de", "en"],
+      "licenses": [
+        {"type": "ISA Level 1 — Surf Instructor", "valid_until": "2026-08-12", "issued_by": "International Surfing Association"},
+        {"type": "Erste Hilfe", "valid_until": "2026-07-30", "issued_by": "Johanniter"}
+      ],
+      "background_check": {"valid_until": "2026-12-15", "type": "Erweitertes Führungszeugnis"},
+      "specialties": ["anfänger", "frauen-kurse"],
+      "availability": {"weekly": "Mai–September Vollzeit"},
+      "since": "2024-05-15"
+    },
+    {
+      "id": "instructor_sylt_003",
+      "school_id": "school_surf_sylt_001",
+      "full_name": "Tom Bechmann",
+      "role": "saison-lehrer (anwärter)",
+      "contact": {"email": "tom.bechmann@protonmail.com", "phone": "+49 175 456 7890"},
+      "languages": ["de", "en"],
+      "licenses": [
+        {"type": "ISA Surf Coach Anwärter (in Ausbildung)", "valid_until": "2026-05-30", "issued_by": "—"},
+        {"type": "Rettungsschwimmer Bronze", "valid_until": "2027-03-10", "issued_by": "DLRG"}
+      ],
+      "background_check": {"valid_until": "2026-09-20", "type": "Erweitertes Führungszeugnis"},
+      "specialties": ["anfänger (nur unter Aufsicht!)"],
+      "availability": {"weekly": "Juni–August Vollzeit"},
+      "since": "2026-04-01",
+      "_signal_hint": "Anwärter-Status — schule.instructor_license_check muss strikt greifen, kein Aufbaukurs allein"
+    },
+    {
+      "id": "instructor_sylt_004",
+      "school_id": "school_surf_sylt_001",
+      "full_name": "Marieke van Veen",
+      "role": "saison-lehrerin",
+      "contact": {"email": "marieke@vanveen.nl", "phone": "+31 6 12345678"},
+      "languages": ["nl", "de", "en"],
+      "licenses": [
+        {"type": "ISA Level 1 — Surf Instructor", "valid_until": "2027-06-18", "issued_by": "International Surfing Association"},
+        {"type": "EHBO Erste Hilfe NL", "valid_until": "2026-11-05", "issued_by": "Het Oranje Kruis"}
+      ],
+      "background_check": {"valid_until": "2026-08-22", "type": "Verklaring Omtrent het Gedrag (NL)"},
+      "specialties": ["anfänger", "niederländische gäste"],
+      "availability": {"weekly": "Juli–August Vollzeit"},
+      "since": "2025-07-01"
+    },
+    {
+      "id": "instructor_sylt_005",
+      "school_id": "school_surf_sylt_001",
+      "full_name": "Jonas Engler",
+      "role": "saison-lehrer",
+      "contact": {"email": "jonas.engler@gmx.de", "phone": "+49 178 567 8901"},
+      "languages": ["de", "en"],
+      "licenses": [
+        {"type": "ISA Level 1 — Surf Instructor", "valid_until": "2027-04-14", "issued_by": "International Surfing Association"},
+        {"type": "Rettungsschwimmer Silber", "valid_until": "2026-10-08", "issued_by": "DLRG"}
+      ],
+      "background_check": {"valid_until": "2027-02-05", "type": "Erweitertes Führungszeugnis"},
+      "specialties": ["fortgeschrittene", "windsurf-bridge"],
+      "availability": {"weekly": "Mai–September Vollzeit"},
+      "since": "2023-05-10"
+    }
+  ],
+
+  "guardians": [
+    {"id": "guardian_sylt_001", "full_name": "Stefan Hartwig", "contact": {"email": "s.hartwig@web.de", "phone": "+49 171 778 9911"}, "related_students": ["student_sylt_005"]},
+    {"id": "guardian_sylt_002", "full_name": "Hannah Vogel", "contact": {"email": "hannah.vogel@gmail.com", "phone": "+49 162 332 1144"}, "related_students": ["student_sylt_011"]},
+    {"id": "guardian_sylt_003", "full_name": "Pieter de Bruyn", "contact": {"email": "p.debruyn@xs4all.nl", "phone": "+31 6 87654321"}, "related_students": ["student_sylt_018", "student_sylt_019"]}
+  ],
+
+  "students": [
+    {"id": "student_sylt_001", "school_id": "school_surf_sylt_001", "full_name": "Maximilian Reinhardt", "birthdate": "1991-04-12", "is_minor": false, "contact": {"email": "max.reinhardt@gmail.com", "phone": "+49 171 234 5566"}, "language": "de", "level": {"surf": "anfänger"}, "active_packages": ["pkg_inst_sylt_001"], "wetsuit_size": "L", "first_visit": "2026-04-20"},
+    {"id": "student_sylt_002", "school_id": "school_surf_sylt_001", "full_name": "Sophie Bauer", "birthdate": "1988-09-18", "is_minor": false, "contact": {"email": "s.bauer@gmail.com", "phone": "+49 162 567 8899"}, "language": "de", "level": {"surf": "fortgeschritten"}, "active_packages": ["pkg_inst_sylt_002"], "wetsuit_size": "M", "first_visit": "2024-07-15"},
+    {"id": "student_sylt_003", "school_id": "school_surf_sylt_001", "full_name": "James O'Connor", "birthdate": "1979-11-30", "is_minor": false, "contact": {"email": "james.oconnor@uk.example.com", "phone": "+44 7700 900123"}, "language": "en", "level": {"surf": "anfänger+"}, "active_packages": ["pkg_inst_sylt_003"], "wetsuit_size": "XL", "first_visit": "2026-04-22", "_pattern_hint": "Englisch-Gast, kommt für 5-Tage-Camp — siehe surf_anmeldung_5tage_english.md"},
+    {"id": "student_sylt_004", "school_id": "school_surf_sylt_001", "full_name": "Leonie Weiss", "birthdate": "1995-03-08", "is_minor": false, "contact": {"email": "leonie.weiss@web.de", "phone": "+49 175 987 6655"}, "language": "de", "level": {"surf": "fortgeschritten"}, "active_packages": ["pkg_inst_sylt_004"], "wetsuit_size": "S", "first_visit": "2023-08-19"},
+    {"id": "student_sylt_005", "school_id": "school_surf_sylt_001", "full_name": "Mia Hartwig", "birthdate": "2011-06-14", "is_minor": true, "guardian_ids": ["guardian_sylt_001"], "language": "de", "level": {"surf": "kinder-anfänger"}, "active_packages": ["pkg_inst_sylt_005"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_sylt_001", "date": "2026-04-15", "valid_until": "2026-12-31"}, {"type": "fotoeinverständnis", "by": "guardian_sylt_001", "date": "2026-04-15", "valid_until": "2026-12-31"}], "wetsuit_size": "JS", "first_visit": "2026-04-22", "medical_notes": "Asthma — Inhalator dabei, Lehrer informiert"},
+    {"id": "student_sylt_006", "school_id": "school_surf_sylt_001", "full_name": "Andreas Korbel", "birthdate": "1985-08-25", "is_minor": false, "contact": {"email": "a.korbel@telekom.de", "phone": "+49 178 332 4477"}, "language": "de", "level": {"surf": "anfänger"}, "active_packages": ["pkg_inst_sylt_006"], "wetsuit_size": "L", "first_visit": "2026-04-23"},
+    {"id": "student_sylt_007", "school_id": "school_surf_sylt_001", "full_name": "Charlotte Kümmel", "birthdate": "1993-01-19", "is_minor": false, "contact": {"email": "c.kuemmel@gmail.com", "phone": "+49 171 543 2188"}, "language": "de", "level": {"surf": "anfänger+"}, "active_packages": ["pkg_inst_sylt_007"], "wetsuit_size": "M", "first_visit": "2025-06-12"},
+    {"id": "student_sylt_008", "school_id": "school_surf_sylt_001", "full_name": "Olaf Schwerter", "birthdate": "1972-12-03", "is_minor": false, "contact": {"email": "o.schwerter@web.de", "phone": "+49 162 778 9011"}, "language": "de", "level": {"surf": "fortgeschritten"}, "active_packages": ["pkg_inst_sylt_008"], "wetsuit_size": "XL", "first_visit": "2018-07-08", "_pattern_hint": "Stammgast seit 8 Jahren"},
+    {"id": "student_sylt_009", "school_id": "school_surf_sylt_001", "full_name": "Lena Köpper", "birthdate": "1990-05-21", "is_minor": false, "contact": {"email": "lena.koepper@gmx.de", "phone": "+49 175 234 5677"}, "language": "de", "level": {"surf": "anfänger"}, "active_packages": [], "_pattern_hint": "trial_followup_due — Probestunde am 24.04. besucht", "first_visit": "2026-04-24"},
+    {"id": "student_sylt_010", "school_id": "school_surf_sylt_001", "full_name": "Marc Heuser", "birthdate": "1987-10-09", "is_minor": false, "contact": {"email": "marc@heuser.io", "phone": "+49 178 345 6788"}, "language": "de", "level": {"surf": "anfänger+"}, "active_packages": ["pkg_inst_sylt_010"], "wetsuit_size": "M", "first_visit": "2024-09-03"},
+    {"id": "student_sylt_011", "school_id": "school_surf_sylt_001", "full_name": "Theo Vogel", "birthdate": "2010-04-17", "is_minor": true, "guardian_ids": ["guardian_sylt_002"], "language": "de", "level": {"surf": "kinder-mittel"}, "active_packages": ["pkg_inst_sylt_011"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_sylt_002", "date": "2026-04-20", "valid_until": "2026-12-31"}], "wetsuit_size": "JM", "first_visit": "2025-08-01", "_pattern_hint": "fotoeinverständnis fehlt — schule.consent_partial"},
+    {"id": "student_sylt_012", "school_id": "school_surf_sylt_001", "full_name": "Birte Lehmann", "birthdate": "1996-07-30", "is_minor": false, "contact": {"email": "birte.lehmann@gmail.com", "phone": "+49 162 456 7899"}, "language": "de", "level": {"surf": "fortgeschritten"}, "active_packages": ["pkg_inst_sylt_012"], "wetsuit_size": "S", "first_visit": "2025-08-12"},
+    {"id": "student_sylt_013", "school_id": "school_surf_sylt_001", "full_name": "Kevin O'Sullivan", "birthdate": "1983-02-11", "is_minor": false, "contact": {"email": "k.osullivan@hotmail.com", "phone": "+353 87 1234567"}, "language": "en", "level": {"surf": "fortgeschritten"}, "active_packages": ["pkg_inst_sylt_013"], "wetsuit_size": "L", "first_visit": "2024-08-22"},
+    {"id": "student_sylt_014", "school_id": "school_surf_sylt_001", "full_name": "Anja Roloff", "birthdate": "1992-11-28", "is_minor": false, "contact": {"email": "anja.roloff@web.de", "phone": "+49 171 567 8900"}, "language": "de", "level": {"surf": "anfänger+"}, "active_packages": ["pkg_inst_sylt_014"], "wetsuit_size": "M", "first_visit": "2025-07-04"},
+    {"id": "student_sylt_015", "school_id": "school_surf_sylt_001", "full_name": "Jens Otterstein", "birthdate": "1976-06-09", "is_minor": false, "contact": {"email": "j.otterstein@gmail.com", "phone": "+49 175 678 9011"}, "language": "de", "level": {"surf": "anfänger"}, "active_packages": ["pkg_inst_sylt_015"], "wetsuit_size": "L", "first_visit": "2026-04-21"},
+    {"id": "student_sylt_016", "school_id": "school_surf_sylt_001", "full_name": "Petra Liebermann", "birthdate": "1980-12-22", "is_minor": false, "contact": {"email": "petra.liebermann@gmx.de", "phone": "+49 178 789 0122"}, "language": "de", "level": {"surf": "anfänger+"}, "active_packages": ["pkg_inst_sylt_016"], "wetsuit_size": "M", "first_visit": "2024-08-05"},
+    {"id": "student_sylt_017", "school_id": "school_surf_sylt_001", "full_name": "Matti Sandner", "birthdate": "1989-05-14", "is_minor": false, "contact": {"email": "matti.sandner@protonmail.com", "phone": "+49 162 890 1233"}, "language": "de", "level": {"surf": "fortgeschritten"}, "active_packages": ["pkg_inst_sylt_017"], "wetsuit_size": "L", "first_visit": "2023-08-12"},
+    {"id": "student_sylt_018", "school_id": "school_surf_sylt_001", "full_name": "Sven de Bruyn", "birthdate": "2008-09-10", "is_minor": true, "guardian_ids": ["guardian_sylt_003"], "language": "nl", "level": {"surf": "kinder-fortgeschritten"}, "active_packages": ["pkg_inst_sylt_018"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_sylt_003", "date": "2026-04-22", "valid_until": "2026-12-31"}, {"type": "fotoeinverständnis", "by": "guardian_sylt_003", "date": "2026-04-22", "valid_until": "2026-12-31"}], "wetsuit_size": "JL", "first_visit": "2024-08-18"},
+    {"id": "student_sylt_019", "school_id": "school_surf_sylt_001", "full_name": "Anouk de Bruyn", "birthdate": "2010-12-05", "is_minor": true, "guardian_ids": ["guardian_sylt_003"], "language": "nl", "level": {"surf": "kinder-mittel"}, "active_packages": ["pkg_inst_sylt_019"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_sylt_003", "date": "2026-04-22", "valid_until": "2026-12-31"}, {"type": "fotoeinverständnis", "by": "guardian_sylt_003", "date": "2026-04-22", "valid_until": "2026-12-31"}], "wetsuit_size": "JM", "first_visit": "2024-08-18"},
+    {"id": "student_sylt_020", "school_id": "school_surf_sylt_001", "full_name": "Carlo Volkmann", "birthdate": "1994-08-03", "is_minor": false, "contact": {"email": "carlo.volkmann@gmail.com", "phone": "+49 171 901 2344"}, "language": "de", "level": {"surf": "fortgeschritten"}, "active_packages": ["pkg_inst_sylt_020"], "wetsuit_size": "L", "first_visit": "2025-06-28"},
+    {"id": "student_sylt_021", "school_id": "school_surf_sylt_001", "full_name": "Laura Stürmer", "birthdate": "1991-02-19", "is_minor": false, "contact": {"email": "laura.stuermer@web.de", "phone": "+49 175 012 3455"}, "language": "de", "level": {"surf": "anfänger+"}, "active_packages": ["pkg_inst_sylt_021"], "wetsuit_size": "S", "first_visit": "2025-09-12"},
+    {"id": "student_sylt_022", "school_id": "school_surf_sylt_001", "full_name": "Tobias Färber", "birthdate": "1983-07-26", "is_minor": false, "contact": {"email": "tobias.faerber@gmail.com", "phone": "+49 178 123 4566"}, "language": "de", "level": {"surf": "anfänger"}, "active_packages": ["pkg_inst_sylt_022"], "wetsuit_size": "M", "first_visit": "2026-04-21"},
+    {"id": "student_sylt_023", "school_id": "school_surf_sylt_001", "full_name": "Emma Visser", "birthdate": "1998-04-02", "is_minor": false, "contact": {"email": "emma.visser@xs4all.nl", "phone": "+31 6 23456789"}, "language": "nl", "level": {"surf": "anfänger+"}, "active_packages": ["pkg_inst_sylt_023"], "wetsuit_size": "S", "first_visit": "2025-07-22"},
+    {"id": "student_sylt_024", "school_id": "school_surf_sylt_001", "full_name": "Gerd Pohlmann", "birthdate": "1965-11-17", "is_minor": false, "contact": {"email": "g.pohlmann@telering.at", "phone": "+43 664 234 5677"}, "language": "de", "level": {"surf": "anfänger"}, "active_packages": ["pkg_inst_sylt_024"], "wetsuit_size": "XXL", "first_visit": "2026-04-23", "_pattern_hint": "Österreichischer Gast, ältere Zielgruppe"},
+    {"id": "student_sylt_025", "school_id": "school_surf_sylt_001", "full_name": "Mira Hesselbach", "birthdate": "1986-06-08", "is_minor": false, "contact": {"email": "mira.hesselbach@protonmail.com", "phone": "+49 162 345 6788"}, "language": "de", "level": {"surf": "fortgeschritten"}, "active_packages": ["pkg_inst_sylt_025"], "wetsuit_size": "M", "first_visit": "2022-07-15"}
+  ],
+
+  "package_templates": [
+    {"id": "pkg_surf_taxikurs_3h", "name": "Taxikurs (3h)", "count": 1, "price": 95.00, "validity_days": 30, "applicable_course_types": ["taxikurs"]},
+    {"id": "pkg_surf_5tage_camp", "name": "5-Tage-Anfängercamp (15h)", "count": 1, "price": 480.00, "validity_days": 90, "applicable_course_types": ["camp_5_tage"]},
+    {"id": "pkg_surf_privat_h", "name": "Privatstunde (1h)", "count": 1, "price": 110.00, "validity_days": 60, "applicable_course_types": ["privat"]},
+    {"id": "pkg_surf_5er_pack", "name": "5er-Pack Stunden", "count": 5, "price": 425.00, "validity_days": 90, "applicable_course_types": ["all"]},
+    {"id": "pkg_surf_kinder_camp", "name": "Kinder-Camp 5 Tage", "count": 1, "price": 360.00, "validity_days": 90, "applicable_course_types": ["kinder_camp"]}
+  ],
+
+  "package_instances": [
+    {"id": "pkg_inst_sylt_001", "template_id": "pkg_surf_5tage_camp", "student_id": "student_sylt_001", "remaining_count": 1, "purchased_at": "2026-04-20", "expires_at": "2026-07-19", "status": "active"},
+    {"id": "pkg_inst_sylt_002", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_002", "remaining_count": 3, "purchased_at": "2026-04-15", "expires_at": "2026-07-14", "status": "active"},
+    {"id": "pkg_inst_sylt_003", "template_id": "pkg_surf_5tage_camp", "student_id": "student_sylt_003", "remaining_count": 1, "purchased_at": "2026-04-22", "expires_at": "2026-07-21", "status": "active"},
+    {"id": "pkg_inst_sylt_004", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_004", "remaining_count": 5, "purchased_at": "2026-04-19", "expires_at": "2026-07-18", "status": "active"},
+    {"id": "pkg_inst_sylt_005", "template_id": "pkg_surf_kinder_camp", "student_id": "student_sylt_005", "remaining_count": 1, "purchased_at": "2026-04-15", "expires_at": "2026-07-14", "status": "active"},
+    {"id": "pkg_inst_sylt_006", "template_id": "pkg_surf_taxikurs_3h", "student_id": "student_sylt_006", "remaining_count": 1, "purchased_at": "2026-04-23", "expires_at": "2026-05-23", "status": "active"},
+    {"id": "pkg_inst_sylt_007", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_007", "remaining_count": 2, "purchased_at": "2026-04-10", "expires_at": "2026-07-09", "status": "active"},
+    {"id": "pkg_inst_sylt_008", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_008", "remaining_count": 4, "purchased_at": "2026-04-21", "expires_at": "2026-07-20", "status": "active"},
+    {"id": "pkg_inst_sylt_010", "template_id": "pkg_surf_taxikurs_3h", "student_id": "student_sylt_010", "remaining_count": 1, "purchased_at": "2026-04-22", "expires_at": "2026-05-22", "status": "active"},
+    {"id": "pkg_inst_sylt_011", "template_id": "pkg_surf_kinder_camp", "student_id": "student_sylt_011", "remaining_count": 1, "purchased_at": "2026-04-20", "expires_at": "2026-07-19", "status": "active"},
+    {"id": "pkg_inst_sylt_012", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_012", "remaining_count": 3, "purchased_at": "2026-04-18", "expires_at": "2026-07-17", "status": "active"},
+    {"id": "pkg_inst_sylt_013", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_013", "remaining_count": 5, "purchased_at": "2026-04-22", "expires_at": "2026-07-21", "status": "active"},
+    {"id": "pkg_inst_sylt_014", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_014", "remaining_count": 4, "purchased_at": "2026-04-20", "expires_at": "2026-07-19", "status": "active"},
+    {"id": "pkg_inst_sylt_015", "template_id": "pkg_surf_taxikurs_3h", "student_id": "student_sylt_015", "remaining_count": 1, "purchased_at": "2026-04-21", "expires_at": "2026-05-21", "status": "active"},
+    {"id": "pkg_inst_sylt_016", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_016", "remaining_count": 2, "purchased_at": "2026-04-15", "expires_at": "2026-07-14", "status": "active"},
+    {"id": "pkg_inst_sylt_017", "template_id": "pkg_surf_5tage_camp", "student_id": "student_sylt_017", "remaining_count": 1, "purchased_at": "2026-04-19", "expires_at": "2026-07-18", "status": "active"},
+    {"id": "pkg_inst_sylt_018", "template_id": "pkg_surf_kinder_camp", "student_id": "student_sylt_018", "remaining_count": 1, "purchased_at": "2026-04-22", "expires_at": "2026-07-21", "status": "active"},
+    {"id": "pkg_inst_sylt_019", "template_id": "pkg_surf_kinder_camp", "student_id": "student_sylt_019", "remaining_count": 1, "purchased_at": "2026-04-22", "expires_at": "2026-07-21", "status": "active"},
+    {"id": "pkg_inst_sylt_020", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_020", "remaining_count": 3, "purchased_at": "2026-04-17", "expires_at": "2026-07-16", "status": "active"},
+    {"id": "pkg_inst_sylt_021", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_021", "remaining_count": 4, "purchased_at": "2026-04-21", "expires_at": "2026-07-20", "status": "active"},
+    {"id": "pkg_inst_sylt_022", "template_id": "pkg_surf_taxikurs_3h", "student_id": "student_sylt_022", "remaining_count": 1, "purchased_at": "2026-04-21", "expires_at": "2026-05-21", "status": "active"},
+    {"id": "pkg_inst_sylt_023", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_023", "remaining_count": 5, "purchased_at": "2026-04-18", "expires_at": "2026-07-17", "status": "active"},
+    {"id": "pkg_inst_sylt_024", "template_id": "pkg_surf_taxikurs_3h", "student_id": "student_sylt_024", "remaining_count": 1, "purchased_at": "2026-04-23", "expires_at": "2026-05-23", "status": "active"},
+    {"id": "pkg_inst_sylt_025", "template_id": "pkg_surf_5er_pack", "student_id": "student_sylt_025", "remaining_count": 2, "purchased_at": "2026-04-15", "expires_at": "2026-07-14", "status": "active"}
+  ],
+
+  "courses": [
+    {"id": "course_surf_taxi_morning", "school_id": "school_surf_sylt_001", "name": "Taxikurs Morgen 9–12", "type": "taxikurs", "level": "anfänger", "capacity_min": 4, "capacity_max": 8, "price": 95.00, "duration_minutes": 180, "weather_dependent": true, "status": "running", "schedule_pattern": "täglich Mo-So 09:00", "instructor_id": "instructor_sylt_002"},
+    {"id": "course_surf_taxi_afternoon", "school_id": "school_surf_sylt_001", "name": "Taxikurs Mittag 14–17", "type": "taxikurs", "level": "anfänger", "capacity_min": 4, "capacity_max": 8, "price": 95.00, "duration_minutes": 180, "weather_dependent": true, "status": "running", "schedule_pattern": "täglich Mo-So 14:00", "instructor_id": "instructor_sylt_005"},
+    {"id": "course_surf_5tage_anfaenger", "school_id": "school_surf_sylt_001", "name": "5-Tage-Camp Anfänger", "type": "camp_5_tage", "level": "anfänger", "capacity_min": 6, "capacity_max": 12, "price": 480.00, "duration_minutes": 180, "weather_dependent": true, "status": "running", "schedule_pattern": "Mo-Fr je 10:00", "instructor_id": "instructor_sylt_001", "start_date": "2026-04-27", "end_date": "2026-05-01"},
+    {"id": "course_surf_kinder_camp", "school_id": "school_surf_sylt_001", "name": "Kinder-Camp 5 Tage", "type": "kinder_camp", "level": "kinder", "capacity_min": 4, "capacity_max": 8, "price": 360.00, "duration_minutes": 120, "weather_dependent": true, "status": "running", "schedule_pattern": "Mo-Fr je 11:00", "instructor_id": "instructor_sylt_002", "start_date": "2026-04-27", "end_date": "2026-05-01", "metadata": {"requires_consent": true, "max_age": 14, "lifeguard_ratio": "1:4"}},
+    {"id": "course_surf_privat", "school_id": "school_surf_sylt_001", "name": "Privatstunde", "type": "privat", "level": "alle", "capacity_min": 1, "capacity_max": 1, "price": 110.00, "duration_minutes": 60, "weather_dependent": true, "status": "on_demand", "schedule_pattern": "auf Anfrage", "instructor_id": null}
+  ],
+
+  "course_sessions_examples": [
+    {"id": "session_sylt_001", "course_id": "course_surf_taxi_morning", "scheduled_at": "2026-04-27T09:00:00+02:00", "instructor_id": "instructor_sylt_002", "location": {"spot": "brandenburger_strand"}, "status": "scheduled", "expected_attendees": ["student_sylt_001","student_sylt_006","student_sylt_015","student_sylt_022","student_sylt_024"], "weather_window_id": "ww_001"},
+    {"id": "session_sylt_002", "course_id": "course_surf_taxi_afternoon", "scheduled_at": "2026-04-27T14:00:00+02:00", "instructor_id": "instructor_sylt_005", "location": {"spot": "buhne_16"}, "status": "weather_postponed", "postponement_reason": "Wind 38 kn aus Nord-West, Welle 1.6m — über Anfänger-Schwelle", "rescheduled_to": "2026-04-29T14:00:00+02:00", "expected_attendees": ["student_sylt_007","student_sylt_010","student_sylt_021"], "weather_window_id": "ww_002", "_signal_hint": "weather.threshold_breach + weather.communication_pending"},
+    {"id": "session_sylt_003", "course_id": "course_surf_5tage_anfaenger", "scheduled_at": "2026-04-27T10:00:00+02:00", "instructor_id": "instructor_sylt_001", "location": {"spot": "brandenburger_strand"}, "status": "scheduled", "expected_attendees": ["student_sylt_001","student_sylt_003"], "weather_window_id": "ww_003"},
+    {"id": "session_sylt_004", "course_id": "course_surf_kinder_camp", "scheduled_at": "2026-04-27T11:00:00+02:00", "instructor_id": "instructor_sylt_002", "location": {"spot": "brandenburger_strand"}, "status": "scheduled", "expected_attendees": ["student_sylt_005","student_sylt_011","student_sylt_018","student_sylt_019"], "weather_window_id": "ww_004", "_safeguarding_check": "Mias Inhalator dabei? Theos foto-einverständnis fehlt → keine Fotos heute"},
+    {"id": "session_sylt_005", "course_id": "course_surf_taxi_morning", "scheduled_at": "2026-04-28T09:00:00+02:00", "instructor_id": "instructor_sylt_004", "location": {"spot": "brandenburger_strand"}, "status": "scheduled", "expected_attendees": ["student_sylt_023"], "weather_window_id": "ww_005", "_pattern_hint": "Marieke (NL-sprachig) für Emma (NL) zugewiesen — language_match"}
+  ],
+
+  "weather_windows_examples": [
+    {"id": "ww_001", "course_session_id": "session_sylt_001", "forecast_data": {"wind_kn": 18, "wind_dir": "W", "wave_m": 0.8, "tide": "rising", "source": "Open-Meteo + DWD"}, "decision_required_at": "2026-04-26T15:00:00+02:00", "decision": "go", "decided_by": "instructor_sylt_001", "decided_at": "2026-04-26T15:42:00+02:00"},
+    {"id": "ww_002", "course_session_id": "session_sylt_002", "forecast_data": {"wind_kn": 38, "wind_dir": "NW", "wave_m": 1.6, "tide": "high", "source": "Open-Meteo + DWD"}, "decision_required_at": "2026-04-26T20:00:00+02:00", "decision": "postpone", "decided_by": "instructor_sylt_001", "decided_at": "2026-04-26T19:55:00+02:00", "alternative_plan": "Theorie-Block im Lager Westerland — Boards-Wachs-Workshop + Surf-Etiquette"},
+    {"id": "ww_003", "course_session_id": "session_sylt_003", "forecast_data": {"wind_kn": 16, "wind_dir": "W", "wave_m": 0.7, "tide": "low", "source": "Open-Meteo + DWD"}, "decision_required_at": "2026-04-26T16:00:00+02:00", "decision": "go", "decided_by": "instructor_sylt_001", "decided_at": "2026-04-26T15:42:00+02:00"},
+    {"id": "ww_004", "course_session_id": "session_sylt_004", "forecast_data": {"wind_kn": 16, "wind_dir": "W", "wave_m": 0.7, "tide": "low", "source": "Open-Meteo + DWD"}, "decision_required_at": "2026-04-26T17:00:00+02:00", "decision": "go", "decided_by": "instructor_sylt_001", "decided_at": "2026-04-26T16:30:00+02:00"},
+    {"id": "ww_005", "course_session_id": "session_sylt_005", "forecast_data": {"wind_kn": 22, "wind_dir": "SW", "wave_m": 0.9, "tide": "rising", "source": "Open-Meteo + DWD"}, "decision_required_at": "2026-04-27T15:00:00+02:00", "decision": "pending", "_signal_hint": "weather.go_no_go_decision_due in 8h"}
+  ],
+
+  "equipment_inventory": {
+    "boards_softtop_anfänger": [
+      {"id": "board_001", "model": "Softech Roller 9'0", "size": "9_0", "status": "available"},
+      {"id": "board_002", "model": "Softech Roller 9'0", "size": "9_0", "status": "available"},
+      {"id": "board_003", "model": "Softech Roller 9'0", "size": "9_0", "status": "in_use", "loaned_to_session": "session_sylt_001"},
+      {"id": "board_004", "model": "Softech Roller 8'0", "size": "8_0", "status": "available"},
+      {"id": "board_005", "model": "Softech Roller 8'0", "size": "8_0", "status": "in_use", "loaned_to_session": "session_sylt_001"},
+      {"id": "board_006", "model": "Softech Kid 6'6", "size": "6_6", "status": "available", "_note": "Kinder-Board"},
+      {"id": "board_007", "model": "Softech Kid 6'6", "size": "6_6", "status": "in_use", "loaned_to_session": "session_sylt_004"},
+      {"id": "board_008", "model": "Softech Kid 6'6", "size": "6_6", "status": "in_use", "loaned_to_session": "session_sylt_004"}
+    ],
+    "boards_hardboard_fortgeschrittene": [
+      {"id": "board_010", "model": "JS Industries 6'2", "status": "available"},
+      {"id": "board_011", "model": "Channel Islands Rookie 6'4", "status": "damaged", "damage_note": "Ding hinten links — Reparatur ausstehend"},
+      {"id": "board_012", "model": "Lost Puddle Jumper 5'10", "status": "available"}
+    ],
+    "wetsuits": [
+      {"id": "ws_001", "size": "S", "thickness": "5/4", "status": "in_use", "loaned_to": "student_sylt_004"},
+      {"id": "ws_002", "size": "M", "thickness": "5/4", "status": "available"},
+      {"id": "ws_003", "size": "M", "thickness": "5/4", "status": "in_use", "loaned_to": "student_sylt_022"},
+      {"id": "ws_004", "size": "L", "thickness": "5/4", "status": "available"},
+      {"id": "ws_005", "size": "L", "thickness": "5/4", "status": "in_use", "loaned_to": "student_sylt_001"},
+      {"id": "ws_006", "size": "XL", "thickness": "5/4", "status": "in_use", "loaned_to": "student_sylt_003"},
+      {"id": "ws_007", "size": "XXL", "thickness": "5/4", "status": "available"},
+      {"id": "ws_008", "size": "JM", "thickness": "5/4", "status": "in_use", "loaned_to": "student_sylt_011"},
+      {"id": "ws_009", "size": "JS", "thickness": "5/4", "status": "in_use", "loaned_to": "student_sylt_005"},
+      {"id": "ws_010", "size": "JL", "thickness": "5/4", "status": "in_use", "loaned_to": "student_sylt_018"}
+    ],
+    "leashes_count": 18,
+    "rashguards_count": 24,
+    "first_aid_kits_count": 3,
+    "rescue_boards_count": 2
+  },
+
+  "suppliers": [
+    {"id": "supp_ion", "name": "ION Wassersport-Großhandel", "type": "ausstatter", "products": ["wetsuits","boards","leashes"], "address": {"street": "Hafenstraße 12", "postal_code": "26384", "city": "Wilhelmshaven", "country": "DE"}, "contact": {"email": "b2b@ion-products.com", "phone": "+49 4421 887 0"}},
+    {"id": "supp_arag", "name": "ARAG Sportversicherung", "type": "versicherung", "policy_numbers": ["SP-2026-998877"], "contact": {"email": "service@arag.de", "phone": "+49 211 963 2222"}, "address": {"street": "ARAG Platz 1", "postal_code": "40472", "city": "Düsseldorf", "country": "DE"}, "_pattern_hint": "Mahnung wegen offener Erstrechnung — siehe ai_documents"},
+    {"id": "supp_gemeinde_sylt", "name": "Gemeinde Sylt", "type": "behörde", "purpose": "Strandzonen-Genehmigung Brandenburger Strand + Buhne 16", "contact": {"email": "ordnungsamt@gemeinde-sylt.de", "phone": "+49 4651 851 0"}, "address": {"street": "Andreas-Nielsen-Straße 1", "postal_code": "25980", "city": "Sylt-Westerland"}},
+    {"id": "supp_unterkunft", "name": "Pension Strandblick Westerland", "type": "kooperationspartner", "purpose": "Surfcamp-Unterkunft", "contact": {"email": "info@strandblick-sylt.de", "phone": "+49 4651 22 33 44"}}
+  ],
+
+  "_pattern_signals_to_emit": [
+    {"signal_key": "schule.weather.threshold_breach", "params": {"session": "Taxikurs Mittag 27.04.", "wind_kn": 38, "limit_kn": 25}, "severity": "high"},
+    {"signal_key": "schule.weather.communication_pending", "params": {"affected_students": 3, "session_date": "2026-04-27"}, "severity": "high"},
+    {"signal_key": "schule.weather.go_no_go_decision_due", "params": {"session": "Taxikurs Morgen 28.04. (NL)", "hours_left": 8}, "severity": "mid"},
+    {"signal_key": "schule.instructor.license_expiring", "params": {"instructor": "Pia Reinhart", "days_left": 109}, "severity": "low"},
+    {"signal_key": "schule.instructor.license_expiring", "params": {"instructor": "Tom Bechmann (Anwärter)", "days_left": 35}, "severity": "mid", "_note": "Anwärter-Status — wenn nicht erneuert, kann er ab 30.05. nicht mehr unterrichten"},
+    {"signal_key": "schule.consent_partial", "params": {"student": "Theo Vogel", "missing": "foto-einverständnis"}, "severity": "mid"},
+    {"signal_key": "schule.enrollment.trial_followup_due", "params": {"student": "Lena Köpper", "days_since": 1}, "severity": "low"},
+    {"signal_key": "schule.equipment.damaged_unrepaired", "params": {"item": "Channel Islands Rookie 6'4", "since_days": 12}, "severity": "low"},
+    {"signal_key": "schule.partnership.payment_overdue", "params": {"partner": "ARAG Sportversicherung", "case": "Erstrechnung SP-2026-998877"}, "severity": "high"}
+  ]
+}

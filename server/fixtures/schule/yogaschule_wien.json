@@ -1,0 +1,368 @@
+{
+  "_meta": {
+    "fixture_name": "Lichtquelle Wien — Yogaschule",
+    "fixture_id": "school_yoga_wien_001",
+    "edition": "schule.shiksha",
+    "type": "yoga",
+    "stand": "25. April 2026",
+    "purpose": "Vollständig fiktive Yogaschule für Edition-Validierung. Alle Personen, Adressen, Bankdaten frei erfunden. Plausibel für Wien 7. Bezirk.",
+    "kennzeichen": "FIKTIV — keine reale Person oder Firma"
+  },
+
+  "school": {
+    "id": "school_yoga_wien_001",
+    "name": "Lichtquelle Wien",
+    "type": "yoga",
+    "edition": "schule.shiksha",
+    "primary_address": {
+      "street": "Burggasse 87",
+      "postal_code": "1070",
+      "city": "Wien",
+      "country": "AT"
+    },
+    "secondary_locations": [],
+    "contact": {
+      "geschaeftsfuehrerin": "Mira Hauser",
+      "email": "studio@lichtquelle-wien.at",
+      "phone": "+43 1 522 88 33",
+      "web": "lichtquelle-wien.at"
+    },
+    "uid_number": "ATU 12345678",
+    "reg_number": "FN 654321z",
+    "tax_number": "12-345/6789",
+    "bank_account": {
+      "iban": "AT26 2011 1000 5550 6678",
+      "bic": "GIBAATWWXXX",
+      "bank": "Erste Bank",
+      "holder": "Lichtquelle Wien e.U."
+    },
+    "business_hours": {
+      "monday": "07:00-21:00",
+      "tuesday": "07:00-21:00",
+      "wednesday": "07:00-21:00",
+      "thursday": "07:00-21:00",
+      "friday": "07:00-20:00",
+      "saturday": "08:30-13:30",
+      "sunday": "09:00-12:00"
+    },
+    "weather_dependent": false,
+    "has_minors": true,
+    "insurance_info": {
+      "provider": "Wiener Städtische Versicherung",
+      "policy_number": "BHV-2026-447723",
+      "valid_until": "2026-12-31"
+    },
+    "rooms": [
+      {"id": "room_yoga_a", "name": "Studio A — Sonne", "capacity": 18, "size_qm": 65, "features": ["heizbar", "tageslicht", "spiegel"]},
+      {"id": "room_yoga_b", "name": "Studio B — Mond", "capacity": 12, "size_qm": 40, "features": ["abdunkelbar", "ölboden"]}
+    ],
+    "tags": ["wien", "indoor", "ganzjährig", "kinder-yoga", "pre-natal"]
+  },
+
+  "instructors": [
+    {
+      "id": "instructor_001",
+      "school_id": "school_yoga_wien_001",
+      "full_name": "Mira Hauser",
+      "role": "geschäftsführerin + lehrerin",
+      "contact": {"email": "mira@lichtquelle-wien.at", "phone": "+43 664 123 4567"},
+      "licenses": [
+        {"type": "Yoga Alliance RYT-500", "level": "500h", "valid_until": "2027-09-30", "issued_by": "Yoga Alliance"},
+        {"type": "Pre-Natal Yoga Trainer", "level": "85h", "valid_until": "2028-04-15", "issued_by": "Yoga & Birth Institute Berlin"}
+      ],
+      "background_check": {"valid_until": "2027-03-12", "type": "Strafregisterbescheinigung Kinder/Jugend"},
+      "specialties": ["hatha", "vinyasa", "pre-natal"],
+      "availability": {"weekly": "Mo-Fr 17:00-21:00, Sa 09:00-12:00"},
+      "hourly_rate": 65.00,
+      "since": "2018-01-15"
+    },
+    {
+      "id": "instructor_002",
+      "school_id": "school_yoga_wien_001",
+      "full_name": "Felix Pranke",
+      "role": "lehrer",
+      "contact": {"email": "felix@lichtquelle-wien.at", "phone": "+43 660 234 5678"},
+      "licenses": [
+        {"type": "Yoga Alliance RYT-200", "level": "200h", "valid_until": "2026-08-30", "issued_by": "Yoga Vidya Bad Meinberg"}
+      ],
+      "background_check": {"valid_until": "2026-11-04", "type": "Strafregisterbescheinigung Kinder/Jugend"},
+      "specialties": ["vinyasa", "yin"],
+      "availability": {"weekly": "Mo, Mi, Fr 07:00-09:00 und 18:00-20:30"},
+      "hourly_rate": 50.00,
+      "since": "2022-09-01",
+      "_signal_hint": "Lizenz läuft am 2026-08-30 ab — muss erneuert werden"
+    },
+    {
+      "id": "instructor_003",
+      "school_id": "school_yoga_wien_001",
+      "full_name": "Tara Almasy",
+      "role": "lehrerin",
+      "contact": {"email": "tara@lichtquelle-wien.at", "phone": "+43 699 345 6789"},
+      "licenses": [
+        {"type": "Yoga Alliance RYT-200", "level": "200h", "valid_until": "2027-05-22", "issued_by": "Power Yoga Vienna"},
+        {"type": "Kinder-Yoga-Trainer", "level": "60h", "valid_until": "2028-01-10", "issued_by": "Yoga Aktuell Akademie"}
+      ],
+      "background_check": {"valid_until": "2027-02-19", "type": "Strafregisterbescheinigung Kinder/Jugend"},
+      "specialties": ["hatha", "kinder-yoga"],
+      "availability": {"weekly": "Di, Do 16:00-19:00, Sa 10:00-12:00"},
+      "hourly_rate": 50.00,
+      "since": "2023-03-10"
+    },
+    {
+      "id": "instructor_004",
+      "school_id": "school_yoga_wien_001",
+      "full_name": "Johannes Berg",
+      "role": "lehrer (freier mitarbeiter)",
+      "contact": {"email": "j.berg@privatmail.at", "phone": "+43 676 456 7890"},
+      "licenses": [
+        {"type": "Yoga Alliance RYT-500", "level": "500h", "valid_until": "2026-12-15", "issued_by": "Yoga House Munich"}
+      ],
+      "background_check": {"valid_until": "—", "type": "—", "_note": "kein Kinderkurs, daher nicht erforderlich"},
+      "specialties": ["yin", "restorative", "men's yoga"],
+      "availability": {"weekly": "Mi 19:00-21:00, So 09:00-12:00"},
+      "hourly_rate": 55.00,
+      "since": "2024-06-01"
+    },
+    {
+      "id": "instructor_005",
+      "school_id": "school_yoga_wien_001",
+      "full_name": "Lina Karadzic",
+      "role": "lehrerin (vertretung)",
+      "contact": {"email": "lina.k@lichtquelle-wien.at", "phone": "+43 681 567 8901"},
+      "licenses": [
+        {"type": "Yoga Alliance RYT-200", "level": "200h", "valid_until": "2027-10-14", "issued_by": "Bhakti Yoga Vienna"}
+      ],
+      "background_check": {"valid_until": "2026-12-02", "type": "Strafregisterbescheinigung Kinder/Jugend"},
+      "specialties": ["hatha", "vinyasa"],
+      "availability": {"weekly": "flexibel auf Anfrage"},
+      "hourly_rate": 45.00,
+      "since": "2025-01-20"
+    }
+  ],
+
+  "guardians": [
+    {"id": "guardian_001", "full_name": "Sandra Weiss", "contact": {"email": "s.weiss@gmx.at", "phone": "+43 664 778 1122"}, "related_students": ["student_006", "student_007"]},
+    {"id": "guardian_002", "full_name": "Ahmad Kheir", "contact": {"email": "a.kheir@protonmail.com", "phone": "+43 699 332 4455"}, "related_students": ["student_011"]},
+    {"id": "guardian_003", "full_name": "Petra Steiner", "contact": {"email": "petra.steiner@gmail.com", "phone": "+43 660 543 9988"}, "related_students": ["student_018"]},
+    {"id": "guardian_004", "full_name": "Mariko Tanaka", "contact": {"email": "m.tanaka@gmail.com", "phone": "+43 676 891 2233"}, "related_students": ["student_023"]}
+  ],
+
+  "students": [
+    {"id": "student_001", "school_id": "school_yoga_wien_001", "full_name": "Anna Fischer", "birthdate": "1989-03-14", "is_minor": false, "contact": {"email": "anna.fischer@gmail.com", "phone": "+43 664 111 2233"}, "level": {"yoga": "fortgeschritten"}, "active_packages": ["pkg_inst_001"], "first_visit": "2023-09-12", "_pattern_hint": "Stammschülerin, Mittwoch + Freitag verlässlich"},
+    {"id": "student_002", "school_id": "school_yoga_wien_001", "full_name": "Sarah Lehner", "birthdate": "1992-07-22", "is_minor": false, "contact": {"email": "sarahleh@gmx.at", "phone": "+43 699 234 5566"}, "level": {"yoga": "anfänger+"}, "active_packages": ["pkg_inst_002"], "first_visit": "2024-11-03", "_pattern_hint": "fehlt seit 14 Tagen — streak_broken Signal-Kandidat"},
+    {"id": "student_003", "school_id": "school_yoga_wien_001", "full_name": "Markus Pichler", "birthdate": "1981-11-08", "is_minor": false, "contact": {"email": "m.pichler@outlook.com", "phone": "+43 660 345 6677"}, "level": {"yoga": "anfänger"}, "active_packages": ["pkg_inst_003"], "first_visit": "2025-08-19"},
+    {"id": "student_004", "school_id": "school_yoga_wien_001", "full_name": "Eva Trosch", "birthdate": "1986-05-30", "is_minor": false, "contact": {"email": "evita@yahoo.de", "phone": "+43 681 456 7788"}, "level": {"yoga": "fortgeschritten"}, "active_packages": ["pkg_inst_004"], "first_visit": "2021-04-12", "_pattern_hint": "Pre-Natal-Schülerin (Hebammen-Bescheinigung in fixtures/ai_documents)"},
+    {"id": "student_005", "school_id": "school_yoga_wien_001", "full_name": "David Reinhardt", "birthdate": "1975-09-17", "is_minor": false, "contact": {"email": "d.reinhardt@a1.net", "phone": "+43 676 567 8899"}, "level": {"yoga": "anfänger"}, "active_packages": ["pkg_inst_005"], "first_visit": "2026-01-08"},
+    {"id": "student_006", "school_id": "school_yoga_wien_001", "full_name": "Lukas Weiss", "birthdate": "2014-02-12", "is_minor": true, "guardian_ids": ["guardian_001"], "level": {"yoga": "kinder-anfänger"}, "active_packages": ["pkg_inst_006"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_001", "date": "2026-01-15", "valid_until": "2026-12-31"}, {"type": "fotoeinverständnis", "by": "guardian_001", "date": "2026-01-15", "valid_until": "2026-12-31"}], "first_visit": "2026-01-22"},
+    {"id": "student_007", "school_id": "school_yoga_wien_001", "full_name": "Mia Weiss", "birthdate": "2017-08-05", "is_minor": true, "guardian_ids": ["guardian_001"], "level": {"yoga": "kinder-anfänger"}, "active_packages": ["pkg_inst_007"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_001", "date": "2026-01-15", "valid_until": "2026-12-31"}, {"type": "fotoeinverständnis", "by": "guardian_001", "date": "2026-01-15", "valid_until": "2026-12-31"}], "first_visit": "2026-01-22"},
+    {"id": "student_008", "school_id": "school_yoga_wien_001", "full_name": "Elena Korabljev", "birthdate": "1995-12-04", "is_minor": false, "contact": {"email": "elena.k@web.de", "phone": "+43 699 678 9900"}, "level": {"yoga": "mittel"}, "active_packages": ["pkg_inst_008"], "first_visit": "2025-06-11"},
+    {"id": "student_009", "school_id": "school_yoga_wien_001", "full_name": "Thomas Ziegler", "birthdate": "1968-04-25", "is_minor": false, "contact": {"email": "tziegler@gmx.at", "phone": "+43 664 789 0011"}, "level": {"yoga": "yin/restorative"}, "active_packages": ["pkg_inst_009"], "first_visit": "2024-02-14", "_pattern_hint": "Männer-Yoga-Stammkunde, Mittwoch 19h verlässlich"},
+    {"id": "student_010", "school_id": "school_yoga_wien_001", "full_name": "Petra Mladic", "birthdate": "1990-10-30", "is_minor": false, "contact": {"email": "p.mladic@gmail.com", "phone": "+43 676 890 1122"}, "level": {"yoga": "fortgeschritten"}, "active_packages": ["pkg_inst_010"], "first_visit": "2022-07-01"},
+    {"id": "student_011", "school_id": "school_yoga_wien_001", "full_name": "Yousef Kheir", "birthdate": "2012-06-19", "is_minor": true, "guardian_ids": ["guardian_002"], "level": {"yoga": "kinder-mittel"}, "active_packages": ["pkg_inst_011"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_002", "date": "2025-09-08", "valid_until": "2026-12-31"}], "_pattern_hint": "Konsent für Foto fehlt — schule.consent_missing Signal-Kandidat", "first_visit": "2025-09-12"},
+    {"id": "student_012", "school_id": "school_yoga_wien_001", "full_name": "Klara Voboril", "birthdate": "1998-01-23", "is_minor": false, "contact": {"email": "klara.voboril@hotmail.com", "phone": "+43 681 901 2233"}, "level": {"yoga": "anfänger"}, "active_packages": [], "_pattern_hint": "Probestunde am 22.04. besucht, noch keine Anmeldung — trial_followup_due", "first_visit": "2026-04-22"},
+    {"id": "student_013", "school_id": "school_yoga_wien_001", "full_name": "Bernd Sailer", "birthdate": "1972-08-14", "is_minor": false, "contact": {"email": "bernd.sailer@a1.net", "phone": "+43 660 012 3344"}, "level": {"yoga": "yin"}, "active_packages": ["pkg_inst_013"], "first_visit": "2023-11-05"},
+    {"id": "student_014", "school_id": "school_yoga_wien_001", "full_name": "Hilde Markovic", "birthdate": "1955-03-09", "is_minor": false, "contact": {"email": "h.markovic@gmail.com", "phone": "+43 699 123 4566"}, "level": {"yoga": "senior-hatha"}, "active_packages": ["pkg_inst_014"], "first_visit": "2020-09-15", "_pattern_hint": "Senior-Stammkundin, Donnerstag 09:30 verlässlich"},
+    {"id": "student_015", "school_id": "school_yoga_wien_001", "full_name": "Gregor Mayrhofer", "birthdate": "1983-12-18", "is_minor": false, "contact": {"email": "gregor.m@protonmail.com", "phone": "+43 664 234 5677"}, "level": {"yoga": "mittel"}, "active_packages": ["pkg_inst_015"], "first_visit": "2025-04-08"},
+    {"id": "student_016", "school_id": "school_yoga_wien_001", "full_name": "Sophia Jahn", "birthdate": "1997-06-27", "is_minor": false, "contact": {"email": "sophia.jahn@gmail.com", "phone": "+43 676 345 6788"}, "level": {"yoga": "vinyasa-fortgeschritten"}, "active_packages": ["pkg_inst_016"], "first_visit": "2024-08-12"},
+    {"id": "student_017", "school_id": "school_yoga_wien_001", "full_name": "Werner Hofbauer", "birthdate": "1962-11-11", "is_minor": false, "contact": {"email": "w.hofbauer@telering.at", "phone": "+43 681 456 7889"}, "level": {"yoga": "anfänger"}, "active_packages": ["pkg_inst_017"], "first_visit": "2025-10-30", "_pattern_hint": "Monatskarte überfällig — Mahnung in fixtures/ai_documents"},
+    {"id": "student_018", "school_id": "school_yoga_wien_001", "full_name": "Emil Steiner", "birthdate": "2013-04-08", "is_minor": true, "guardian_ids": ["guardian_003"], "level": {"yoga": "kinder-anfänger"}, "active_packages": ["pkg_inst_018"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_003", "date": "2026-02-20", "valid_until": "2026-12-31"}, {"type": "fotoeinverständnis", "by": "guardian_003", "date": "2026-02-20", "valid_until": "2026-12-31"}], "first_visit": "2026-03-01"},
+    {"id": "student_019", "school_id": "school_yoga_wien_001", "full_name": "Anita Winkler", "birthdate": "1979-05-16", "is_minor": false, "contact": {"email": "anita.winkler@yahoo.com", "phone": "+43 660 567 8990"}, "level": {"yoga": "pre-natal"}, "active_packages": ["pkg_inst_019"], "medical_notes": "Schwangerschaft 28. SSW — Hebammen-Bescheinigung 2026-04-12 in document.module", "first_visit": "2026-03-10"},
+    {"id": "student_020", "school_id": "school_yoga_wien_001", "full_name": "Patrick Donath", "birthdate": "1988-09-21", "is_minor": false, "contact": {"email": "patrick@donath.io", "phone": "+43 699 678 9011"}, "level": {"yoga": "anfänger"}, "active_packages": ["pkg_inst_020"], "first_visit": "2025-11-22"},
+    {"id": "student_021", "school_id": "school_yoga_wien_001", "full_name": "Karoline Fischer", "birthdate": "1993-02-28", "is_minor": false, "contact": {"email": "k.fischer@gmail.com", "phone": "+43 664 890 1233"}, "level": {"yoga": "vinyasa-fortgeschritten"}, "active_packages": ["pkg_inst_021"], "first_visit": "2023-05-14"},
+    {"id": "student_022", "school_id": "school_yoga_wien_001", "full_name": "Stefan Auer", "birthdate": "1971-07-03", "is_minor": false, "contact": {"email": "s.auer@a1.net", "phone": "+43 676 901 2344"}, "level": {"yoga": "yin"}, "active_packages": [], "_pattern_hint": "Karte ausgelaufen vor 8 Wochen — kein Folgekauf — Retention-Risiko", "first_visit": "2024-01-09"},
+    {"id": "student_023", "school_id": "school_yoga_wien_001", "full_name": "Hiroki Tanaka", "birthdate": "2014-11-25", "is_minor": true, "guardian_ids": ["guardian_004"], "level": {"yoga": "kinder-anfänger"}, "active_packages": ["pkg_inst_023"], "consent_records": [{"type": "kursteilnahme", "by": "guardian_004", "date": "2026-04-04", "valid_until": "2026-12-31"}], "_pattern_hint": "Foto-Einverständnis fehlt — Operator muss nachfragen", "first_visit": "2026-04-12"},
+    {"id": "student_024", "school_id": "school_yoga_wien_001", "full_name": "Lea Bachmann", "birthdate": "1996-08-19", "is_minor": false, "contact": {"email": "lea.bachmann@gmail.com", "phone": "+43 681 012 3455"}, "level": {"yoga": "vinyasa-fortgeschritten"}, "active_packages": ["pkg_inst_024"], "first_visit": "2024-12-02"},
+    {"id": "student_025", "school_id": "school_yoga_wien_001", "full_name": "Robert Vidovic", "birthdate": "1985-03-07", "is_minor": false, "contact": {"email": "robert.vidovic@gmx.at", "phone": "+43 660 123 4567"}, "level": {"yoga": "anfänger"}, "active_packages": ["pkg_inst_025"], "first_visit": "2025-12-15"},
+    {"id": "student_026", "school_id": "school_yoga_wien_001", "full_name": "Mariella Stranzl", "birthdate": "1999-10-12", "is_minor": false, "contact": {"email": "mari.stranzl@hotmail.com", "phone": "+43 699 234 5688"}, "level": {"yoga": "vinyasa-mittel"}, "active_packages": ["pkg_inst_026"], "first_visit": "2025-02-18"},
+    {"id": "student_027", "school_id": "school_yoga_wien_001", "full_name": "Jakob Hinterseer", "birthdate": "1990-06-05", "is_minor": false, "contact": {"email": "j.hinterseer@protonmail.com", "phone": "+43 664 345 6789"}, "level": {"yoga": "yin"}, "active_packages": ["pkg_inst_027"], "first_visit": "2024-10-25"},
+    {"id": "student_028", "school_id": "school_yoga_wien_001", "full_name": "Sabina Pejak", "birthdate": "1987-01-28", "is_minor": false, "contact": {"email": "s.pejak@gmail.com", "phone": "+43 676 456 7890"}, "level": {"yoga": "fortgeschritten"}, "active_packages": ["pkg_inst_028"], "first_visit": "2022-11-08"},
+    {"id": "student_029", "school_id": "school_yoga_wien_001", "full_name": "Michael Kropf", "birthdate": "1978-05-13", "is_minor": false, "contact": {"email": "m.kropf@outlook.com", "phone": "+43 681 567 8901"}, "level": {"yoga": "anfänger"}, "active_packages": ["pkg_inst_029"], "first_visit": "2025-07-19"},
+    {"id": "student_030", "school_id": "school_yoga_wien_001", "full_name": "Tina Schweighofer", "birthdate": "1994-12-02", "is_minor": false, "contact": {"email": "tina.schweighofer@gmail.com", "phone": "+43 660 678 9012"}, "level": {"yoga": "vinyasa-fortgeschritten"}, "active_packages": ["pkg_inst_030"], "first_visit": "2023-08-21"}
+  ],
+
+  "package_templates": [
+    {"id": "pkg_drop_in", "school_id": "school_yoga_wien_001", "name": "Drop-In Einzelstunde", "count": 1, "price": 25.00, "validity_days": 30, "applicable_course_types": ["all"]},
+    {"id": "pkg_10er_karte", "school_id": "school_yoga_wien_001", "name": "10er-Karte", "count": 10, "price": 180.00, "validity_days": 180, "applicable_course_types": ["all"]},
+    {"id": "pkg_monatskarte", "school_id": "school_yoga_wien_001", "name": "Monatskarte unbegrenzt", "count": -1, "price": 110.00, "validity_days": 31, "applicable_course_types": ["all"]},
+    {"id": "pkg_jahreskarte", "school_id": "school_yoga_wien_001", "name": "Jahreskarte unbegrenzt", "count": -1, "price": 990.00, "validity_days": 365, "applicable_course_types": ["all"]},
+    {"id": "pkg_kinder_block", "school_id": "school_yoga_wien_001", "name": "Kinder-Yoga 8er-Block", "count": 8, "price": 96.00, "validity_days": 90, "applicable_course_types": ["kinder-yoga"]},
+    {"id": "pkg_pre_natal_block", "school_id": "school_yoga_wien_001", "name": "Pre-Natal 6er-Block", "count": 6, "price": 96.00, "validity_days": 60, "applicable_course_types": ["pre-natal"]}
+  ],
+
+  "package_instances": [
+    {"id": "pkg_inst_001", "template_id": "pkg_10er_karte", "student_id": "student_001", "remaining_count": 7, "purchased_at": "2026-03-08", "expires_at": "2026-09-04", "status": "active"},
+    {"id": "pkg_inst_002", "template_id": "pkg_10er_karte", "student_id": "student_002", "remaining_count": 5, "purchased_at": "2026-02-14", "expires_at": "2026-08-13", "status": "active", "_pattern_hint": "5 Sessions ungenutzt, fehlt seit 14 Tagen"},
+    {"id": "pkg_inst_003", "template_id": "pkg_10er_karte", "student_id": "student_003", "remaining_count": 9, "purchased_at": "2026-04-10", "expires_at": "2026-10-07", "status": "active"},
+    {"id": "pkg_inst_004", "template_id": "pkg_pre_natal_block", "student_id": "student_004", "remaining_count": 4, "purchased_at": "2026-04-12", "expires_at": "2026-06-11", "status": "active"},
+    {"id": "pkg_inst_005", "template_id": "pkg_monatskarte", "student_id": "student_005", "remaining_count": -1, "purchased_at": "2026-04-01", "expires_at": "2026-05-01", "status": "active"},
+    {"id": "pkg_inst_006", "template_id": "pkg_kinder_block", "student_id": "student_006", "remaining_count": 6, "purchased_at": "2026-02-01", "expires_at": "2026-05-02", "status": "active"},
+    {"id": "pkg_inst_007", "template_id": "pkg_kinder_block", "student_id": "student_007", "remaining_count": 6, "purchased_at": "2026-02-01", "expires_at": "2026-05-02", "status": "active"},
+    {"id": "pkg_inst_008", "template_id": "pkg_10er_karte", "student_id": "student_008", "remaining_count": 3, "purchased_at": "2025-12-20", "expires_at": "2026-06-18", "status": "active"},
+    {"id": "pkg_inst_009", "template_id": "pkg_jahreskarte", "student_id": "student_009", "remaining_count": -1, "purchased_at": "2025-09-01", "expires_at": "2026-08-31", "status": "active"},
+    {"id": "pkg_inst_010", "template_id": "pkg_10er_karte", "student_id": "student_010", "remaining_count": 8, "purchased_at": "2026-04-05", "expires_at": "2026-10-02", "status": "active"},
+    {"id": "pkg_inst_011", "template_id": "pkg_kinder_block", "student_id": "student_011", "remaining_count": 4, "purchased_at": "2026-03-15", "expires_at": "2026-06-13", "status": "active"},
+    {"id": "pkg_inst_013", "template_id": "pkg_monatskarte", "student_id": "student_013", "remaining_count": -1, "purchased_at": "2026-03-30", "expires_at": "2026-04-30", "status": "active", "_pattern_hint": "läuft in 5 Tagen ab — package.expiring_soon"},
+    {"id": "pkg_inst_014", "template_id": "pkg_jahreskarte", "student_id": "student_014", "remaining_count": -1, "purchased_at": "2025-10-01", "expires_at": "2026-09-30", "status": "active"},
+    {"id": "pkg_inst_015", "template_id": "pkg_10er_karte", "student_id": "student_015", "remaining_count": 6, "purchased_at": "2026-03-22", "expires_at": "2026-09-19", "status": "active"},
+    {"id": "pkg_inst_016", "template_id": "pkg_monatskarte", "student_id": "student_016", "remaining_count": -1, "purchased_at": "2026-04-15", "expires_at": "2026-05-16", "status": "active"},
+    {"id": "pkg_inst_017", "template_id": "pkg_monatskarte", "student_id": "student_017", "remaining_count": -1, "purchased_at": "2026-03-12", "expires_at": "2026-04-12", "status": "expired", "_pattern_hint": "abgelaufen, Mahnung in document.module — siehe yoga_mahnung_monatskarte.md"},
+    {"id": "pkg_inst_018", "template_id": "pkg_kinder_block", "student_id": "student_018", "remaining_count": 7, "purchased_at": "2026-03-01", "expires_at": "2026-05-30", "status": "active"},
+    {"id": "pkg_inst_019", "template_id": "pkg_pre_natal_block", "student_id": "student_019", "remaining_count": 5, "purchased_at": "2026-04-12", "expires_at": "2026-06-11", "status": "active"},
+    {"id": "pkg_inst_020", "template_id": "pkg_10er_karte", "student_id": "student_020", "remaining_count": 4, "purchased_at": "2026-01-20", "expires_at": "2026-07-19", "status": "active"},
+    {"id": "pkg_inst_021", "template_id": "pkg_jahreskarte", "student_id": "student_021", "remaining_count": -1, "purchased_at": "2025-08-15", "expires_at": "2026-08-14", "status": "active"},
+    {"id": "pkg_inst_023", "template_id": "pkg_kinder_block", "student_id": "student_023", "remaining_count": 8, "purchased_at": "2026-04-12", "expires_at": "2026-07-11", "status": "active"},
+    {"id": "pkg_inst_024", "template_id": "pkg_monatskarte", "student_id": "student_024", "remaining_count": -1, "purchased_at": "2026-04-08", "expires_at": "2026-05-09", "status": "active"},
+    {"id": "pkg_inst_025", "template_id": "pkg_10er_karte", "student_id": "student_025", "remaining_count": 2, "purchased_at": "2025-12-30", "expires_at": "2026-06-28", "status": "active"},
+    {"id": "pkg_inst_026", "template_id": "pkg_monatskarte", "student_id": "student_026", "remaining_count": -1, "purchased_at": "2026-04-18", "expires_at": "2026-05-19", "status": "active"},
+    {"id": "pkg_inst_027", "template_id": "pkg_10er_karte", "student_id": "student_027", "remaining_count": 5, "purchased_at": "2026-02-22", "expires_at": "2026-08-21", "status": "active"},
+    {"id": "pkg_inst_028", "template_id": "pkg_jahreskarte", "student_id": "student_028", "remaining_count": -1, "purchased_at": "2025-11-15", "expires_at": "2026-11-14", "status": "active"},
+    {"id": "pkg_inst_029", "template_id": "pkg_10er_karte", "student_id": "student_029", "remaining_count": 7, "purchased_at": "2026-03-05", "expires_at": "2026-09-01", "status": "active"},
+    {"id": "pkg_inst_030", "template_id": "pkg_jahreskarte", "student_id": "student_030", "remaining_count": -1, "purchased_at": "2025-09-12", "expires_at": "2026-09-11", "status": "active"}
+  ],
+
+  "courses": [
+    {
+      "id": "course_hatha_morning",
+      "school_id": "school_yoga_wien_001",
+      "name": "Hatha Morgen",
+      "type": "hatha",
+      "level": "alle stufen",
+      "capacity_min": 4,
+      "capacity_max": 14,
+      "price": 25.00,
+      "duration_minutes": 75,
+      "weather_dependent": false,
+      "status": "running",
+      "schedule_pattern": "Mo + Mi 07:00",
+      "instructor_id": "instructor_002"
+    },
+    {
+      "id": "course_vinyasa_evening",
+      "school_id": "school_yoga_wien_001",
+      "name": "Vinyasa Power",
+      "type": "vinyasa",
+      "level": "fortgeschritten",
+      "capacity_min": 6,
+      "capacity_max": 16,
+      "price": 25.00,
+      "duration_minutes": 90,
+      "weather_dependent": false,
+      "status": "running",
+      "schedule_pattern": "Mi + Fr 18:30",
+      "instructor_id": "instructor_001"
+    },
+    {
+      "id": "course_yin_evening",
+      "school_id": "school_yoga_wien_001",
+      "name": "Yin & Restorative",
+      "type": "yin",
+      "level": "alle stufen",
+      "capacity_min": 4,
+      "capacity_max": 12,
+      "price": 25.00,
+      "duration_minutes": 75,
+      "weather_dependent": false,
+      "status": "running",
+      "schedule_pattern": "Mi 19:30",
+      "instructor_id": "instructor_004"
+    },
+    {
+      "id": "course_kinder_yoga",
+      "school_id": "school_yoga_wien_001",
+      "name": "Kinder-Yoga (6–10)",
+      "type": "kinder-yoga",
+      "level": "kinder",
+      "capacity_min": 4,
+      "capacity_max": 10,
+      "price": 12.00,
+      "duration_minutes": 50,
+      "weather_dependent": false,
+      "status": "running",
+      "schedule_pattern": "Sa 10:00",
+      "instructor_id": "instructor_003",
+      "metadata": {"requires_consent": true, "guardian_present_recommended": false}
+    },
+    {
+      "id": "course_pre_natal",
+      "school_id": "school_yoga_wien_001",
+      "name": "Pre-Natal Yoga",
+      "type": "pre-natal",
+      "level": "schwangerschaft 12.-36. SSW",
+      "capacity_min": 3,
+      "capacity_max": 8,
+      "price": 18.00,
+      "duration_minutes": 60,
+      "weather_dependent": false,
+      "status": "running",
+      "schedule_pattern": "Di 17:00",
+      "instructor_id": "instructor_001",
+      "metadata": {"requires_medical_clearance": true}
+    },
+    {
+      "id": "course_workshop_meditation",
+      "school_id": "school_yoga_wien_001",
+      "name": "Workshop: Atem & Meditation",
+      "type": "workshop",
+      "level": "alle stufen",
+      "capacity_min": 6,
+      "capacity_max": 18,
+      "price": 65.00,
+      "duration_minutes": 180,
+      "weather_dependent": false,
+      "status": "enrollment_open",
+      "schedule_pattern": "Sa 14:00 (einmalig)",
+      "instructor_id": "instructor_001",
+      "start_date": "2026-05-09",
+      "end_date": "2026-05-09",
+      "_pattern_hint": "5 Anmeldungen, braucht noch 1 für threshold"
+    }
+  ],
+
+  "course_sessions_examples": [
+    {"id": "session_001", "course_id": "course_hatha_morning", "scheduled_at": "2026-04-27T07:00:00+02:00", "instructor_id": "instructor_002", "location": {"room_id": "room_yoga_a"}, "status": "scheduled", "expected_attendees": ["student_001","student_009","student_014","student_017","student_022"]},
+    {"id": "session_002", "course_id": "course_vinyasa_evening", "scheduled_at": "2026-04-29T18:30:00+02:00", "instructor_id": "instructor_001", "location": {"room_id": "room_yoga_a"}, "status": "scheduled", "expected_attendees": ["student_001","student_010","student_016","student_021","student_028","student_030"]},
+    {"id": "session_003", "course_id": "course_yin_evening", "scheduled_at": "2026-04-29T19:30:00+02:00", "instructor_id": "instructor_004", "location": {"room_id": "room_yoga_b"}, "status": "scheduled", "expected_attendees": ["student_004","student_009","student_013","student_022","student_027"]},
+    {"id": "session_004", "course_id": "course_kinder_yoga", "scheduled_at": "2026-05-02T10:00:00+02:00", "instructor_id": "instructor_003", "location": {"room_id": "room_yoga_b"}, "status": "scheduled", "expected_attendees": ["student_006","student_007","student_011","student_018","student_023"], "_safeguarding_check": "alle Consents valid außer student_023 (foto-einverständnis fehlt)"},
+    {"id": "session_005", "course_id": "course_pre_natal", "scheduled_at": "2026-04-28T17:00:00+02:00", "instructor_id": "instructor_001", "location": {"room_id": "room_yoga_b"}, "status": "scheduled", "expected_attendees": ["student_004","student_019"]}
+  ],
+
+  "enrollments_active_examples": [
+    {"id": "enroll_001", "student_id": "student_006", "course_id": "course_kinder_yoga", "status": "confirmed", "consent_status": "all_valid", "enrolled_at": "2026-01-22"},
+    {"id": "enroll_002", "student_id": "student_007", "course_id": "course_kinder_yoga", "status": "confirmed", "consent_status": "all_valid", "enrolled_at": "2026-01-22"},
+    {"id": "enroll_003", "student_id": "student_011", "course_id": "course_kinder_yoga", "status": "confirmed", "consent_status": "consent_valid_foto_missing", "enrolled_at": "2025-09-12", "_signal": "schule.consent_partial"},
+    {"id": "enroll_004", "student_id": "student_018", "course_id": "course_kinder_yoga", "status": "confirmed", "consent_status": "all_valid", "enrolled_at": "2026-03-01"},
+    {"id": "enroll_005", "student_id": "student_023", "course_id": "course_kinder_yoga", "status": "confirmed", "consent_status": "consent_valid_foto_missing", "enrolled_at": "2026-04-12", "_signal": "schule.consent_partial"},
+    {"id": "enroll_006", "student_id": "student_004", "course_id": "course_pre_natal", "status": "confirmed", "consent_status": "—", "medical_clearance": {"received_at": "2026-04-12", "issued_by": "Hebamme Andrea Pichler"}, "enrolled_at": "2026-04-12"},
+    {"id": "enroll_007", "student_id": "student_019", "course_id": "course_pre_natal", "status": "confirmed", "consent_status": "—", "medical_clearance": {"received_at": "2026-04-12", "issued_by": "Hebamme Andrea Pichler"}, "enrolled_at": "2026-04-12"},
+    {"id": "enroll_008", "student_id": "student_012", "course_id": "course_hatha_morning", "status": "inquiry", "trial_class_session_id": "session_trial_001", "enrolled_at": "2026-04-22", "_signal": "enrollment.trial_followup_due (3 Tage seit Probestunde)"}
+  ],
+
+  "equipment_inventory": [
+    {"id": "eq_mat_001", "type": "yogamatte", "model": "Manduka PRO", "status": "available", "purchased": "2024-03-15"},
+    {"id": "eq_mat_002", "type": "yogamatte", "model": "Manduka PRO", "status": "available", "purchased": "2024-03-15"},
+    {"id": "eq_mat_003", "type": "yogamatte", "model": "Liforme Travel", "status": "in_use", "loaned_to": "student_001", "loaned_until": "2026-04-30"},
+    {"id": "eq_block_001", "type": "yoga-block", "model": "Manduka cork", "status": "available", "count": 24},
+    {"id": "eq_strap_001", "type": "yoga-strap", "model": "B-Halfmoon", "status": "available", "count": 18},
+    {"id": "eq_bolster_001", "type": "bolster", "model": "Manduka", "status": "available", "count": 12},
+    {"id": "eq_blanket_001", "type": "decke", "model": "Mexican blanket", "status": "available", "count": 20}
+  ],
+
+  "suppliers": [
+    {"id": "supp_yogamatten_grossh", "name": "Yogashop Berlin GmbH", "type": "ausstatter", "contact": {"email": "info@yogashop-berlin.de", "phone": "+49 30 123 456"}, "address": {"street": "Greifswalder Str. 211", "postal_code": "10405", "city": "Berlin", "country": "DE"}, "products": ["matten", "blocks", "straps", "bolster"]},
+    {"id": "supp_versicherung", "name": "Wiener Städtische Versicherung", "type": "versicherung", "contact": {"email": "service@wienerstaedtische.at", "phone": "+43 50 350 99100"}, "address": {"street": "Schottenring 30", "postal_code": "1010", "city": "Wien", "country": "AT"}, "policy_numbers": ["BHV-2026-447723"]},
+    {"id": "supp_strom", "name": "Wien Energie", "type": "versorger", "contact": {"phone": "+43 800 500 800"}, "address": {"street": "Thomas-Klestil-Platz 14", "postal_code": "1030", "city": "Wien", "country": "AT"}},
+    {"id": "supp_reinigung", "name": "REI-Service Hausbetreuung KG", "type": "dienstleister", "contact": {"phone": "+43 1 596 23 45"}, "address": {"street": "Mariahilfer Straße 88", "postal_code": "1070", "city": "Wien", "country": "AT"}}
+  ],
+
+  "_pattern_signals_to_emit": [
+    {"signal_key": "schule.instructor.license_expiring", "params": {"instructor": "Felix Pranke", "days_left": 127}, "severity": "low"},
+    {"signal_key": "schule.participation.streak_broken", "params": {"student": "Sarah Lehner", "days_since": 14}, "severity": "mid"},
+    {"signal_key": "schule.consent_partial", "params": {"student": "Yousef Kheir", "missing": "foto-einverständnis"}, "severity": "mid"},
+    {"signal_key": "schule.consent_partial", "params": {"student": "Hiroki Tanaka", "missing": "foto-einverständnis"}, "severity": "mid"},
+    {"signal_key": "schule.package.expired_unrenewed", "params": {"student": "Werner Hofbauer", "days_overdue": 13}, "severity": "high"},
+    {"signal_key": "schule.package.expiring_soon", "params": {"student": "Bernd Sailer", "days_left": 5}, "severity": "low"},
+    {"signal_key": "schule.enrollment.trial_followup_due", "params": {"student": "Klara Voboril", "days_since": 3}, "severity": "mid"},
+    {"signal_key": "schule.retention.at_risk", "params": {"student": "Stefan Auer", "days_inactive": 56}, "severity": "mid"},
+    {"signal_key": "schule.course.threshold_close", "params": {"course": "Workshop Atem & Meditation", "current": 5, "min": 6}, "severity": "low"}
+  ]
+}
