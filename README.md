@@ -40,12 +40,13 @@ Mehr: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 [`docs/EDITIONS.md`](docs/EDITIONS.md) ·
 [`docs/DEPLOY.md`](docs/DEPLOY.md)
 
-## Sicherheits-Schulden
+## Tech-Schulden
 
 Bekannte, noch nicht behobene Findings stehen in
-[`docs/security-todos.md`](docs/security-todos.md). Aktuell: ein
-Critical-Finding (hardcoded DB-Credentials in `server/calendar_module.py`).
-Wird nach der Migration in einem eigenen Sprint behoben.
+[`docs/tech-debt.md`](docs/tech-debt.md). Zwei Kategorien:
+**Critical Security Debt** (hardcoded DB-Credentials in `server/calendar_module.py`)
+und **Unfinished Refactors** (Document-Compression-Split). Beide bekommen
+eigene Mini-Sprints nach Phase 6.
 
 ## Lizenz
 
