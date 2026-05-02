@@ -1,0 +1,184 @@
+/* ============================================================================
+   SHIKSHA — DESIGN TOKENS V1
+   Stand: 25.04.2026
+   Zentrale Quelle der Wahrheit für alle SHIKSHA-UI-Komponenten.
+
+   Verwendung:
+   - Standalone-HTML-Mockups: kopieren in jeden :root-Block (für Portabilität)
+   - Produktive Web-App: <link rel="stylesheet" href="shiksha_design_tokens.css">
+   - Audit: alle Tokens müssen über alle Files identisch sein, sonst hier korrigieren
+
+   Konventionen:
+   - Token-Name = semantische Rolle, NIE Farbe ("--accent", nicht "--green")
+   - Soft-Varianten enden auf -soft (helle Hintergrund-Version)
+   - Skala: 4 Severity-Stufen (info / accent / warn / alert)
+   - Lern-Tokens (lila) nur fürs safeguarding-Modul
+   ============================================================================ */
+
+:root {
+  /* === BASIS-FLÄCHE === */
+  --bg: #f7f7f5;            /* Operator-Hintergrund — warm-grau, sachlich */
+  --bg-mobile: #f0eee9;     /* Mobile-Hintergrund — warmer für Pocket-Use */
+  --card: #ffffff;          /* Kartenfläche, immer hell */
+  --phone-bg: #ffffff;      /* Phone-Mockup-Innenfläche (Mobile-App-Container) */
+
+  /* === LINIEN UND TRENNER === */
+  --line: #e6e4de;          /* Operator-Linie — kühl-warmer Übergang */
+  --line-mobile: #ece9e2;   /* Mobile-Linie — leicht heller, weicher */
+  --line-strong: #c6c2b8;   /* Hervorgehobene Trennung */
+
+  /* === TYPOGRAFIE-FARBEN === */
+  --ink: #1a1a1a;           /* Hauptschrift */
+  --ink-soft: #55524b;      /* Sekundärschrift */
+  --ink-mute: #7a7a74;      /* Operator-Tertiär (Operator-Density) */
+  --ink-mute-mobile: #8a8780; /* Mobile-Tertiär (etwas weicher) */
+
+  /* === AKZENT (Positiv, Erfolg, "alles gut") === */
+  --accent: #2d7a5f;        /* SHIKSHA-Grün, ruhig nicht aufdringlich */
+  --accent-soft: #e8f1ec;
+
+  /* === ZUSATZ-POSITIV (für Stamm­gast/Erfreulich, nur Camping) === */
+  --positive: #4a8050;
+  --positive-soft: #e3f0e6;
+
+  /* === WARN (mid-Severity, "schau hin") === */
+  --warn: #8a6a2a;          /* Senf-/Holz-Ton, nicht kritisch */
+  --warn-soft: #f5ebd8;
+
+  /* === ALERT (high-Severity, "handeln") === */
+  --alert: #a0391f;         /* Erdrot, nicht knall-rot */
+  --alert-soft: #f5e1da;
+
+  /* === INFO (neutral-blau, für Patterns/Pflege/Hinweise) === */
+  --info: #4a6a80;
+  --info-soft: #e8eef1;
+
+  /* === LEARN (lila — nur für safeguarding-Modul Lern-UI) === */
+  --learn: #6a4faf;
+  --learn-soft: #efeaf5;
+
+  /* === MONOSPACE (Code, Zahlen, Zähler-Werte, IDs) === */
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* === FARB-SCHEMA === */
+  color-scheme: light;
+}
+
+/* ============================================================================
+   MOBILE-CONTAINER UTILS
+   Wenn ein File primär Mobile-First ist (Phone-Mockup, Gäste-App, Schüler-App):
+   überschreibe die Operator-Defaults mit den Mobile-Varianten.
+   ============================================================================ */
+
+.is-mobile-context {
+  --bg: var(--bg-mobile);
+  --line: var(--line-mobile);
+  --ink-mute: var(--ink-mute-mobile);
+}
+
+/* ============================================================================
+   BASE TYPOGRAPHIE (gemeinsam für alle Files)
+   ============================================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================================
+   GEMEINSAME UI-PRIMITIVE — können in alle Files importiert werden
+   ============================================================================ */
+
+/* SEVERITY-PILL — überall gleich verwendet */
+.sev,
+.signal-sev {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.sev.high, .signal-sev.high { background: var(--alert-soft); color: var(--alert); }
+.sev.mid, .signal-sev.mid   { background: var(--warn-soft); color: var(--warn); }
+.sev.low, .signal-sev.low   { background: var(--info-soft); color: var(--info); }
+.sev.info, .signal-sev.info { background: #f0f0ee; color: var(--ink-mute); }
+.sev.pos, .signal-sev.pos   { background: var(--positive-soft); color: var(--positive); }
+
+/* SHIKSHA-SENTENCE-BLOCK — die definierende UI-Struktur */
+.sentence-block {
+  background: #fafaf8;
+  border-left: 4px solid var(--ink);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 16px 0;
+}
+.sentence-block strong { font-weight: 600; }
+.sentence-block.warn  { border-left-color: var(--warn);  background: var(--warn-soft); }
+.sentence-block.alert { border-left-color: var(--alert); background: var(--alert-soft); }
+.sentence-block.ok    { border-left-color: var(--accent); background: var(--accent-soft); }
+.sentence-block.learn { border-left-color: var(--learn); background: var(--learn-soft); }
+
+/* PILL-Group für Auswahl-Buttons (Filter, Modi) */
+.pill-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--line); border-radius: 999px;
+  font-size: 13px; cursor: pointer;
+  background: #fafaf8; color: var(--ink-soft);
+  user-select: none;
+}
+.pill input { display: none; }
+.pill:has(input:checked) { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* PRIMARY/SECONDARY-BUTTON */
+button.primary {
+  padding: 10px 18px; background: var(--ink); color: #fff;
+  border: 0; border-radius: 6px; font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+button.secondary {
+  padding: 10px 18px; background: transparent; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 6px;
+  font-size: 14px; cursor: pointer;
+}
+button.alert {
+  padding: 10px 18px; background: var(--alert); color: #fff;
+  border: 0; border-radius: 6px; font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* FOTO-FLOW — die signature-CTA in allen Operator-Editions */
+.foto-flow {
+  background: var(--ink); color: #fff;
+  border-radius: 12px; padding: 18px 22px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 16px;
+}
+.foto-flow .icon {
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.1); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.foto-flow .text { flex: 1; }
+.foto-flow h3 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+.foto-flow p  { margin: 0; font-size: 13px; color: rgba(255,255,255,0.75); }
+.foto-flow button {
+  padding: 9px 16px; background: #fff; color: var(--ink);
+  border: 0; border-radius: 6px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+
+/* ============================================================================
+   ENDE — DESIGN TOKENS V1
+   Bei Änderung: Token hier, Audit über alle HTML-Mockups
+   ============================================================================ */
