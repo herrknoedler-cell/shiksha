@@ -1,5 +1,11 @@
 # SHIKSHA
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
+[![Status](https://img.shields.io/badge/status-private%20alpha-yellow.svg)](#status)
+[![Python](https://img.shields.io/badge/python-3.12-blue.svg)](docs/DEPLOY.md)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](docs/ARCHITECTURE.md)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](docs/DEPLOY.md)
+
 > **Lebendig · Lernend · Lieb**
 
 SHIKSHA ist eine Plattform für KITAs, Campingplätze, Surf- und Yogaschulen,

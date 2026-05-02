@@ -1,0 +1,40 @@
+version: 2
+
+# Hinweis: Dependabot wird aktiv, sobald requirements.txt / package.json
+# im Repo liegen. Aktuell laufen die Dependencies in /opt/shiksha/venv/
+# auf dem Server; eine kuratierte requirements.txt wandert in einem
+# eigenen Mini-Sprint ins Repo. Bis dahin ist diese Config nur das
+# Gerüst.
+
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "python"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "javascript"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"
