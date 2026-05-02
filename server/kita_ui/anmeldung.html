@@ -38,7 +38,10 @@ body {
 .app {
   max-width: 540px; margin: 0 auto; padding: 12px;
   min-height: 100vh; display: flex; flex-direction: column;
+  width: 100%;
 }
+input[type="date"] { -webkit-appearance: none; appearance: none; }
+.modules-table { max-width: 100%; overflow-x: auto; }
 
 /* HEADER */
 header.top {
@@ -104,18 +107,28 @@ header.top {
   text-transform: uppercase; letter-spacing: 0.04em;
 }
 .field input, .field select, .field textarea {
-  width: 100%; padding: 14px 16px;
+  width: 100%;
+  max-width: 100%;
+  padding: 14px 16px;
   border: 2px solid var(--line);
   border-radius: 14px;
   font-size: 16px; /* >=16px verhindert Zoom auf iOS */
   font-family: inherit; background: #fff;
   transition: border-color .15s, box-shadow .15s;
+  box-sizing: border-box;
 }
 .field input:focus, .field select:focus, .field textarea:focus {
   outline: none; border-color: var(--holi-pink);
   box-shadow: 0 0 0 4px rgba(255, 77, 141, 0.15);
 }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+.field-row .field { min-width: 0; }
+.app, body { overflow-x: hidden; }
+.step, .card { max-width: 100%; }
 
 /* MODULE GRID */
 .modules-table {
