@@ -123,22 +123,27 @@ section.soft { background: var(--bg-soft); }
     var(--bg);
   overflow: hidden;
 }
-.hero-content { text-align: center; padding: 0 24px; max-width: 1000px; position: relative; z-index: 2; }
+.hero-content {
+  text-align: center; padding: 0 24px; max-width: 1000px;
+  position: relative; z-index: 2;
+  color: #ffffff;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.18),
+    0 4px 24px rgba(0, 0, 0, 0.22);
+}
 .hero-greeting {
-  font-size: 14px; font-weight: 600; color: var(--ink-2);
-  margin-bottom: 28px; letter-spacing: 0.05em; text-transform: uppercase;
+  font-size: 14px; font-weight: 600; color: #ffffff;
+  margin-bottom: 28px; letter-spacing: 0.18em; text-transform: uppercase;
   opacity: 0;
 }
-.hero-greeting .accent { color: var(--pink); }
+.hero-greeting .accent { color: #ffffff; }
 .hero h1 {
   margin-bottom: 28px;
-  background: linear-gradient(135deg, var(--ink) 30%, var(--pink) 70%, var(--purple) 100%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff;
   opacity: 0;
 }
 .hero-tagline {
-  font-size: clamp(18px, 2.4vw, 26px); color: var(--ink-2);
+  font-size: clamp(18px, 2.4vw, 26px); color: #ffffff;
   max-width: 680px; margin: 0 auto 36px; line-height: 1.45;
   letter-spacing: -0.015em; opacity: 0;
 }
@@ -146,15 +151,18 @@ section.soft { background: var(--bg-soft); }
 .btn {
   padding: 16px 32px; border-radius: 14px; font-weight: 600; font-size: 15px;
   border: 0; cursor: pointer; font-family: inherit; display: inline-block;
-  transition: transform .15s, background .2s;
+  transition: transform .15s, background .2s, border-color .2s;
 }
 .btn-primary { background: var(--ink); color: #fff; }
 .btn-primary:hover { background: var(--pink); transform: translateY(-2px); }
 .btn-ghost {
-  background: rgba(255,255,255,0.7); color: var(--ink);
-  border: 1px solid var(--line); backdrop-filter: blur(8px);
+  background: transparent; color: #fff;
+  border: 1px solid rgba(255,255,255,0.7);
 }
-.btn-ghost:hover { border-color: var(--pink); transform: translateY(-2px); }
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: #fff; transform: translateY(-2px);
+}
 
 .hero-pulse {
   position: absolute; width: 8px; height: 8px;
@@ -168,12 +176,14 @@ section.soft { background: var(--bg-soft); }
 
 .hero-scroll-cue {
   position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
-  font-size: 11px; font-weight: 600; color: var(--ink-3);
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.85);
   letter-spacing: 0.2em; text-transform: uppercase;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   animation: shiksha-bounce 2s ease-in-out infinite; animation-delay: 1.6s;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  z-index: 2;
 }
-.hero-scroll-cue::after { content: ""; width: 1px; height: 20px; background: linear-gradient(to bottom, var(--ink-3), transparent); }
+.hero-scroll-cue::after { content: ""; width: 1px; height: 20px; background: linear-gradient(to bottom, rgba(255,255,255,0.85), transparent); }
 @keyframes shiksha-bounce {
   0%,100% { opacity: 0.6; transform: translate(-50%,0); }
   50% { opacity: 1; transform: translate(-50%,6px); }
@@ -185,15 +195,6 @@ section.soft { background: var(--bg-soft); }
   width: 100%; height: 100%;
   object-fit: cover;
   z-index: 0;
-}
-.hero-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.85) 100%
-  );
-  z-index: 1;
 }
 
 /* Reduced Motion: kein Video, nur Poster als CSS-Background */
@@ -688,7 +689,6 @@ footer .heart { color: var(--pink); }
 <!-- 1. HERO -->
 <section class="hero" id="hero">
   <video class="hero-bg" autoplay muted loop playsinline preload="none"></video>
-  <div class="hero-overlay"></div>
   <span class="hero-pulse" style="top:18%;left:12%;animation-delay:0s;"></span>
   <span class="hero-pulse" style="top:32%;right:18%;animation-delay:2s;"></span>
   <span class="hero-pulse" style="bottom:24%;left:22%;animation-delay:4s;"></span>
