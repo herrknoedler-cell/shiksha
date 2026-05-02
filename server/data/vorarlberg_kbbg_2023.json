@@ -1,0 +1,144 @@
+{
+  "comment": "SHIKSHA · KITA · Vorarlberger Kinderbildungs- und -betreuungsgesetz (KBBG) 2023 — Seed-Daten",
+  "source_law": {
+    "name": "KBBG — Kinderbildungs- und -betreuungsgesetz Vorarlberg",
+    "in_force_since": "2023-09-11",
+    "verordnung_personaleinsatz": "Verordnung über den Personaleinsatz und die Gruppengröße",
+    "verordnung_url": "https://vorarlberg.at/-/informationen-zum-neuen-kbbg",
+    "ris_url": "https://ris.bka.gv.at/Dokumente/Landesnormen/LVB40043080/LVB40043080.html",
+    "explanatory_notes": "https://vorarlberg.at/documents/302033/0/Erl%C3%A4uternde_Bemerkungen_Verordnung_Personaleinsatz_und_Gruppengr%C3%B6%C3%9Fe_Stand_6.10.2022+(1).pdf"
+  },
+  "stadt_dornbirn": {
+    "source": "https://www.dornbirn.at/leben-in-dornbirn/mensch/familien/kinderbetreuung",
+    "kontakt": "Jasmin Spannring, jasmin.spannring@dornbirn.at, +43 5572 306 4152",
+    "facts": [
+      "Stadt Dornbirn ist Trägerin von 20 Kindergärten + 8 Spielgruppen",
+      "Tarife werden jährlich vom Land Vorarlberg vorgegeben",
+      "Subventionen einkommensabhängig (Nettoeinkommen der Erziehungsberechtigten)"
+    ]
+  },
+  "rulesets": [
+    {
+      "id": "rs_kbbg_vbg_2023",
+      "level": "land",
+      "jurisdiction": "AT-8",
+      "name": "KBBG Vorarlberg (in Kraft seit 11.09.2023)",
+      "valid_from": "2023-09-11",
+      "valid_to": null,
+      "source_url": "https://ris.bka.gv.at/Dokumente/Landesnormen/LVB40043080/LVB40043080.html",
+      "notes": "Aktuelle Fassung. Updates 2025/26: Betreuungsanspruch ab vollendetem 2. Lebensjahr."
+    },
+    {
+      "id": "rs_dornbirn_2025",
+      "level": "stadt",
+      "jurisdiction": "AT-8-DOR",
+      "name": "Förderrichtlinie Stadt Dornbirn (2025)",
+      "valid_from": "2025-01-01",
+      "valid_to": null,
+      "source_url": "https://www.dornbirn.at/leben-in-dornbirn/mensch/familien/kinderbetreuung",
+      "notes": "Tarife laut Land VBG, Subvention einkommensabhängig"
+    }
+  ],
+  "personnel_ratios": [
+    {
+      "id": "pr_kbbg_kleinkind_unter2",
+      "ruleset_id": "rs_kbbg_vbg_2023",
+      "group_type": "kleinkindgruppe",
+      "subtype": "mehrheitlich_unter_2_jahre",
+      "age_min_months": 0,
+      "age_max_months": 36,
+      "children_max": 9,
+      "children_per_caregiver_max": 3,
+      "fte_required": 3.00,
+      "qual_paedagoge_min_pct": 33,
+      "qual_assistent_max_pct": 67,
+      "qual_helfer_max_pct": 0,
+      "preparation_hours_per_week_min": 16,
+      "notes": "Kleinkindgruppe mit Mehrheit oder mehr als 4 Kindern unter 2 Jahren: max 3 Kinder pro Betreuungsperson, max 9 Kinder pro Gruppe"
+    },
+    {
+      "id": "pr_kbbg_kleinkind_normal",
+      "ruleset_id": "rs_kbbg_vbg_2023",
+      "group_type": "kleinkindgruppe",
+      "subtype": "normal",
+      "age_min_months": 24,
+      "age_max_months": 36,
+      "children_max": 12,
+      "children_per_caregiver_max": 5,
+      "fte_required": 2.40,
+      "qual_paedagoge_min_pct": 50,
+      "qual_assistent_max_pct": 50,
+      "qual_helfer_max_pct": 0,
+      "preparation_hours_per_week_min": 16,
+      "notes": "Kleinkindgruppe mit Mehrheit über 2 Jahren: max 5 Kinder pro Betreuungsperson, max 12 Kinder"
+    },
+    {
+      "id": "pr_kbbg_kiga",
+      "ruleset_id": "rs_kbbg_vbg_2023",
+      "group_type": "kiga",
+      "subtype": "regelgruppe",
+      "age_min_months": 36,
+      "age_max_months": 72,
+      "children_max": 25,
+      "children_per_caregiver_max": 12,
+      "fte_required": 2.10,
+      "qual_paedagoge_min_pct": 50,
+      "qual_assistent_max_pct": 50,
+      "qual_helfer_max_pct": 25,
+      "preparation_hours_per_week_min": 16,
+      "notes": "Kindergartengruppe: BAfEP-Absolvent muss immer anwesend sein. Quereinsteiger ab 2 Jahren Berufserfahrung erlaubt."
+    },
+    {
+      "id": "pr_kbbg_hort",
+      "ruleset_id": "rs_kbbg_vbg_2023",
+      "group_type": "hort",
+      "subtype": "schulkindgruppe",
+      "age_min_months": 72,
+      "age_max_months": 168,
+      "children_max": 30,
+      "children_per_caregiver_max": 25,
+      "fte_required": 1.20,
+      "qual_paedagoge_min_pct": 50,
+      "qual_assistent_max_pct": 50,
+      "qual_helfer_max_pct": 50,
+      "preparation_hours_per_week_min": 12,
+      "notes": "Schulkindgruppe: max 25 Kinder pro Betreuungsperson, max 30 pro Gruppe"
+    }
+  ],
+  "funding_rates": [
+    {
+      "comment": "VORLÄUFIGE WERTE — bitte gegen aktuellen Förderbescheid abgleichen!",
+      "id": "fr_dornbirn_kleinkind_2025",
+      "ruleset_id": "rs_dornbirn_2025",
+      "group_type": "kleinkindgruppe",
+      "rate_per_day": 18.50,
+      "rate_per_month": 380.00,
+      "notes": "Schätzwert basierend auf typischen DACH-Krippe-Sätzen — REAL aus Förderbescheid einzulesen"
+    },
+    {
+      "id": "fr_dornbirn_kiga_2025",
+      "ruleset_id": "rs_dornbirn_2025",
+      "group_type": "kiga",
+      "rate_per_day": 11.20,
+      "rate_per_month": 235.00,
+      "notes": "Schätzwert — REAL aus Förderbescheid einzulesen"
+    },
+    {
+      "id": "fr_dornbirn_hort_2025",
+      "ruleset_id": "rs_dornbirn_2025",
+      "group_type": "hort",
+      "rate_per_day": 7.80,
+      "rate_per_month": 165.00,
+      "notes": "Schätzwert — REAL aus Förderbescheid einzulesen"
+    }
+  ],
+  "key_compliance_rules_text": [
+    "Eine Pädagog:in mit BAfEP-Abschluss muss IMMER anwesend sein, sobald Gruppe geöffnet ist",
+    "Quereinstieg möglich, wenn 2 Jahre einschlägige Berufserfahrung (z.B. Tagesmutter)",
+    "Vorbereitungszeit: bei 1 Betreuer:in mind. 12h/Woche, bei mehreren mind. 16h/Woche — wird IM Stellenprozent berücksichtigt, nicht zusätzlich!",
+    "Betreuungsanspruch ab vollendetem 2. Lebensjahr (Update 2025/26)",
+    "Mindest-Öffnungsfenster: 5 Stunden täglich",
+    "Bei Krankheit über 5 Tage ohne Vertretung: Förderung kann nachträglich gekürzt werden",
+    "Kochzeiten und Reinigungsarbeiten zählen NICHT als pädagogische Anwesenheit"
+  ]
+}
