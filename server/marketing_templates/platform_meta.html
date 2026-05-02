@@ -179,6 +179,31 @@ section.soft { background: var(--bg-soft); }
   50% { opacity: 1; transform: translate(-50%,6px); }
 }
 
+/* Hero-Video-Background — Desktop/Mobile-Switch via JS am Page-Load */
+.hero-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.85) 100%
+  );
+  z-index: 1;
+}
+
+/* Reduced Motion: kein Video, nur Poster als CSS-Background */
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg { display: none; }
+  .hero {
+    background: url('/static/hero-loop-desktop-poster.jpg') center/cover;
+  }
+}
+
 /* ---------- 3 PILLARS ---------- */
 .pillars-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
@@ -662,6 +687,8 @@ footer .heart { color: var(--pink); }
 
 <!-- 1. HERO -->
 <section class="hero" id="hero">
+  <video class="hero-bg" autoplay muted loop playsinline preload="none"></video>
+  <div class="hero-overlay"></div>
   <span class="hero-pulse" style="top:18%;left:12%;animation-delay:0s;"></span>
   <span class="hero-pulse" style="top:32%;right:18%;animation-delay:2s;"></span>
   <span class="hero-pulse" style="bottom:24%;left:22%;animation-delay:4s;"></span>
@@ -1244,6 +1271,23 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
 });
+</script>
+
+<script>
+// Hero-Video: passende Quelle je Viewport am Load wählen, eines lädt
+// (preload="none" verhindert Eager-Download des nicht-gewählten).
+(function() {
+  const v = document.querySelector('.hero-bg');
+  if (!v) return;
+  const isDesktop = window.matchMedia('(min-width: 769px)').matches;
+  const base = isDesktop ? 'desktop' : 'mobile';
+  v.poster = '/static/hero-loop-' + base + '-poster.jpg';
+  const source = document.createElement('source');
+  source.src = '/static/hero-loop-' + base + '.mp4';
+  source.type = 'video/mp4';
+  v.appendChild(source);
+  v.load();
+})();
 </script>
 
 </body>
