@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta name="theme-color" content="#ff4d8d" />
+<title>SHIKSHA · KITA · Anmeldung</title>
+<style>
+:root {
+  /* Holi-Palette */
+  --holi-pink: #ff4d8d;
+  --holi-turquoise: #00d4d4;
+  --holi-yellow: #ffd93d;
+  --holi-purple: #a855f7;
+  --holi-orange: #ff8c42;
+  --holi-green: #6dd47e;
+
+  --bg: #fff8f0;        /* warmes Cream */
+  --card: #ffffff;
+  --line: #f0e8dc;
+  --line-strong: #e0d5c0;
+  --ink: #2a2530;
+  --ink-soft: #5a5060;
+  --ink-mute: #9a8e9e;
+  --shadow: 0 4px 16px rgba(255, 77, 141, 0.10);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #fff8f0 0%, #ffe4f0 50%, #e4f8ff 100%);
+  background-attachment: fixed;
+  color: var(--ink); line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 540px; margin: 0 auto; padding: 12px;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+
+/* HEADER */
+header.top {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 8px;
+}
+.logo {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--holi-pink) 0%, var(--holi-purple) 100%);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 22px;
+  box-shadow: var(--shadow);
+}
+.title { flex: 1; }
+.title h1 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.title p { font-size: 12px; color: var(--ink-mute); margin: 0; }
+
+/* PROGRESS */
+.progress {
+  display: flex; gap: 6px; padding: 0 8px 16px;
+}
+.progress-dot {
+  flex: 1; height: 6px; border-radius: 3px;
+  background: var(--line); transition: background .3s;
+}
+.progress-dot.active { background: var(--holi-pink); }
+.progress-dot.done { background: var(--holi-turquoise); }
+
+/* CARD */
+.step {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  display: none;
+}
+.step.active { display: block; }
+
+.step-num {
+  display: inline-block;
+  font-size: 11px; font-weight: 700;
+  color: var(--holi-pink); text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+.step h2 {
+  font-size: 22px; font-weight: 700;
+  margin: 0 0 6px; letter-spacing: -0.02em;
+  background: linear-gradient(120deg, var(--holi-pink), var(--holi-purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.step .lede { font-size: 14px; color: var(--ink-soft); margin: 0 0 18px; }
+
+/* FORM ELEMENTS */
+.field {
+  margin-bottom: 14px;
+}
+.field label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: var(--ink-soft); margin-bottom: 4px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 14px 16px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  font-size: 16px; /* >=16px verhindert Zoom auf iOS */
+  font-family: inherit; background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--holi-pink);
+  box-shadow: 0 0 0 4px rgba(255, 77, 141, 0.15);
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* MODULE GRID */
+.modules-table {
+  display: grid;
+  grid-template-columns: 90px repeat(4, 1fr);
+  gap: 4px;
+  margin: 16px 0;
+  font-size: 11px;
+}
+.modules-table .head {
+  background: var(--ink); color: #fff;
+  padding: 8px 4px; border-radius: 8px;
+  text-align: center; font-weight: 600;
+  font-size: 10px;
+}
+.modules-table .day-label {
+  padding: 14px 4px;
+  background: linear-gradient(120deg, var(--holi-yellow) 0%, var(--holi-orange) 100%);
+  color: var(--ink); font-weight: 700;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+}
+.module-cell {
+  padding: 14px 4px;
+  background: #f9f4ec;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 11px; color: var(--ink-soft);
+  transition: all .15s;
+  user-select: none;
+}
+.module-cell:hover { background: #fff; border-color: var(--line-strong); }
+.module-cell.selected {
+  background: linear-gradient(135deg, var(--holi-pink), var(--holi-purple));
+  color: #fff; font-weight: 700;
+  border-color: var(--holi-purple);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.module-summary {
+  background: linear-gradient(135deg, var(--holi-turquoise) 0%, var(--holi-green) 100%);
+  color: #fff; padding: 14px 18px; border-radius: 14px;
+  margin-top: 12px; font-weight: 600;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.module-summary .label { font-size: 12px; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.05em; }
+.module-summary .val { font-size: 22px; font-weight: 800; }
+
+/* CONSENT */
+.consent-box {
+  background: #fffbf0;
+  border: 2px dashed var(--holi-yellow);
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 13px; color: var(--ink-soft);
+  line-height: 1.7;
+  margin: 14px 0;
+}
+.consent-toggle {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 14px; cursor: pointer;
+  transition: all .15s;
+}
+.consent-toggle.checked {
+  border-color: var(--holi-green); background: #f0fff5;
+}
+.consent-toggle .check {
+  width: 28px; height: 28px;
+  border-radius: 8px; border: 2px solid var(--line-strong);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; transition: all .15s;
+}
+.consent-toggle.checked .check {
+  background: var(--holi-green); color: #fff; border-color: var(--holi-green);
+}
+
+/* SIGNATURE */
+.sig-wrapper {
+  position: relative;
+  background: #fff;
+  border: 2px dashed var(--holi-purple);
+  border-radius: 14px;
+  margin: 14px 0;
+  overflow: hidden;
+}
+.sig-canvas {
+  display: block; width: 100%; height: 200px;
+  touch-action: none;
+}
+.sig-hint {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px; color: var(--ink-mute);
+  pointer-events: none;
+  font-style: italic;
+}
+.sig-clear {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid var(--line);
+  padding: 6px 10px; border-radius: 8px;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer; color: var(--ink-soft);
+}
+
+/* BUTTONS */
+.actions {
+  display: flex; gap: 10px;
+  margin-top: 24px;
+}
+.btn {
+  flex: 1;
+  padding: 16px 20px;
+  border: 0; border-radius: 16px;
+  font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: transform .1s, box-shadow .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.98); }
+.btn.primary {
+  background: linear-gradient(135deg, var(--holi-pink) 0%, var(--holi-purple) 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255, 77, 141, 0.4);
+}
+.btn.primary:disabled {
+  background: #ddd; box-shadow: none; opacity: 0.6;
+}
+.btn.ghost {
+  background: transparent; color: var(--ink-soft);
+  border: 2px solid var(--line);
+}
+
+/* SUCCESS */
+.success-card {
+  background: linear-gradient(135deg, var(--holi-turquoise) 0%, var(--holi-green) 100%);
+  color: #fff; padding: 32px 24px; border-radius: 24px;
+  text-align: center; box-shadow: 0 8px 32px rgba(0, 212, 212, 0.3);
+}
+.success-card .icon { font-size: 56px; margin-bottom: 12px; }
+.success-card h2 { font-size: 24px; margin: 0 0 8px; -webkit-text-fill-color: #fff; background: none; }
+.success-card p { font-size: 15px; margin: 0; opacity: 0.95; }
+
+/* HOLI-DOTS Background-Akzente */
+.bg-dots {
+  position: fixed; pointer-events: none; z-index: -1;
+}
+.dot1 { top: 10%; left: 5%; width: 80px; height: 80px;
+  background: radial-gradient(circle, var(--holi-yellow), transparent 70%); }
+.dot2 { top: 50%; right: 5%; width: 100px; height: 100px;
+  background: radial-gradient(circle, var(--holi-turquoise), transparent 70%); }
+.dot3 { bottom: 15%; left: 10%; width: 60px; height: 60px;
+  background: radial-gradient(circle, var(--holi-purple), transparent 70%); }
+
+footer.bot {
+  text-align: center; padding: 20px 8px;
+  font-size: 11px; color: var(--ink-mute);
+}
+footer.bot strong { color: var(--holi-pink); }
+</style>
+</head>
+<body>
+
+<div class="bg-dots dot1"></div>
+<div class="bg-dots dot2"></div>
+<div class="bg-dots dot3"></div>
+
+<div class="app">
+
+<header class="top">
+  <div class="logo">K</div>
+  <div class="title">
+    <h1>Anmeldung</h1>
+    <p id="kita-name-display">Spielgruppe · Kindergarten</p>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="progress-dot active" data-step="1"></div>
+  <div class="progress-dot" data-step="2"></div>
+  <div class="progress-dot" data-step="3"></div>
+  <div class="progress-dot" data-step="4"></div>
+  <div class="progress-dot" data-step="5"></div>
+</div>
+
+<!-- SCHRITT 1: KIND -->
+<div class="step active" data-step="1">
+  <div class="step-num">Schritt 1 von 5</div>
+  <h2>Über das Kind</h2>
+  <p class="lede">Damit wir Flora oder Felix richtig willkommen heißen können.</p>
+
+  <div class="field-row">
+    <div class="field">
+      <label>Vorname *</label>
+      <input type="text" id="child_first_name" placeholder="Flora" required />
+    </div>
+    <div class="field">
+      <label>Nachname *</label>
+      <input type="text" id="child_last_name" placeholder="Köb" required />
+    </div>
+  </div>
+  <div class="field">
+    <label>Geburtsdatum *</label>
+    <input type="date" id="birth_date" required />
+  </div>
+  <div class="field">
+    <label>Adresse</label>
+    <input type="text" id="child_address" placeholder="Kehlegg 106" />
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>PLZ</label>
+      <input type="text" id="child_postal_code" placeholder="6850" />
+    </div>
+    <div class="field">
+      <label>Ort</label>
+      <input type="text" id="child_city" placeholder="Dornbirn" value="Dornbirn" />
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Muttersprache</label>
+      <input type="text" id="mother_tongue" placeholder="Deutsch" value="Deutsch" />
+    </div>
+    <div class="field">
+      <label>Staatsbürgerschaft</label>
+      <input type="text" id="nationality" placeholder="Österreich" value="Österreich" />
+    </div>
+  </div>
+  <div class="field">
+    <label>Sozialversicherungsnummer</label>
+    <input type="text" id="sv_number" inputmode="numeric" placeholder="4670 080124" />
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" onclick="goStep(2)">Weiter →</button>
+  </div>
+</div>
+
+<!-- SCHRITT 2: ELTERN -->
+<div class="step" data-step="2">
+  <div class="step-num">Schritt 2 von 5</div>
+  <h2>Eltern-Kontakt</h2>
+  <p class="lede">Wer ist erreichbar, wenn etwas wichtig ist?</p>
+
+  <h3 style="font-size:14px; color:var(--holi-pink); margin:8px 0 4px;">Mutter</h3>
+  <div class="field">
+    <label>Name</label>
+    <input type="text" id="mother_name" placeholder="Sarah Köb-Stadler" />
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Telefon</label>
+      <input type="tel" id="mother_phone" placeholder="0660 1220705" />
+    </div>
+    <div class="field">
+      <label>Arbeitgeber</label>
+      <input type="text" id="mother_employer" placeholder="Stadt Dornbirn" />
+    </div>
+  </div>
+  <div class="field">
+    <label>E-Mail</label>
+    <input type="email" id="mother_email" placeholder="sarah.beispiel@..." />
+  </div>
+
+  <h3 style="font-size:14px; color:var(--holi-purple); margin:18px 0 4px;">Vater</h3>
+  <div class="field">
+    <label>Name</label>
+    <input type="text" id="father_name" placeholder="Joshua Köb" />
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Telefon</label>
+      <input type="tel" id="father_phone" placeholder="0664 9682626" />
+    </div>
+    <div class="field">
+      <label>Arbeitgeber</label>
+      <input type="text" id="father_employer" placeholder="Wolfgang Pendl" />
+    </div>
+  </div>
+  <div class="field">
+    <label>E-Mail</label>
+    <input type="email" id="father_email" placeholder="..." />
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="goStep(1)">← Zurück</button>
+    <button class="btn primary" onclick="goStep(3)">Weiter →</button>
+  </div>
+</div>
+
+<!-- SCHRITT 3: MODULE -->
+<div class="step" data-step="3">
+  <div class="step-num">Schritt 3 von 5</div>
+  <h2>Betreuungs-Zeiten</h2>
+  <p class="lede">Wähle die Halbtage und Module, die ihr buchen möchtet. Tippe einmal zum Auswählen.</p>
+
+  <div class="modules-table" id="modules-grid">
+    <!-- wird per JS gerendert -->
+  </div>
+
+  <div class="module-summary">
+    <div>
+      <div class="label">Wochenstunden</div>
+      <div id="hours-count">0</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="label">Halbtage</div>
+      <div class="val"><span id="halfday-count">0</span> / Woche</div>
+    </div>
+  </div>
+
+  <div class="field" style="margin-top:18px;">
+    <label>Vertrag gültig ab</label>
+    <input type="date" id="enrolled_from" />
+  </div>
+  <div class="field">
+    <label>Vertrag gültig bis (optional)</label>
+    <input type="date" id="enrolled_to" />
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="goStep(2)">← Zurück</button>
+    <button class="btn primary" onclick="goStep(4)">Weiter →</button>
+  </div>
+</div>
+
+<!-- SCHRITT 4: ZUSTIMMUNG -->
+<div class="step" data-step="4">
+  <div class="step-num">Schritt 4 von 5</div>
+  <h2>Zustimmung</h2>
+  <p class="lede">Bitte lest die folgenden Hinweise und bestätigt mit einem Tipp.</p>
+
+  <div class="consent-box">
+    <strong>Was passiert mit unseren Daten?</strong><br><br>
+    • Die Anmelde-Daten werden ausschließlich für die Betreuung Ihres Kindes verwendet<br>
+    • Speicherung in der EU (Hetzner Deutschland), DSGVO-konform<br>
+    • Keine Weitergabe an Dritte, kein Marketing<br>
+    • Sie können jederzeit Auskunft, Berichtigung oder Löschung verlangen<br>
+    • Der unterzeichnete Vertrag wird sicher in der KITA-Verwaltung verwahrt
+  </div>
+
+  <div class="consent-toggle" id="consent-toggle" onclick="toggleConsent()">
+    <div class="check" id="consent-check">·</div>
+    <div style="flex:1;">
+      <strong>Ich/Wir stimmen den Bedingungen zu</strong>
+      <div style="font-size:12px; color:var(--ink-mute); margin-top:2px;">und nehmen die Richtlinien des Betreuungsvertrages zur Kenntnis</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="goStep(3)">← Zurück</button>
+    <button class="btn primary" id="btn-step5" onclick="goStep(5)" disabled>Weiter →</button>
+  </div>
+</div>
+
+<!-- SCHRITT 5: UNTERSCHRIFT -->
+<div class="step" data-step="5">
+  <div class="step-num">Schritt 5 von 5</div>
+  <h2>Unterschrift</h2>
+  <p class="lede">Mit Finger oder Stift im Feld unterschreiben. Bei gemeinsamer Sorge unterschreiben bitte beide Eltern.</p>
+
+  <div class="field">
+    <label>Ort</label>
+    <input type="text" id="signed_location" placeholder="Dornbirn" value="Dornbirn" />
+  </div>
+
+  <!-- Unterschrift 1 — Pflicht -->
+  <div style="margin-top:18px;">
+    <label style="display:flex; justify-content:space-between; align-items:baseline; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">
+      <span><span id="sig1-label">Erziehungsberechtigte:r 1</span> *</span>
+      <span style="color:var(--holi-pink); font-size:10px;">PFLICHT</span>
+    </label>
+    <div class="sig-wrapper" style="border-color:var(--holi-pink);">
+      <canvas id="sig-canvas-1" class="sig-canvas"></canvas>
+      <div class="sig-hint" id="sig-hint-1">Hier unterschreiben</div>
+      <button class="sig-clear" onclick="clearSig(1)">↺ Löschen</button>
+    </div>
+  </div>
+
+  <!-- Unterschrift 2 — Optional -->
+  <div style="margin-top:18px;">
+    <label style="display:flex; justify-content:space-between; align-items:baseline; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">
+      <span><span id="sig2-label">Erziehungsberechtigte:r 2</span></span>
+      <span style="color:var(--ink-mute); font-size:10px;">OPTIONAL</span>
+    </label>
+    <div class="sig-wrapper" style="border-color:var(--holi-purple);">
+      <canvas id="sig-canvas-2" class="sig-canvas"></canvas>
+      <div class="sig-hint" id="sig-hint-2">Falls beide Eltern sorgeberechtigt</div>
+      <button class="sig-clear" onclick="clearSig(2)">↺ Löschen</button>
+    </div>
+    <div style="font-size:11px; color:var(--ink-mute); margin-top:6px; text-align:center;">
+      Bei gemeinsamer Sorge bestätigen beide Eltern — bei alleinerziehend dieses Feld leer lassen.
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="goStep(4)">← Zurück</button>
+    <button class="btn primary" id="btn-submit" onclick="submitForm()">Anmeldung absenden</button>
+  </div>
+</div>
+
+<!-- ERFOLG -->
+<div class="step" data-step="6">
+  <div class="success-card">
+    <div class="icon">🎉</div>
+    <h2>Anmeldung erhalten!</h2>
+    <p id="success-msg">Vielen Dank — die KITA-Leitung wird sich bald melden.</p>
+  </div>
+  <div style="text-align:center; margin-top:20px; font-size:13px; color:var(--ink-mute);">
+    Eine Bestätigung per E-Mail folgt in den nächsten 24 Stunden.<br>
+    Bei Fragen einfach in der KITA melden.
+  </div>
+</div>
+
+<footer class="bot">
+  Geschützt durch <strong>SHIKSHA · KITA</strong> · Daten in der EU
+</footer>
+
+</div>
+
+<script>
+const API = "/kita";
+
+// =============================================================
+// STATE
+// =============================================================
+let CURRENT_STEP = 1;
+let SELECTED_MODULES = {}; // { monday: ['07:15-11:30'], wednesday: ['13:30-17:30'] }
+let CONSENT = false;
+let MODULES_INFO = null;
+
+const SLOTS = [
+  { slot: "07:15-11:30", label: "Vormittag", hours: 4.25 },
+  { slot: "11:30-12:30", label: "Mittag", hours: 1.0 },
+  { slot: "12:30-13:30", label: "Mittagsruhe", hours: 1.0 },
+  { slot: "13:30-17:30", label: "Nachmittag", hours: 4.0 },
+];
+const WEEKDAYS = [
+  { key: "monday", label: "Mo" },
+  { key: "tuesday", label: "Di" },
+  { key: "wednesday", label: "Mi" },
+  { key: "thursday", label: "Do" },
+  { key: "friday", label: "Fr" },
+];
+
+// =============================================================
+// HELPERS
+// =============================================================
+function $(id) { return document.getElementById(id); }
+function val(id) { return ($(id) || {}).value || ""; }
+
+// =============================================================
+// STEP NAVIGATION
+// =============================================================
+function goStep(n) {
+  document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(`.step[data-step="${n}"]`).forEach(s => s.classList.add("active"));
+  document.querySelectorAll(".progress-dot").forEach(d => {
+    const dn = parseInt(d.dataset.step);
+    d.classList.toggle("active", dn === n);
+    d.classList.toggle("done", dn < n);
+  });
+  CURRENT_STEP = n;
+  window.scrollTo(0, 0);
+  if (n === 5) initSignature();
+}
+
+// =============================================================
+// MODULE-GRID
+// =============================================================
+function renderModules() {
+  const grid = $("modules-grid");
+  let html = `<div class="head"></div>`;
+  SLOTS.forEach(s => {
+    html += `<div class="head">${s.label}<br><small style="opacity:0.7;">${s.slot}</small></div>`;
+  });
+  WEEKDAYS.forEach(wd => {
+    html += `<div class="day-label">${wd.label}</div>`;
+    SLOTS.forEach(s => {
+      html += `<div class="module-cell" data-day="${wd.key}" data-slot="${s.slot}" data-hours="${s.hours}">·</div>`;
+    });
+  });
+  grid.innerHTML = html;
+
+  grid.querySelectorAll(".module-cell").forEach(cell => {
+    cell.addEventListener("click", () => {
+      cell.classList.toggle("selected");
+      const day = cell.dataset.day;
+      const slot = cell.dataset.slot;
+      if (!SELECTED_MODULES[day]) SELECTED_MODULES[day] = [];
+      if (cell.classList.contains("selected")) {
+        if (!SELECTED_MODULES[day].includes(slot)) SELECTED_MODULES[day].push(slot);
+      } else {
+        SELECTED_MODULES[day] = SELECTED_MODULES[day].filter(s => s !== slot);
+        if (!SELECTED_MODULES[day].length) delete SELECTED_MODULES[day];
+      }
+      updateModuleSummary();
+    });
+  });
+}
+
+function updateModuleSummary() {
+  let totalHours = 0;
+  let totalSlots = 0;
+  Object.values(SELECTED_MODULES).forEach(slots => {
+    slots.forEach(slot => {
+      totalSlots++;
+      const s = SLOTS.find(x => x.slot === slot);
+      if (s) totalHours += s.hours;
+    });
+  });
+  $("hours-count").textContent = totalHours.toFixed(1) + "h";
+  $("halfday-count").textContent = totalSlots;
+}
+
+// =============================================================
+// CONSENT
+// =============================================================
+function toggleConsent() {
+  CONSENT = !CONSENT;
+  const tg = $("consent-toggle");
+  const ck = $("consent-check");
+  tg.classList.toggle("checked", CONSENT);
+  ck.textContent = CONSENT ? "✓" : "·";
+  $("btn-step5").disabled = !CONSENT;
+}
+
+// =============================================================
+// SIGNATURE-CANVAS — zwei unabhängige Felder
+// =============================================================
+const SIGS = {}; // {1: {ctx, canvas, drawing, hasContent}, 2: {...}}
+
+function setupOneSignature(num) {
+  const canvas = $(`sig-canvas-${num}`);
+  if (canvas.dataset.init) return;
+  canvas.dataset.init = "1";
+
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#2a2530";
+
+  SIGS[num] = { ctx, canvas, drawing: false, hasContent: false };
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  function start(e) {
+    e.preventDefault();
+    SIGS[num].drawing = true; SIGS[num].hasContent = true;
+    $(`sig-hint-${num}`).style.display = "none";
+    const p = getPos(e);
+    ctx.beginPath(); ctx.moveTo(p.x, p.y);
+  }
+  function draw(e) {
+    if (!SIGS[num].drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y); ctx.stroke();
+  }
+  function stop() { SIGS[num].drawing = false; }
+
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("mouseup", stop);
+  canvas.addEventListener("mouseleave", stop);
+  canvas.addEventListener("touchstart", start, { passive: false });
+  canvas.addEventListener("touchmove", draw, { passive: false });
+  canvas.addEventListener("touchend", stop);
+}
+
+function initSignature() {
+  setupOneSignature(1);
+  setupOneSignature(2);
+
+  // Labels dynamisch aus Eltern-Daten setzen
+  const motherName = val("mother_name").trim();
+  const fatherName = val("father_name").trim();
+  if (motherName && fatherName) {
+    $("sig1-label").textContent = "Mutter · " + motherName;
+    $("sig2-label").textContent = "Vater · " + fatherName;
+  } else if (motherName) {
+    $("sig1-label").textContent = "Mutter · " + motherName;
+    $("sig2-label").textContent = "Zweite:r Erziehungsberechtigte:r";
+  } else if (fatherName) {
+    $("sig1-label").textContent = "Vater · " + fatherName;
+    $("sig2-label").textContent = "Zweite:r Erziehungsberechtigte:r";
+  }
+}
+
+function clearSig(num) {
+  const sig = SIGS[num];
+  if (!sig) return;
+  sig.ctx.clearRect(0, 0, sig.canvas.width, sig.canvas.height);
+  sig.hasContent = false;
+  $(`sig-hint-${num}`).style.display = "block";
+}
+
+// =============================================================
+// SUBMIT
+// =============================================================
+async function submitForm() {
+  // Validation
+  if (!val("child_first_name") || !val("child_last_name") || !val("birth_date")) {
+    alert("Bitte Schritt 1 vollständig ausfüllen (Kindesname + Geburtsdatum).");
+    goStep(1); return;
+  }
+  if (!CONSENT) { alert("Bitte Zustimmung in Schritt 4 erteilen."); goStep(4); return; }
+  if (!SIGS[1] || !SIGS[1].hasContent) { alert("Bitte unterschreiben (Pflichtfeld)."); return; }
+
+  const btn = $("btn-submit");
+  btn.disabled = true;
+  btn.textContent = "Sende …";
+
+  const sigDataUrl = SIGS[1].canvas.toDataURL("image/png");
+  const sigDataUrl2 = (SIGS[2] && SIGS[2].hasContent) ? SIGS[2].canvas.toDataURL("image/png") : null;
+
+  const payload = {
+    child_first_name: val("child_first_name"),
+    child_last_name: val("child_last_name"),
+    child_name: val("child_first_name") + " " + val("child_last_name"),
+    birth_date: val("birth_date"),
+    child_address: val("child_address"),
+    child_postal_code: val("child_postal_code"),
+    child_city: val("child_city"),
+    mother_tongue: val("mother_tongue"),
+    nationality: val("nationality"),
+    sv_number: val("sv_number"),
+    mother_name: val("mother_name"),
+    mother_phone: val("mother_phone"),
+    mother_email: val("mother_email"),
+    mother_employer: val("mother_employer"),
+    father_name: val("father_name"),
+    father_phone: val("father_phone"),
+    father_email: val("father_email"),
+    father_employer: val("father_employer"),
+    enrolled_from: val("enrolled_from"),
+    enrolled_to: val("enrolled_to"),
+    modules: SELECTED_MODULES,
+    consent: CONSENT,
+    signed_location: val("signed_location"),
+    signature_data_url: sigDataUrl,
+    signature_data_url_2: sigDataUrl2,
+    signed_by_1_label: $("sig1-label").textContent,
+    signed_by_2_label: sigDataUrl2 ? $("sig2-label").textContent : null,
+  };
+
+  try {
+    const res = await fetch(API + "/anmeldung/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Fehler beim Senden");
+    $("success-msg").textContent = `Danke, ${data.child_name}! Anmeldung mit ${data.booked_hours_per_week.toFixed(1)}h/Woche registriert.`;
+    goStep(6);
+  } catch (e) {
+    alert("Fehler: " + e.message);
+    btn.disabled = false; btn.textContent = "Anmeldung absenden";
+  }
+}
+
+// =============================================================
+// BOOT
+// =============================================================
+async function boot() {
+  // KITA-Stammdaten holen
+  try {
+    const info = await fetch(API + "/anmeldung/info").then(r => r.json());
+    MODULES_INFO = info;
+    if (info.available_groups?.length) {
+      $("kita-name-display").textContent = info.available_groups.map(g => g.name).join(" · ");
+    }
+  } catch (e) {
+    console.warn("info fetch failed", e);
+  }
+
+  // Default: heute als enrolled_from
+  const today = new Date().toISOString().slice(0, 10);
+  $("enrolled_from").value = today;
+
+  renderModules();
+}
+boot();
+</script>
+
+</body>
+</html>

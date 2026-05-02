@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ site.business_name }}{% if site.tagline %} — {{ site.tagline }}{% endif %}</title>
+<meta name="description" content="{{ site.description or site.business_name }}">
+
+<!-- Open Graph für Social-Sharing -->
+<meta property="og:title" content="{{ site.business_name }}">
+<meta property="og:description" content="{{ site.description or site.tagline or '' }}">
+{% if hero_url %}<meta property="og:image" content="{{ hero_url }}">{% endif %}
+<meta property="og:type" content="website">
+
+<style>
+:root {
+  /* Frühlings-Theme: cremig, fresh, weicher Pink + Gelb-Grün */
+  --bg: #fffaf3;
+  --bg-soft: #fff5e8;
+  --bg-card: #ffffff;
+  --ink: #1a1a1f;
+  --ink-2: #4a4a55;
+  --ink-3: #8a8a95;
+  --line: #ece4d8;
+  --accent: #ff7da3;       /* warmer Frühlings-Pink */
+  --accent-soft: #fff0f5;
+  --accent-2: #6dd47e;     /* fresh Grün */
+  --shadow-md: 0 1px 3px rgba(20,16,30,0.04), 0 12px 40px rgba(20,16,30,0.05);
+  --radius: 24px;
+  --radius-sm: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.005em;
+}
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- Top Nav ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 24px;
+  background: rgba(255, 250, 243, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--line);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+.nav-logo img { height: 32px; width: 32px; border-radius: 8px; object-fit: cover; }
+.nav-logo .name {
+  font-weight: 700; font-size: 16px; letter-spacing: -0.02em;
+}
+.nav-spacer { flex: 1; }
+.nav-cta {
+  background: var(--ink); color: #fff;
+  padding: 9px 16px; border-radius: 10px;
+  text-decoration: none; font-size: 13px; font-weight: 600;
+  transition: background .15s, transform .12s;
+}
+.nav-cta:hover { background: var(--accent); transform: translateY(-1px); }
+
+/* ---------- Hero ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  padding: 80px 0 60px;
+}
+@media (max-width: 880px) {
+  .hero { grid-template-columns: 1fr; padding: 56px 0 40px; }
+}
+.hero-greeting {
+  font-size: 13px; font-weight: 600;
+  color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  margin: 0 0 22px;
+  background: linear-gradient(120deg, var(--ink) 60%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p {
+  font-size: 19px; color: var(--ink-2);
+  line-height: 1.55; max-width: 36em;
+  margin: 0 0 28px;
+}
+.hero-cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--ink); color: #fff;
+  padding: 14px 28px; border-radius: 14px;
+  text-decoration: none; font-weight: 600; font-size: 15px;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: background .15s, transform .12s;
+}
+.btn-primary:hover { background: var(--accent); transform: translateY(-2px); }
+.btn-secondary {
+  background: var(--bg-card); color: var(--ink); border: 1px solid var(--line);
+  padding: 14px 28px; border-radius: 14px;
+  text-decoration: none; font-weight: 600; font-size: 15px;
+}
+.btn-secondary:hover { border-color: var(--accent); }
+.hero-image {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  aspect-ratio: 4 / 3;
+  background: var(--bg-soft);
+}
+.hero-image img { width: 100%; height: 100%; object-fit: cover; }
+.hero-image-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px; opacity: 0.3;
+  background: linear-gradient(135deg, var(--accent-soft), var(--bg-soft));
+}
+
+/* ---------- Live-Card ---------- */
+.live {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: var(--shadow-md);
+  margin: 0 0 60px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 720px) { .live { grid-template-columns: 1fr; } }
+.live-block .label {
+  font-size: 11px; font-weight: 600; color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;
+}
+.live-block .value {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);
+}
+.live-block .sub { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+
+/* ---------- Sections ---------- */
+section { padding: 60px 0; }
+.section-head {
+  font-size: 12px; font-weight: 600;
+  color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+section h2 {
+  font-size: clamp(28px, 3.5vw, 40px); font-weight: 700;
+  letter-spacing: -0.025em; margin: 0 0 24px;
+  line-height: 1.15;
+}
+section p {
+  font-size: 17px; color: var(--ink-2); line-height: 1.65;
+  max-width: 60ch;
+}
+
+/* ---------- Knowledge Card ---------- */
+.knowledge {
+  background: linear-gradient(135deg, #fff8e1 0%, #fff0f5 100%);
+  border-radius: var(--radius);
+  padding: 32px 36px;
+  margin: 40px 0;
+  position: relative;
+  overflow: hidden;
+}
+.knowledge::before {
+  content: "💭"; position: absolute; top: 24px; right: 28px;
+  font-size: 28px; opacity: 0.7;
+}
+.knowledge .head {
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
+}
+.knowledge .title {
+  font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px;
+}
+.knowledge .body {
+  font-size: 16px; color: var(--ink-2); line-height: 1.6;
+  max-width: 60ch;
+}
+
+/* ---------- Gallery ---------- */
+.gallery {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.gallery-item {
+  border-radius: var(--radius-sm);
+  overflow: hidden; aspect-ratio: 4 / 3;
+  box-shadow: var(--shadow-md);
+  transition: transform .25s;
+}
+.gallery-item:hover { transform: translateY(-3px); }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- Events ---------- */
+.events { display: flex; flex-direction: column; gap: 10px; }
+.event {
+  display: flex; align-items: center; gap: 18px;
+  background: var(--bg-card); padding: 16px 20px;
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+}
+.event-bar { width: 4px; align-self: stretch; min-height: 32px; border-radius: 3px; background: var(--accent); }
+.event-when {
+  min-width: 80px; font-size: 13px; font-weight: 600; color: var(--ink-2);
+}
+.event-title { font-size: 16px; font-weight: 500; flex: 1; }
+.event-type { font-size: 12px; color: var(--ink-3); }
+
+/* ---------- Anmeldung ---------- */
+.anmeldung {
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 56px 48px;
+  margin: 60px 0;
+}
+.anmeldung h2 { color: #fff; }
+.anmeldung p { color: rgba(255,255,255,0.75); }
+.form-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;
+}
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+.form-row.full { grid-template-columns: 1fr; }
+.form-row label {
+  display: block; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.6); margin-bottom: 6px;
+}
+.form-row input, .form-row textarea {
+  width: 100%; padding: 12px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; color: #fff;
+  font-size: 15px; font-family: inherit;
+}
+.form-row input:focus, .form-row textarea:focus {
+  outline: none; border-color: var(--accent);
+  background: rgba(255,255,255,0.1);
+}
+.form-row textarea { min-height: 100px; resize: vertical; }
+.btn-submit {
+  background: var(--accent); color: #fff;
+  border: 0; cursor: pointer;
+  padding: 14px 28px; border-radius: 12px;
+  font-weight: 600; font-size: 15px;
+  margin-top: 20px;
+  transition: transform .12s;
+}
+.btn-submit:hover { transform: translateY(-2px); }
+.form-message {
+  margin-top: 16px; padding: 12px 16px; border-radius: 10px;
+  background: rgba(109, 212, 126, 0.15); color: #6dd47e;
+  font-size: 14px; display: none;
+}
+.form-message.show { display: block; }
+
+/* ---------- Footer ---------- */
+footer {
+  border-top: 0.5px solid var(--line);
+  padding: 36px 0 30px;
+  margin-top: 40px;
+  color: var(--ink-3); font-size: 13px;
+}
+footer .row {
+  display: flex; gap: 24px; flex-wrap: wrap; align-items: center;
+}
+footer .row > * { flex: 1; min-width: 200px; }
+footer .shiksha-credit {
+  font-size: 11px; color: var(--ink-3); opacity: 0.7;
+}
+footer .shiksha-credit a { color: var(--accent); text-decoration: none; }
+
+/* Mini-Animation für die Begrüßung — zarte Bewegung */
+@keyframes shiksha-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.fade-in { animation: shiksha-fade .8s cubic-bezier(.22,.61,.36,1) both; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="nav-logo">
+    {% if logo_url %}<img src="{{ logo_url }}" alt="{{ site.business_name }}">{% endif %}
+    <span class="name">{{ site.business_name }}</span>
+  </a>
+  <div class="nav-spacer"></div>
+  <a href="#anmeldung" class="nav-cta">Probetag anfragen</a>
+</nav>
+
+<div class="container">
+
+  <!-- HERO -->
+  <header class="hero fade-in">
+    <div>
+      <div class="hero-greeting">{{ greeting }}{% if live.kids_present %} · {{ live.kids_present }} Kinder gerade bei uns{% endif %}</div>
+      <h1>{{ site.tagline or site.business_name }}</h1>
+      <p>{{ site.description or "Eine KITA, in der Kinder mit echtem Interesse begleitet werden." }}</p>
+      <div class="hero-cta-row">
+        <a href="#anmeldung" class="btn-primary">Probetag anfragen →</a>
+        <a href="#about" class="btn-secondary">Mehr erfahren</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      {% if hero_url %}
+        <img src="{{ hero_url }}" alt="{{ site.business_name }}">
+      {% else %}
+        <div class="hero-image-placeholder">🌱</div>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- LIVE-DATEN -->
+  {% if live %}
+  <div class="live fade-in">
+    {% if live.kids_total %}
+    <div class="live-block">
+      <div class="label">Heute bei uns</div>
+      <div class="value">{{ live.kids_present }} von {{ live.kids_total }} Kindern</div>
+      <div class="sub">Wir freuen uns auf jeden neuen Tag.</div>
+    </div>
+    {% endif %}
+    {% if live.weekly_theme %}
+    <div class="live-block">
+      <div class="label">Diese Woche bei uns</div>
+      <div class="value">{{ live.weekly_theme }}</div>
+      <div class="sub">Ein Fokus, der durch alle Tage trägt.</div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- ÜBER UNS -->
+  {% if site.about_text %}
+  <section id="about">
+    <div class="section-head">Über uns</div>
+    <h2>Wer wir sind</h2>
+    <div style="font-size: 17px; color: var(--ink-2); line-height: 1.7; max-width: 60ch;">
+      {% for paragraph in site.about_text.split('\n\n') %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- KONZEPT -->
+  {% if site.concept_text %}
+  <section id="konzept">
+    <div class="section-head">Pädagogisches Konzept</div>
+    <h2>Wie wir arbeiten</h2>
+    <div style="font-size: 17px; color: var(--ink-2); line-height: 1.7; max-width: 60ch;">
+      {% for paragraph in site.concept_text.split('\n\n') %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- WISSENS-SNIPPET -->
+  {% if knowledge %}
+  <div class="knowledge fade-in">
+    <div class="head">Eine kleine Erinnerung</div>
+    <div class="title">{{ knowledge.title }}</div>
+    <div class="body">{{ knowledge.body }}</div>
+  </div>
+  {% endif %}
+
+  <!-- GALERIE -->
+  {% if gallery %}
+  <section id="galerie">
+    <div class="section-head">Einblicke</div>
+    <h2>So sieht's bei uns aus</h2>
+    <div class="gallery">
+      {% for img in gallery %}
+        <div class="gallery-item">
+          <img src="{{ img.url }}" alt="{{ img.alt }}" loading="lazy">
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ANSTEHENDE TERMINE -->
+  {% if live.events %}
+  <section id="termine">
+    <div class="section-head">Termine</div>
+    <h2>Was bei uns ansteht</h2>
+    <div class="events">
+      {% for ev in live.events %}
+        <div class="event">
+          <div class="event-bar" style="background: {{ ev.color or '#ff7da3' }}"></div>
+          <div class="event-when">{{ ev.start_date }}</div>
+          <div class="event-title">{{ ev.title }}</div>
+          <div class="event-type">{{ ev.event_type }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ANFAHRT -->
+  {% if site.arrival_text %}
+  <section id="anfahrt">
+    <div class="section-head">So findet Ihr uns</div>
+    <h2>Anfahrt</h2>
+    <div style="font-size: 17px; color: var(--ink-2); line-height: 1.7; max-width: 60ch;">
+      <p>{{ site.arrival_text }}</p>
+      {% if site.address_line %}
+        <p style="margin-top: 16px; color: var(--ink); font-weight: 500;">
+          {{ site.address_line }}<br>
+          {{ site.postal_code }} {{ site.city }}
+        </p>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ANMELDUNG -->
+  <section id="anmeldung">
+    <div class="anmeldung">
+      <div class="section-head" style="color: var(--accent);">Probetag anfragen</div>
+      <h2>Lernen wir uns kennen</h2>
+      <p>Ein unverbindlicher Probetag ist der beste Weg, eine KITA wirklich zu spüren. Schreibt uns kurz, wer Ihr seid — wir melden uns innerhalb von zwei Werktagen.</p>
+      <form id="anmeldung-form">
+        <div class="form-row">
+          <div>
+            <label>Ihr Name</label>
+            <input type="text" name="name" required>
+          </div>
+          <div>
+            <label>E-Mail</label>
+            <input type="email" name="email" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Telefon (optional)</label>
+            <input type="tel" name="phone">
+          </div>
+          <div>
+            <label>Name des Kindes</label>
+            <input type="text" name="child_name">
+          </div>
+        </div>
+        <div class="form-row full">
+          <div>
+            <label>Geburtsdatum des Kindes (optional)</label>
+            <input type="date" name="child_birth">
+          </div>
+        </div>
+        <div class="form-row full">
+          <div>
+            <label>Nachricht (optional)</label>
+            <textarea name="message" placeholder="Worum geht es? Wann hättet Ihr Zeit für einen Probetag?"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">Anfrage senden</button>
+        <div class="form-message" id="form-message"></div>
+      </form>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div>
+        <strong style="color: var(--ink);">{{ site.business_name }}</strong><br>
+        {% if site.address_line %}{{ site.address_line }}, {{ site.postal_code }} {{ site.city }}<br>{% endif %}
+        {% if site.contact_email %}<a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>{% endif %}
+        {% if site.phone %} · {{ site.phone }}{% endif %}
+      </div>
+      <div style="text-align: right;">
+        <span class="shiksha-credit">
+          Diese Seite wird betrieben mit
+          <a href="https://shiksha.world" target="_blank">SHIKSHA</a>.<br>
+          Sie atmet — jeden Tag ein bisschen anders.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const form = document.getElementById('anmeldung-form');
+const msg = document.getElementById('form-message');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(form);
+  const payload = {};
+  for (const [k, v] of fd.entries()) payload[k] = v;
+  try {
+    const r = await fetch('/m/{{ site.slug }}/anmeldung', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+    const d = await r.json();
+    msg.textContent = d.message || 'Danke — wir melden uns!';
+    msg.classList.add('show');
+    form.reset();
+  } catch (err) {
+    msg.textContent = 'Etwas ist schiefgegangen. Versucht es bitte nochmal.';
+    msg.style.background = 'rgba(255,77,141,0.15)';
+    msg.style.color = '#ff7da3';
+    msg.classList.add('show');
+  }
+});
+</script>
+
+</body>
+</html>

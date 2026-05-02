@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHIKSHA · Marketing-Builder</title>
+<style>
+:root {
+  --ink:#1a1a1f; --ink-2:#4a4a55; --ink-3:#8a8a95;
+  --bg:#fafaf6; --card:#fff; --line:#e8e6e0;
+  --pink:#ff4d8d; --purple:#a855f7; --turquoise:#00d4d4;
+  --accent:#ff7da3;
+  --shadow:0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  background: var(--bg); color: var(--ink);
+  -webkit-font-smoothing: antialiased; letter-spacing: -0.005em;
+}
+.app {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  min-height: 100vh;
+}
+@media (max-width: 1000px) { .app { grid-template-columns: 1fr; } }
+
+/* ---------- Sidebar (Builder) ---------- */
+.sidebar {
+  background: var(--card);
+  border-right: 0.5px solid var(--line);
+  padding: 22px 24px 80px;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+.head {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px;
+}
+.head .logo {
+  width: 38px; height: 38px; border-radius: 11px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; box-shadow: 0 2px 6px rgba(255,77,141,0.25);
+}
+.head h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.head .sub { font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+
+.section {
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 18px 18px 16px;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-size: 11px; font-weight: 700; color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px;
+}
+.field { margin-bottom: 10px; }
+.field label {
+  display: block; font-size: 12px; font-weight: 500;
+  color: var(--ink-2); margin-bottom: 4px;
+}
+.field input, .field textarea {
+  width: 100%; padding: 9px 12px;
+  border: 1px solid var(--line); border-radius: 9px;
+  font-size: 13.5px; font-family: inherit;
+  background: var(--card); color: var(--ink);
+}
+.field input:focus, .field textarea:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255,125,163,0.1);
+}
+.field textarea { min-height: 70px; resize: vertical; }
+
+.btn {
+  padding: 10px 16px; border: 0; border-radius: 10px;
+  font-weight: 600; font-size: 13px; cursor: pointer;
+  font-family: inherit;
+  transition: transform .12s, background .15s;
+}
+.btn:active { transform: scale(0.98); }
+.btn-magic {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(255,77,141,0.25);
+  width: 100%;
+}
+.btn-magic:hover { transform: translateY(-1px); }
+.btn-publish {
+  background: var(--ink); color: #fff;
+  width: 100%;
+}
+.btn-publish:hover { background: #000; }
+.btn-ghost {
+  background: transparent; color: var(--ink-2); border: 1px solid var(--line);
+}
+.btn-ghost:hover { background: var(--line); color: var(--ink); }
+
+.upload {
+  display: block;
+  padding: 20px;
+  border: 1.5px dashed var(--line);
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 12px; color: var(--ink-3);
+  transition: border-color .15s, background .15s;
+}
+.upload:hover { border-color: var(--accent); background: var(--card); color: var(--ink-2); }
+.upload input { display: none; }
+.upload .preview { max-height: 80px; margin-bottom: 6px; border-radius: 6px; }
+
+.gallery-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+  margin-top: 6px;
+}
+.gallery-item {
+  aspect-ratio: 4 / 3; border-radius: 6px; overflow: hidden;
+  position: relative; cursor: pointer;
+}
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-item.selected::after {
+  content: "✓"; position: absolute; top: 4px; right: 4px;
+  background: var(--accent); color: #fff;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+
+.actions {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 18px;
+}
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff;
+  padding: 10px 18px; border-radius: 12px; font-size: 13px;
+  z-index: 100; opacity: 0; pointer-events: none;
+  transition: opacity .2s, transform .2s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, -4px); }
+.toast.warn { background: #b86b00; }
+.toast.error { background: var(--pink); }
+
+/* ---------- Preview ---------- */
+.preview-pane {
+  background: var(--bg);
+  position: relative;
+  display: flex; flex-direction: column;
+}
+.preview-bar {
+  background: var(--card);
+  border-bottom: 0.5px solid var(--line);
+  padding: 10px 20px;
+  font-size: 12px; color: var(--ink-3);
+  display: flex; align-items: center; gap: 12px;
+}
+.preview-bar .url-pill {
+  background: var(--bg); padding: 6px 12px; border-radius: 8px;
+  font-family: SF Mono, Monaco, monospace; font-size: 11px;
+  color: var(--ink-2);
+}
+.preview-bar .spacer { flex: 1; }
+.preview-bar a {
+  color: var(--accent); text-decoration: none; font-weight: 600;
+}
+.preview-iframe {
+  flex: 1; border: 0; width: 100%;
+  background: var(--card);
+}
+.helper {
+  font-size: 11px; color: var(--ink-3); line-height: 1.5;
+  padding: 8px 12px; background: rgba(255,217,61,0.12);
+  border-radius: 8px; margin-top: 8px;
+  border-left: 2px solid #ffd93d;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR (Builder) -->
+  <aside class="sidebar">
+    <div class="head">
+      <div class="logo">M</div>
+      <div>
+        <h1>Marketing-Site</h1>
+        <div class="sub">Slug: <span id="slug-display">…</span></div>
+      </div>
+    </div>
+
+    <!-- Stammdaten -->
+    <div class="section">
+      <div class="section-title">Stammdaten</div>
+      <div class="field">
+        <label>Name</label>
+        <input id="f_business_name" placeholder="z.B. Krummelus">
+      </div>
+      <div class="field">
+        <label>Adresse</label>
+        <input id="f_address_line" placeholder="Straße + Nr.">
+      </div>
+      <div style="display: grid; grid-template-columns: 80px 1fr; gap: 8px;">
+        <div class="field">
+          <label>PLZ</label>
+          <input id="f_postal_code" placeholder="6850">
+        </div>
+        <div class="field">
+          <label>Ort</label>
+          <input id="f_city" placeholder="Dornbirn">
+        </div>
+      </div>
+      <div class="field">
+        <label>E-Mail</label>
+        <input id="f_contact_email" type="email" placeholder="hallo@krummelus.at">
+      </div>
+      <div class="field">
+        <label>Telefon</label>
+        <input id="f_phone" type="tel">
+      </div>
+      <div class="helper">
+        💡 Mit Adresse + Name reichen für die KI-Generierung. Sie erfindet den Rest aus dem, was sie über den Ort weiß.
+      </div>
+    </div>
+
+    <!-- AI-Generierung -->
+    <div class="section">
+      <div class="section-title">SHIKSHA-Magie</div>
+      <button class="btn btn-magic" id="btn-generate">
+        ✨ Inhalte vorschlagen lassen
+      </button>
+      <div class="helper">
+        Wir holen Bahnhof, Flughafen und Sehenswürdigkeiten in der Umgebung und schreiben Tagline, About-Text, Konzept und Anfahrt zusammen. Du kannst danach alles redigieren.
+      </div>
+    </div>
+
+    <!-- Texte -->
+    <div class="section">
+      <div class="section-title">Texte</div>
+      <div class="field">
+        <label>Tagline</label>
+        <input id="f_tagline" placeholder='z.B. "Eine KITA, die mitwächst."'>
+      </div>
+      <div class="field">
+        <label>Hero-Untertitel (2-3 Sätze)</label>
+        <textarea id="f_description"></textarea>
+      </div>
+      <div class="field">
+        <label>Über uns</label>
+        <textarea id="f_about_text" style="min-height: 120px;"></textarea>
+      </div>
+      <div class="field">
+        <label>Pädagogisches Konzept</label>
+        <textarea id="f_concept_text" style="min-height: 120px;"></textarea>
+      </div>
+      <div class="field">
+        <label>Anfahrt</label>
+        <textarea id="f_arrival_text"></textarea>
+      </div>
+    </div>
+
+    <!-- Logo -->
+    <div class="section">
+      <div class="section-title">Logo</div>
+      <label class="upload" id="upload-logo">
+        <input type="file" accept="image/*" data-role="logo">
+        <div id="logo-preview-wrap"></div>
+        <span>Logo auswählen oder ablegen</span>
+      </label>
+    </div>
+
+    <!-- Hero-Bild -->
+    <div class="section">
+      <div class="section-title">Hero-Bild</div>
+      <label class="upload" id="upload-hero">
+        <input type="file" accept="image/*" data-role="hero">
+        <div id="hero-preview-wrap"></div>
+        <span>Hero-Bild auswählen — eigenes oder aus dem SHIKSHA-Pool unten</span>
+      </label>
+      <div id="pool-images" style="margin-top: 10px;">
+        <div class="section-title" style="margin: 6px 0 6px;">SHIKSHA-Pool · Frühling</div>
+        <div class="gallery-grid" id="pool-grid"></div>
+      </div>
+    </div>
+
+    <!-- Galerie -->
+    <div class="section">
+      <div class="section-title">Galerie</div>
+      <label class="upload" id="upload-gallery">
+        <input type="file" accept="image/*" data-role="gallery" multiple>
+        <span>Mehrere Bilder auswählen</span>
+      </label>
+      <div class="gallery-grid" id="gallery-current"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" id="btn-save">Entwurf speichern</button>
+      <button class="btn btn-publish" id="btn-publish">🚀 Veröffentlichen</button>
+    </div>
+  </aside>
+
+  <!-- PREVIEW -->
+  <main class="preview-pane">
+    <div class="preview-bar">
+      <span class="url-pill" id="public-url">/m/…</span>
+      <div class="spacer"></div>
+      <a href="#" id="open-public" target="_blank">Im neuen Tab öffnen ↗</a>
+      <button class="btn btn-ghost" id="btn-reload" style="padding: 6px 12px;">↻ neu laden</button>
+    </div>
+    <iframe class="preview-iframe" id="preview" src="about:blank"></iframe>
+  </main>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ADMIN = "/kita/admin/marketing";
+const PUBLIC = "/m";
+
+// Slug aus URL: ?site=krummelus
+const params = new URLSearchParams(location.search);
+const SLUG = params.get('site') || 'krummelus';
+$("slug-display").textContent = SLUG;
+$("public-url").textContent = `/m/${SLUG}`;
+$("open-public").href = `/m/${SLUG}`;
+$("preview").src = `/m/${SLUG}`;
+
+const HDR = { "Content-Type":"application/json", "X-Org-Slug":"kita_pilot" };
+
+function showToast(msg, kind) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (kind ? " " + kind : "");
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function reloadPreview() {
+  $("preview").src = $("preview").src.split("?")[0] + "?_=" + Date.now();
+}
+
+const FIELDS = [
+  "business_name","address_line","postal_code","city","contact_email","phone",
+  "tagline","description","about_text","concept_text","arrival_text"
+];
+
+async function loadSite() {
+  try {
+    const r = await fetch(`${ADMIN}/sites/${SLUG}`, { headers: HDR });
+    if (r.status === 404) {
+      // Site existiert noch nicht — wird beim Speichern angelegt
+      showToast("Neue Site — Stammdaten ausfüllen + speichern");
+      return;
+    }
+    const d = await r.json();
+    FIELDS.forEach(f => {
+      if ($(`f_${f}`) && d[f] != null) $(`f_${f}`).value = d[f];
+    });
+    if (d.logo_asset_id) renderPreview("logo-preview-wrap", `/m/asset/${d.logo_asset_id}`);
+    if (d.hero_asset_id) renderPreview("hero-preview-wrap", `/m/asset/${d.hero_asset_id}`);
+    if (d.gallery_asset_ids?.length) {
+      $("gallery-current").innerHTML = d.gallery_asset_ids.map(id =>
+        `<div class="gallery-item"><img src="/m/asset/${id}"></div>`
+      ).join("");
+    }
+  } catch (e) { console.warn(e); }
+}
+
+function renderPreview(wrap_id, url) {
+  $(wrap_id).innerHTML = `<img class="preview" src="${url}">`;
+}
+
+async function loadPoolImages() {
+  try {
+    const r = await fetch(`${ADMIN}/pool/images?edition=kita&season=spring`, { headers: HDR });
+    const d = await r.json();
+    if (!d.images?.length) {
+      $("pool-grid").innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 14px; font-size: 11px; color: var(--ink-3);">Pool noch leer — Bilder mit Firefly generieren</div>`;
+      return;
+    }
+    $("pool-grid").innerHTML = d.images.map(img => `
+      <div class="gallery-item" data-asset-id="${img.id}" data-role="hero-from-pool">
+        <img src="${img.url}" alt="${img.alt || ''}">
+      </div>
+    `).join("");
+    document.querySelectorAll('[data-role="hero-from-pool"]').forEach(el => {
+      el.addEventListener("click", () => selectHeroFromPool(el.dataset.assetId, el));
+    });
+  } catch (e) { console.warn(e); }
+}
+
+async function selectHeroFromPool(asset_id, el) {
+  // Verknüpft das Pool-Bild als Hero (über PATCH)
+  try {
+    await fetch(`${ADMIN}/sites/${SLUG}`, {
+      method: "PUT",
+      headers: HDR,
+      body: JSON.stringify({ hero_asset_id: parseInt(asset_id) }),
+    });
+    document.querySelectorAll('[data-role="hero-from-pool"]').forEach(e => e.classList.remove("selected"));
+    el.classList.add("selected");
+    renderPreview("hero-preview-wrap", `/m/asset/${asset_id}`);
+    showToast("Hero-Bild gesetzt");
+    reloadPreview();
+  } catch (e) { showToast("Fehler", "error"); }
+}
+
+// File-Upload (Logo, Hero, Gallery)
+document.querySelectorAll('input[type="file"]').forEach(input => {
+  input.addEventListener("change", async (e) => {
+    const role = input.dataset.role;
+    const files = [...input.files];
+    if (!files.length) return;
+    showToast("Lade hoch …");
+    for (const file of files) {
+      const fd = new FormData();
+      fd.append("role", role);
+      fd.append("file", file);
+      try {
+        const r = await fetch(`${ADMIN}/sites/${SLUG}/upload`, {
+          method: "POST",
+          headers: { "X-Org-Slug": "kita_pilot" },
+          body: fd,
+        });
+        const d = await r.json();
+        if (role === "logo") renderPreview("logo-preview-wrap", d.url);
+        else if (role === "hero") renderPreview("hero-preview-wrap", d.url);
+        else if (role === "gallery") {
+          $("gallery-current").insertAdjacentHTML("beforeend",
+            `<div class="gallery-item"><img src="${d.url}"></div>`);
+        }
+      } catch (e) { showToast("Upload fehlgeschlagen", "error"); }
+    }
+    showToast("Hochgeladen ✓");
+    reloadPreview();
+  });
+});
+
+// Speichern
+async function saveSite(silent) {
+  const payload = {};
+  FIELDS.forEach(f => {
+    const el = $(`f_${f}`);
+    if (el && el.value !== "") payload[f] = el.value;
+  });
+  // Erst checken: existiert die Site?
+  const checkR = await fetch(`${ADMIN}/sites/${SLUG}`, { headers: HDR });
+  if (checkR.status === 404) {
+    // Erst anlegen
+    if (!payload.business_name) {
+      showToast("Bitte Name ausfüllen", "warn"); return false;
+    }
+    await fetch(`${ADMIN}/sites`, {
+      method: "POST", headers: HDR,
+      body: JSON.stringify({ slug: SLUG, edition: "kita", ...payload }),
+    });
+  } else {
+    await fetch(`${ADMIN}/sites/${SLUG}`, {
+      method: "PUT", headers: HDR,
+      body: JSON.stringify(payload),
+    });
+  }
+  if (!silent) showToast("Gespeichert ✓");
+  return true;
+}
+
+$("btn-save").addEventListener("click", async () => {
+  if (await saveSite()) reloadPreview();
+});
+
+// Generate via Claude
+$("btn-generate").addEventListener("click", async () => {
+  if (!$("f_business_name").value || !$("f_address_line").value) {
+    showToast("Bitte zuerst Name + Adresse ausfüllen", "warn"); return;
+  }
+  if (!await saveSite(true)) return;
+  $("btn-generate").textContent = "✨ SHIKSHA denkt nach …";
+  $("btn-generate").disabled = true;
+  try {
+    const r = await fetch(`${ADMIN}/sites/${SLUG}/generate`, { method: "POST", headers: HDR });
+    const d = await r.json();
+    if (!d.ok) {
+      showToast("KI-Fehler: " + (d.error || "unbekannt"), "error");
+      return;
+    }
+    const g = d.generated;
+    if (g.tagline) $("f_tagline").value = g.tagline;
+    if (g.description) $("f_description").value = g.description;
+    if (g.about_text) $("f_about_text").value = g.about_text;
+    if (g.concept_text) $("f_concept_text").value = g.concept_text;
+    if (g.arrival_text) $("f_arrival_text").value = g.arrival_text;
+    showToast("Vorschläge geladen — bitte sichten ✓");
+    reloadPreview();
+  } catch (e) { showToast("Fehler: " + e.message, "error"); }
+  finally {
+    $("btn-generate").innerHTML = "✨ Inhalte vorschlagen lassen";
+    $("btn-generate").disabled = false;
+  }
+});
+
+// Veröffentlichen
+$("btn-publish").addEventListener("click", async () => {
+  if (!await saveSite(true)) return;
+  await fetch(`${ADMIN}/sites/${SLUG}/publish`, { method: "POST", headers: HDR });
+  showToast("Site ist live ✓ ");
+  reloadPreview();
+});
+
+$("btn-reload").addEventListener("click", reloadPreview);
+
+// Auto-save on field blur
+FIELDS.forEach(f => {
+  const el = $(`f_${f}`);
+  if (el) el.addEventListener("blur", () => saveSite(true));
+});
+
+// Init
+loadSite();
+loadPoolImages();
+</script>
+
+</body>
+</html>

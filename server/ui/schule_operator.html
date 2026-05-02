@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA · SCHULE — Operator</title>
+<style>
+:root {
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --line: #e6e4de;
+  --line-strong: #c6c2b8;
+  --ink: #1a1a1a;
+  --ink-soft: #55524b;
+  --ink-mute: #7a7a74;
+  --accent: #2d7a5f;
+  --accent-soft: #e8f1ec;
+  --warn: #8a6a2a;
+  --warn-soft: #f5ebd8;
+  --alert: #a0391f;
+  --alert-soft: #f5e1da;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+}
+header.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+}
+.brand {
+  display: flex;
+  flex-direction: column;
+}
+.eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+}
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 2px 0 0;
+  letter-spacing: -0.005em;
+}
+.school-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #fafaf8;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.school-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.tab {
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  color: var(--ink-mute);
+  cursor: pointer;
+  font-weight: 500;
+}
+.tab.active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+/* PANEL */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.card .lede {
+  font-size: 13px;
+  color: var(--ink-mute);
+  margin: 0 0 16px;
+}
+
+/* FORM ELEMENTS */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+.field label {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="tel"],
+.field input[type="number"],
+.field input[type="date"],
+.field input[type="time"],
+.field select,
+.field textarea {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fafaf8;
+  color: var(--ink);
+  width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+  background: #fff;
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+/* CHECKBOX-PILLS */
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+  background: #fafaf8;
+  color: var(--ink-soft);
+  user-select: none;
+}
+.pill input { display: none; }
+.pill:has(input:checked) {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* SHIKSHA SPRACHE — Sentence-Frame */
+.sentence {
+  font-size: 15px;
+  line-height: 1.7;
+  background: linear-gradient(0deg, transparent 0%, transparent 60%, #fff8d6 60%, #fff8d6 95%, transparent 95%);
+  padding: 4px 0;
+  display: inline;
+}
+.sentence-block {
+  background: #fafaf8;
+  border-left: 4px solid var(--ink);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 16px 0;
+}
+.sentence-block strong { font-weight: 600; }
+
+/* CONFIDENCE-SPRACHE */
+.conf-low { color: var(--ink-mute); font-style: italic; }
+.conf-mid { color: var(--warn); }
+.conf-high { color: var(--accent); }
+
+/* BUTTONS */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+button.primary {
+  padding: 10px 18px;
+  background: var(--ink);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+button.primary:hover { opacity: 0.9; }
+button.secondary {
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+button.alert {
+  padding: 10px 18px;
+  background: var(--alert);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* SIGNALS */
+.signal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.signal {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fafaf8;
+}
+.signal-sev {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.signal-sev.high { background: var(--alert-soft); color: var(--alert); }
+.signal-sev.mid { background: var(--warn-soft); color: var(--warn); }
+.signal-sev.low { background: #eef2ee; color: var(--ink-soft); }
+.signal-text { flex: 1; font-size: 14px; }
+.signal-meta { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+
+/* CONSENT BLOCK */
+.consent-block {
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fdfcf6;
+  margin: 12px 0;
+}
+.consent-block h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin: 0 0 8px;
+}
+.consent-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.consent-status {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.consent-status.ok { background: var(--accent-soft); color: var(--accent); }
+.consent-status.miss { background: var(--alert-soft); color: var(--alert); }
+
+/* WEATHER */
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+.weather-stat {
+  padding: 14px;
+  background: #fafaf8;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+}
+.weather-stat .v {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--mono);
+}
+.weather-stat .l {
+  font-size: 11px;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.weather-stat.over .v { color: var(--alert); }
+
+/* FOTO-FLOW PROMINENT */
+.foto-flow {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.foto-flow .icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.foto-flow .text { flex: 1; }
+.foto-flow h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.foto-flow p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+}
+.foto-flow button {
+  padding: 9px 16px;
+  background: #fff;
+  color: var(--ink);
+  border: 0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+footer.bot {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+@media (max-width: 700px) {
+  .field-row, .field-row.three { grid-template-columns: 1fr; }
+  .weather-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<header class="top">
+  <div class="brand">
+    <span class="eyebrow">SHIKSHA · SCHULE.EDITION</span>
+    <h1>Studio</h1>
+  </div>
+  <span class="school-pill">Lichtquelle Wien · 7. Bezirk</span>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" data-panel="today">Heute</button>
+  <button class="tab" data-panel="kurs">Kurs anlegen</button>
+  <button class="tab" data-panel="anmeldung">Anmeldung</button>
+  <button class="tab" data-panel="wetter">Wetter</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: HEUTE -->
+<!-- ============================================================ -->
+<div class="panel active" id="panel-today">
+
+<div class="card">
+  <h2>Heute</h2>
+  <p class="lede">Was gerade läuft. Was als nächstes ansteht.</p>
+
+  <div class="sentence-block">
+    Drei Sachen heute: <strong>Werner zahlt nicht</strong>, <strong>Klara hat probiert</strong> und <strong>Annas Karte läuft bald</strong>.
+  </div>
+
+  <div class="signal-list">
+    <div class="signal">
+      <span class="signal-sev high">jetzt</span>
+      <div class="signal-text">
+        Werner Hofbauer Karte ist überfällig.
+        <div class="signal-meta">Mahnung 1 verschickt am 22.04. — keine Reaktion · €115,00</div>
+      </div>
+      <button class="primary">Werner erinnern?</button>
+    </div>
+    <div class="signal">
+      <span class="signal-sev mid">heute</span>
+      <div class="signal-text">
+        Klara hat probiert, wartet seit 3 Tagen.
+        <div class="signal-meta">Probestunde 22.04. Hatha Morgen · noch keine Anmeldung</div>
+      </div>
+      <button class="secondary">Bei Klara nachfragen?</button>
+    </div>
+    <div class="signal">
+      <span class="signal-sev low">demnächst</span>
+      <div class="signal-text">
+        Bernds Monatskarte läuft in 5 Tagen aus.
+        <div class="signal-meta">erneuert seit 6 Monaten regelmäßig · low effort</div>
+      </div>
+      <button class="secondary">Bernd erinnern?</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Patterns gerade</h2>
+  <p class="lede">Was sich wiederholt. Was du wissen solltest.</p>
+  <div class="signal-list">
+    <div class="signal">
+      <span class="signal-sev low">Muster</span>
+      <div class="signal-text">
+        Mittwoch 18:30 ist seit 4 Wochen voll.
+        <div class="signal-meta">Vinyasa Power · 16/16 Plätze · überlege Doppelstunde</div>
+      </div>
+    </div>
+    <div class="signal">
+      <span class="signal-sev mid">Muster</span>
+      <div class="signal-text">
+        Mittwochs trägt Tom 60% der Stunden.
+        <div class="signal-meta">2x Hatha Morgen + 2x Vinyasa Abend · seit 3 Wochen</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: KURS ANLEGEN -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-kurs">
+
+<div class="card">
+  <h2>Kurs anlegen</h2>
+  <p class="lede">Erst die Idee, dann die Termine.</p>
+
+  <div class="field">
+    <label>Wie heißt der Kurs?</label>
+    <input type="text" placeholder="z.B. Vinyasa Power" value="" />
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <label>Welche Art?</label>
+      <select>
+        <option>hatha</option>
+        <option selected>vinyasa</option>
+        <option>yin</option>
+        <option>kinder-yoga</option>
+        <option>pre-natal</option>
+        <option>workshop</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Welche Stufe?</label>
+      <select>
+        <option>alle stufen</option>
+        <option>anfänger</option>
+        <option>mittel</option>
+        <option selected>fortgeschritten</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field-row three">
+    <div class="field">
+      <label>Plätze min</label>
+      <input type="number" value="6" />
+    </div>
+    <div class="field">
+      <label>Plätze max</label>
+      <input type="number" value="16" />
+    </div>
+    <div class="field">
+      <label>Dauer (Min)</label>
+      <input type="number" value="90" />
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <label>Preis Drop-In</label>
+      <input type="number" value="25" step="0.01" />
+    </div>
+    <div class="field">
+      <label>Wer unterrichtet?</label>
+      <select>
+        <option>Mira Hauser</option>
+        <option>Felix Pranke</option>
+        <option>Tara Almasy</option>
+        <option>Johannes Berg</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Wann?</label>
+    <input type="text" placeholder="z.B. Mi + Fr 18:30" value="Mi + Fr 18:30" />
+    <small style="color: var(--ink-mute); margin-top: 4px;">Sprachlich okay — wir verstehen das.</small>
+  </div>
+
+  <div class="field">
+    <label>Wetter-abhängig?</label>
+    <div class="pill-group">
+      <label class="pill"><input type="radio" name="weather" checked /> nein</label>
+      <label class="pill"><input type="radio" name="weather" /> ja</label>
+    </div>
+  </div>
+
+  <div class="sentence-block">
+    <strong>Vinyasa Power</strong> mit <strong>Mira</strong>, <strong>Mi + Fr 18:30</strong>, max <strong>16 Plätze</strong>, fortgeschritten. Klingt das passend?
+  </div>
+
+  <div class="actions">
+    <button class="primary">Passt — Sessions erzeugen</button>
+    <button class="secondary">Erst überlegen</button>
+  </div>
+</div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: ANMELDUNG -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-anmeldung">
+
+<div class="foto-flow">
+  <div class="icon">📷</div>
+  <div class="text">
+    <h3>Foto reicht.</h3>
+    <p>Lade einen ausgefüllten Anmeldebogen — wir lesen den Rest.</p>
+  </div>
+  <button>Foto wählen</button>
+</div>
+
+<div class="card">
+  <h2>Anmeldung</h2>
+  <p class="lede">Wer kommt? Wofür? Was fehlt?</p>
+
+  <div class="field">
+    <label>Wer ist das?</label>
+    <input type="text" value="Lukas Weiss" />
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <label>Geburtstag</label>
+      <input type="date" value="2014-02-12" />
+    </div>
+    <div class="field">
+      <label>Sprache</label>
+      <select>
+        <option selected>Deutsch</option>
+        <option>English</option>
+        <option>Niederländisch</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sentence-block conf-mid">
+    Lukas ist <strong>12 Jahre</strong> — Eltern-Einverständnis brauchen wir.
+  </div>
+
+  <div class="field">
+    <label>Wofür?</label>
+    <select>
+      <option selected>Kinder-Yoga 6–10, Sa 10:00</option>
+      <option>Probestunde</option>
+      <option>Workshop Atem & Meditation</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Welches Paket?</label>
+    <select>
+      <option selected>Kinder-Yoga 8er-Block (96 €)</option>
+      <option>Drop-In (12 €)</option>
+    </select>
+  </div>
+
+  <!-- CONSENT-BLOCK — Pflicht bei Minderjährigen -->
+  <div class="consent-block">
+    <h3>Einverständnisse Erziehungsberechtigte</h3>
+
+    <div class="field">
+      <label>Wer entscheidet für Lukas?</label>
+      <input type="text" value="Sandra Weiss" />
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Telefon</label>
+        <input type="tel" value="+43 664 778 1122" />
+      </div>
+      <div class="field">
+        <label>E-Mail</label>
+        <input type="email" value="s.weiss@gmx.at" />
+      </div>
+    </div>
+
+    <div class="consent-row">
+      <input type="checkbox" checked />
+      <span>Kursteilnahme</span>
+      <span class="consent-status ok">erteilt</span>
+    </div>
+    <div class="consent-row">
+      <input type="checkbox" checked />
+      <span>Foto / Video für Studio-Instagram</span>
+      <span class="consent-status ok">erteilt</span>
+    </div>
+    <div class="consent-row">
+      <input type="checkbox" />
+      <span>Datenweitergabe an Dritte</span>
+      <span class="consent-status miss">nicht erteilt</span>
+    </div>
+
+    <div class="sentence-block conf-high" style="margin-top: 8px;">
+      Sandra hat <strong>Kursteilnahme</strong> und <strong>Foto-Einverständnis</strong> erteilt. Datenweitergabe nicht — passt.
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Beschwerden / Allergien / Besonderheiten?</label>
+    <textarea rows="2" placeholder="Was sollte die Lehrerin wissen?"></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="primary">Anmelden — alles passt</button>
+    <button class="secondary">Erst nachfragen</button>
+  </div>
+</div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: WETTER (für Surf) -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-wetter">
+
+<div class="card">
+  <h2>Wetter entscheiden</h2>
+  <p class="lede">Du entscheidest. SHIKSHA macht den Vorschlag.</p>
+
+  <div class="sentence-block conf-mid">
+    <strong>Taxikurs Mittag</strong> morgen 14 Uhr — Wind weht zu stark. Sicherheit geht vor.
+  </div>
+
+  <div class="weather-grid">
+    <div class="weather-stat over">
+      <div class="v">38</div>
+      <div class="l">Wind kn</div>
+    </div>
+    <div class="weather-stat">
+      <div class="v">NW</div>
+      <div class="l">Richtung</div>
+    </div>
+    <div class="weather-stat over">
+      <div class="v">1.6</div>
+      <div class="l">Welle m</div>
+    </div>
+    <div class="weather-stat">
+      <div class="v">↑</div>
+      <div class="l">Tide</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Was passt für dich?</label>
+    <div class="pill-group">
+      <label class="pill"><input type="radio" name="dec" /> trotzdem laufen</label>
+      <label class="pill"><input type="radio" name="dec" checked /> auf Mi 14:00 schieben</label>
+      <label class="pill"><input type="radio" name="dec" /> ganz absagen</label>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Plan B?</label>
+    <textarea rows="2">Theorie-Block im Lager Westerland — Boards-Wachs-Workshop + Surf-Etiquette</textarea>
+  </div>
+
+  <div class="sentence-block">
+    <strong>3 Schüler</strong> sind betroffen: Charlotte, Marc, Laura. Soll ich ihnen jetzt einen Vorschlag schicken?
+  </div>
+
+  <div class="actions">
+    <button class="alert">Vorschlag schicken</button>
+    <button class="secondary">Erst noch warten</button>
+  </div>
+</div>
+
+</div>
+
+<footer class="bot">
+  SHIKSHA · SCHULE.EDITION V1 · Mockup im Workspace · 25.04.2026 · review_required = true · alle Aktionen sind Vorschläge
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    const target = t.dataset.panel;
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + target).classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SHIKSHA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #0f0e0c;
+    --paper:  #f5f2ed;
+    --warm:   #e8e2d9;
+    --accent: #c8873a;
+    --muted:  #8a8278;
+    --radius: 20px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ── Screens ── */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px 40px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease, transform .35s ease;
+    transform: translateY(16px);
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+
+  /* ── Screen 1: START ── */
+  #s-start .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 13px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: auto;
+    padding-top: 16px;
+    align-self: flex-start;
+  }
+
+  #s-start .headline {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 9vw, 52px);
+    line-height: 1.15;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  #s-start .headline em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  #s-start .sub {
+    font-size: 15px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 48px;
+    line-height: 1.5;
+  }
+
+  #s-start .cta-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: auto;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    width: 100%;
+    max-width: 320px;
+    padding: 20px 28px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: .01em;
+    cursor: pointer;
+    transition: transform .15s ease, background .15s ease;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-primary:active { transform: scale(.97); background: #2a2820; }
+
+  .btn-secondary {
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 4px 8px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Screen 2: PREVIEW ── */
+  #s-preview .preview-wrap {
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 3/4;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--warm);
+    position: relative;
+    box-shadow: 0 8px 32px rgba(15,14,12,.12);
+    margin-bottom: 28px;
+  }
+  #s-preview .preview-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #s-preview .badge {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15,14,12,.72);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    padding: 7px 18px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+  #s-preview .consent-text {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+    max-width: 300px;
+    margin-bottom: 24px;
+  }
+  #s-preview .consent-text strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  #s-preview .legal-note {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 12px;
+    opacity: .7;
+    max-width: 280px;
+  }
+  #s-preview .retake-btn {
+    font-size: 13px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 4px;
+    padding: 8px;
+    -webkit-tap-highlight-color: transparent;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ── Screen 3: LOADING ── */
+  #s-loading .loader-ring {
+    width: 56px; height: 56px;
+    border: 2.5px solid var(--warm);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin-bottom: 28px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #s-loading .loading-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  #s-loading .loading-sub {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── Screen 4: RESULT ── */
+  #s-result { justify-content: flex-start; overflow-y: auto; padding-top: 56px; }
+
+  #s-result .result-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+  }
+  #s-result .result-icon svg { width: 24px; height: 24px; }
+  #s-result .result-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  #s-result .result-type {
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  
+.summary-sentence {
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+}
+.summary-text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #ffffff;
+  font-style: italic;
+  width: 100%;
+}
+.field-list {
+    width: 100%;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--warm);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .field-row {
+    background: var(--paper);
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .field-key {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    flex-shrink: 0;
+    padding-top: 1px;
+    min-width: 90px;
+  }
+  .field-val {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: right;
+    line-height: 1.4;
+  }
+  .field-val.warn { color: #c0392b; }
+
+  .entity-card {
+    width: 100%;
+    max-width: 340px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .entity-card .ec-label {
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    opacity: .5;
+    margin-bottom: 6px;
+  }
+  .entity-card .ec-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .entity-card .ec-conf {
+    font-size: 12px;
+    opacity: .5;
+  }
+
+  .review-banner {
+    width: 100%;
+    max-width: 340px;
+    background: #fff8ed;
+    border: 1px solid #f0d9b0;
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #7a5a20;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .btn-outline {
+    width: 100%;
+    max-width: 320px;
+    padding: 16px 28px;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--warm);
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color .15s;
+    -webkit-tap-highlight-color: transparent;
+    margin-bottom: 48px;
+  }
+  .btn-outline:active { border-color: var(--ink); }
+
+  /* ── hidden input ── */
+  #camera-input { display: none; }
+</style>
+</head>
+<body>
+
+<!-- INPUT (hidden) -->
+<input type="file" id="camera-input" accept="image/*" capture="environment">
+
+<!-- SCREEN 1: START -->
+<div class="screen active" id="s-start">
+  <p class="logo">SHIKSHA</p>
+
+  <h1 class="headline">Ein Foto<br><em>genügt.</em></h1>
+  <p class="sub">Rechnung, Mahnung, Vertrag —<br>SHIKSHA erkennt und ordnet ein.</p>
+
+  <div class="cta-group">
+    <button class="btn-primary" id="btn-camera">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+      Foto machen
+    </button>
+    <button class="btn-secondary" id="btn-gallery">oder bestehendes Bild wählen</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: PREVIEW -->
+<div class="screen" id="s-preview">
+  <div class="preview-wrap">
+    <img id="preview-img" src="" alt="Dokument Vorschau">
+    <div class="badge">Passt.</div>
+  </div>
+
+  <p class="consent-text">
+    <strong>SHIKSHA schaut sich Dein Dokument an<br>und ordnet es ein.</strong><br>
+    Deine Daten bleiben in Deiner SHIKSHA.
+  </p>
+
+  <button class="btn-primary" id="btn-send">
+    Senden &amp; verstehen lassen
+  </button>
+  <p class="legal-note">Mit dem Senden stimmst Du der Verarbeitung Deiner Daten zu.</p>
+  <button class="retake-btn" id="btn-retake">Anderes Foto wählen</button>
+</div>
+
+<!-- SCREEN 3: LOADING -->
+<div class="screen" id="s-loading">
+  <div class="loader-ring"></div>
+  <p class="loading-label">SHIKSHA liest.</p>
+  <p class="loading-sub">Einen Moment.</p>
+</div>
+
+<!-- SCREEN 4: RESULT -->
+<div class="screen" id="s-result">
+  <div class="result-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <h2 class="result-title" id="r-title">Erkannt.</h2>
+  <p class="result-type" id="r-type">—</p>
+
+  <div class="field-list" id="r-fields"></div>
+
+  <div class="entity-card" id="r-entity" style="display:none">
+    <div class="ec-label">Zugeordnet zu</div>
+    <div class="ec-name" id="r-entity-name">—</div>
+    <div class="ec-conf" id="r-entity-conf"></div>
+  </div>
+
+  <div class="review-banner" id="r-review" style="display:none">
+    <span>⚠️</span>
+    <span id="r-review-text">Bitte prüfe diese Felder manuell.</span>
+  </div>
+
+  <button class="btn-outline" id="btn-again">Weiteres Dokument</button>
+</div>
+
+<script>
+const SERVER = 'https://shiksha.tun.zone';
+
+// ── helpers ──────────────────────────────────────────
+const $ = id => document.getElementById(id);
+let currentFile = null;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ── camera / gallery ─────────────────────────────────
+$('btn-camera').onclick = () => {
+  const inp = $('camera-input');
+  inp.removeAttribute('capture');
+  inp.setAttribute('capture', 'environment');
+  inp.click();
+};
+
+$('btn-gallery').onclick = () => {
+  const inp = $('camera-input');
+  inp.removeAttribute('capture');
+  inp.click();
+};
+
+$('btn-retake').onclick = () => {
+  $('camera-input').click();
+};
+
+$('camera-input').onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  currentFile = file;
+  const url = URL.createObjectURL(file);
+  $('preview-img').src = url;
+  show('s-preview');
+  // reset input so same file can be re-selected
+  e.target.value = '';
+};
+
+// ── send ─────────────────────────────────────────────
+$('btn-send').onclick = async () => {
+  if (!currentFile) return;
+  show('s-loading');
+
+  const form = new FormData();
+  form.append('file', currentFile, currentFile.name || 'foto.jpg');
+  form.append('edition', 'business.shiksha');
+  form.append('language', 'de');
+
+  try {
+    const res = await fetch(`${SERVER}/documents/photo`, {
+      method: 'POST',
+      body: form
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    renderResult(data);
+    show('s-result');
+
+  } catch (err) {
+    alert('Fehler: ' + err.message);
+    show('s-preview');
+  }
+};
+
+$('btn-again').onclick = () => {
+  currentFile = null;
+  $('r-fields').innerHTML = '';
+  $('r-entity').style.display = 'none';
+  $('r-review').style.display = 'none';
+  show('s-start');
+};
+
+// ── render result ─────────────────────────────────────
+const TYPE_LABELS = {
+  invoice:        'Rechnung',
+  dunning:        'Mahnung',
+  penalty_notice: 'Strafverfügung',
+  offer:          'Angebot',
+  contract:       'Vertrag',
+  note:           'Notiz',
+  unknown:        'Unbekannt',
+};
+
+const FIELD_LABELS = {
+  customer_name:              'Empfänger',
+  invoice_number:             'Rechnungs-Nr.',
+  invoice_date:               'Datum',
+  document_date:              'Datum',
+  due_date:                   'Fällig am',
+  amount_total:               'Gesamtbetrag',
+  amount_due:                 'Offener Betrag',
+  amount_tax:                 'MwSt.',
+  currency:                   'Währung',
+  iban:                       'IBAN',
+  reminder_level:             'Mahnstufe',
+  vehicle_plate:              'Kennzeichen',
+  authority_name:             'Behörde',
+  case_number:                'Aktenzeichen',
+  incident_date:              'Tatdatum',
+  referenced_invoice_number:  'Urspr. Rechnung',
+  reference_number:           'Referenz',
+};
+
+// Felder die im UI angezeigt werden — in dieser Reihenfolge
+const DISPLAY_FIELDS = [
+  'amount_total', 'amount_due',
+  'due_date', 'invoice_date', 'document_date',
+  'invoice_number', 'case_number', 'reference_number', 'referenced_invoice_number',
+  'iban',
+  'vehicle_plate', 'authority_name',
+];
+
+// Confidence → Sprache
+function entityConfidenceText(confidence) {
+  if (confidence >= 0.75) return 'Soll ich das zuordnen?';
+  if (confidence >= 0.45) return 'Vermutlich richtig. Stimmt das?';
+  return 'Für wen ist das?';
+}
+
+// IBAN confidence_note → verständlicher Hinweis
+function ibanHint(note) {
+  if (!note) return null;
+  if (note.includes('truncated') || note.includes('manual check')) {
+    return 'IBAN unvollständig — bitte manuell prüfen.';
+  }
+  if (note.includes('validation failed')) {
+    return 'IBAN konnte nicht geprüft werden.';
+  }
+  return null;
+}
+
+function renderResult(data) {
+  const typeKey = data.detected_document_type || 'unknown';
+  const summary = data.summary || {};
+
+  $('r-title').textContent = 'Erkannt.';
+  $('r-type').textContent = TYPE_LABELS[typeKey] || typeKey;
+
+  const container = $('r-fields');
+  container.innerHTML = '';
+
+  // high_level_summary als Hauptsatz
+  if (summary.high_level_summary) {
+    const row = document.createElement('div');
+    row.className = 'field-row summary-sentence';
+    row.innerHTML = `<span class="field-val summary-text">${summary.high_level_summary}</span>`;
+    container.appendChild(row);
+  }
+
+  // Nur definierte Felder, in festgelegter Reihenfolge, confidence >= 0.40
+  const fieldMap = {};
+  (data.extracted_fields || []).forEach(f => { fieldMap[f.field_key] = f; });
+
+  let ibanWarning = null;
+
+  DISPLAY_FIELDS.forEach(key => {
+    const f = fieldMap[key];
+    if (!f || f.confidence < 0.40) return;
+
+    // IBAN: technische Note in verständlichen Hinweis übersetzen
+    if (key === 'iban') {
+      const hint = ibanHint(f.confidence_note);
+      if (hint) ibanWarning = hint;
+      // IBAN nur zeigen wenn confidence >= 0.80 (valide)
+      if (f.confidence < 0.80) return;
+    }
+
+    const label = FIELD_LABELS[key] || key;
+    const row = document.createElement('div');
+    row.className = 'field-row';
+    row.innerHTML = `
+      <span class="field-key">${label}</span>
+      <span class="field-val">${f.field_value}</span>
+    `;
+    container.appendChild(row);
+  });
+
+  // Entity suggestion — Sprache statt Prozent
+  const s = data.entity_suggestion;
+  if (s && s.suggested_entity_name && s.confidence >= 0.40) {
+    $('r-entity').style.display = 'block';
+    $('r-entity-name').textContent = s.suggested_entity_name;
+    $('r-entity-conf').textContent = entityConfidenceText(s.confidence);
+  } else if (s && (!s.suggested_entity_id || s.confidence < 0.40)) {
+    $('r-entity').style.display = 'block';
+    $('r-entity-name').textContent = '—';
+    $('r-entity-conf').textContent = 'Für wen ist das?';
+  }
+
+  // Review banner — nur IBAN-Warnung oder review_required ohne technischen Text
+  const showReview = ibanWarning || (s && s.review_required && typeKey === 'unknown');
+  if (showReview) {
+    $('r-review').style.display = 'flex';
+    $('r-review-text').textContent = ibanWarning || 'Bitte kurz prüfen.';
+  } else {
+    $('r-review').style.display = 'none';
+  }
+}
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SHIKSHA · Wochen-Fokus</title>
+<style>
+:root {
+  --pink:#ff4d8d; --purple:#a855f7; --yellow:#ffd93d;
+  --bg:#fafaf6; --card:#fff; --line:#e8e6e0;
+  --ink:#1a1a1f; --ink-2:#4a4a55; --ink-3:#8a8a95;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; padding:24px;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:linear-gradient(135deg,#fafaf6 0%,#fef9f3 100%);
+  color:var(--ink); min-height:100vh;
+}
+.wrap { max-width:680px; margin:0 auto; }
+header { display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+.logo {
+  width:44px; height:44px; border-radius:14px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:22px; box-shadow:0 4px 16px rgba(255,77,141,0.18);
+}
+h1 { margin:0; font-size:22px; font-weight:700; letter-spacing:-0.02em; }
+.sub { color:var(--ink-3); font-size:13px; }
+
+.card {
+  background:var(--card); border-radius:20px; padding:24px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+  margin-bottom:14px;
+}
+.field { margin-bottom:16px; }
+.field label {
+  display:block; font-size:11px; font-weight:600;
+  color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em;
+  margin-bottom:6px;
+}
+.field input, .field textarea, .field select {
+  width:100%; padding:12px 14px;
+  border:1px solid var(--line); border-radius:12px;
+  font-size:15px; font-family:inherit; background:#fafaf6;
+}
+.field textarea { min-height:80px; resize:vertical; }
+.field input:focus, .field textarea:focus {
+  outline:none; border-color:var(--purple);
+  background:#fff; box-shadow:0 0 0 3px rgba(168,85,247,0.1);
+}
+
+.preview {
+  background:linear-gradient(135deg,#fffdf6,#fff5e8);
+  border-left:3px solid var(--pink);
+  padding:14px 16px; border-radius:12px; margin-top:8px;
+}
+.preview-head {
+  font-size:10px; font-weight:600; color:var(--ink-3);
+  text-transform:uppercase; letter-spacing:0.06em;
+}
+.preview-title { font-size:15px; font-weight:600; margin-top:2px; }
+.preview-meta { font-size:11px; color:var(--ink-3); margin-top:4px; }
+
+.btn-row { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+.btn {
+  padding:10px 18px; border:0; border-radius:12px;
+  font-weight:600; font-size:14px; cursor:pointer;
+  font-family:inherit;
+}
+.btn.primary {
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:#fff;
+  box-shadow:0 4px 12px rgba(255,77,141,0.25);
+}
+.btn.primary:hover { transform:translateY(-1px); }
+.btn.ghost { background:transparent; color:var(--ink-2); }
+.btn.ghost:hover { background:var(--line); }
+
+.examples {
+  background:var(--bg); padding:14px 16px; border-radius:12px;
+  margin-top:12px; font-size:13px; color:var(--ink-2);
+}
+.examples-head { font-weight:600; color:var(--ink); margin-bottom:6px; font-size:12px; }
+.example-pill {
+  display:inline-block; padding:5px 11px; border-radius:8px;
+  background:#fff; border:1px solid var(--line);
+  font-size:12px; cursor:pointer; margin:2px;
+  transition:all .12s;
+}
+.example-pill:hover {
+  border-color:var(--purple); transform:translateY(-1px);
+}
+
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  background:var(--ink); color:#fff;
+  padding:12px 20px; border-radius:12px; font-size:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);
+  opacity:0; transition:opacity .2s, transform .2s;
+  pointer-events:none;
+}
+.toast.show { opacity:1; transform:translate(-50%,-4px); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <div class="logo">🎯</div>
+  <div>
+    <h1>Wochen-Fokus</h1>
+    <p class="sub" id="week-info">…</p>
+  </div>
+</header>
+
+<div class="card">
+  <div class="field">
+    <label>Wochenstart</label>
+    <input type="date" id="week-start">
+  </div>
+  <div class="field">
+    <label>Fokus dieser Woche</label>
+    <input type="text" id="theme" placeholder="z.B. Eingewöhnung der neuen Familien">
+  </div>
+  <div class="field">
+    <label>Notiz (optional)</label>
+    <textarea id="note" placeholder="Was Du dem Team mitgeben möchtest."></textarea>
+  </div>
+  <div class="field">
+    <label>Gesetzt von</label>
+    <input type="text" id="set-by" placeholder="Dein Name" value="Heidi">
+  </div>
+
+  <div class="examples">
+    <div class="examples-head">Beispiel-Themen — anklicken zum Übernehmen</div>
+    <span class="example-pill">Eingewöhnung der neuen Familien</span>
+    <span class="example-pill">Sprache &amp; Geschichten erzählen</span>
+    <span class="example-pill">Gemeinsames Mittagessen</span>
+    <span class="example-pill">Bewegung im Freien</span>
+    <span class="example-pill">Sommerfest-Vorbereitung</span>
+    <span class="example-pill">Konflikte als Lernchance</span>
+    <span class="example-pill">Beobachtung &amp; Dokumentation</span>
+    <span class="example-pill">Eltern-Kommunikation vertiefen</span>
+    <span class="example-pill">Naturmaterialien</span>
+    <span class="example-pill">Ruhe &amp; Stille üben</span>
+  </div>
+
+  <div class="preview" id="preview" style="display:none;">
+    <div class="preview-head">Vorschau · so erscheint's morgen früh</div>
+    <div class="preview-title" id="prev-title"></div>
+    <div class="preview-meta" id="prev-meta"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn ghost" id="btn-cancel">Verwerfen</button>
+    <button class="btn primary" id="btn-save">Speichern</button>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "/kita/dashboard/weekly-theme";
+const $ = id => document.getElementById(id);
+
+function thisMonday() {
+  const d = new Date();
+  const day = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - day);
+  d.setHours(0,0,0,0);
+  return d.toISOString().slice(0,10);
+}
+
+function showToast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function updatePreview() {
+  const t = $("theme").value.trim();
+  if (!t) { $("preview").style.display = "none"; return; }
+  $("preview").style.display = "";
+  $("prev-title").textContent = t;
+  const setBy = $("set-by").value || "Leitung";
+  const ws = new Date($("week-start").value || thisMonday());
+  $("prev-meta").textContent = `gesetzt von ${setBy} · Woche ab ${ws.toLocaleDateString("de-DE")}`;
+}
+
+document.querySelectorAll(".example-pill").forEach(p => {
+  p.addEventListener("click", () => {
+    $("theme").value = p.textContent;
+    updatePreview();
+    $("theme").focus();
+  });
+});
+
+["theme","set-by","week-start"].forEach(id => $(id).addEventListener("input", updatePreview));
+
+$("btn-save").addEventListener("click", async () => {
+  const theme = $("theme").value.trim();
+  if (!theme) { showToast("Bitte ein Thema eintragen"); return; }
+  try {
+    const r = await fetch(API, {
+      method:"PUT",
+      headers:{"Content-Type":"application/json","X-Org-Slug":"kita_pilot"},
+      body: JSON.stringify({
+        week_start: $("week-start").value || thisMonday(),
+        theme,
+        note: $("note").value || null,
+        set_by: $("set-by").value || "Leitung",
+      }),
+    });
+    if (!r.ok) throw new Error("HTTP "+r.status);
+    showToast("Wochen-Fokus gespeichert ✓");
+  } catch (e) { showToast("Fehler: " + e.message); }
+});
+
+$("btn-cancel").addEventListener("click", () => {
+  $("theme").value = ""; $("note").value = "";
+  updatePreview();
+});
+
+// Initial
+(async () => {
+  $("week-start").value = thisMonday();
+  $("week-info").textContent = "Woche ab " + new Date(thisMonday()).toLocaleDateString("de-DE", {day:"2-digit",month:"long",year:"numeric"});
+  // Bestehenden Wert laden
+  try {
+    const r = await fetch(`${API}?week_start=${thisMonday()}`, {headers:{"X-Org-Slug":"kita_pilot"}});
+    const d = await r.json();
+    if (d.theme) {
+      $("theme").value = d.theme;
+      $("note").value = d.note || "";
+      $("set-by").value = d.set_by || "";
+      updatePreview();
+    }
+  } catch {}
+})();
+</script>
+</body>
+</html>

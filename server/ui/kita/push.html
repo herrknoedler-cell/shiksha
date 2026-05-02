@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SHIKSHA · Push senden</title>
+<style>
+:root {
+  --pink:#ff4d8d; --turquoise:#00d4d4; --purple:#a855f7;
+  --bg:#fff8f0; --card:#fff; --line:#f0e8dc;
+  --ink:#2a2530; --ink-mute:#9a8e9e;
+  --shadow:0 4px 16px rgba(255,77,141,0.10);
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; padding:18px;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:linear-gradient(135deg,#fff8f0,#ffe4f0,#e4f8ff);
+  background-attachment:fixed; min-height:100vh;
+  color:var(--ink); line-height:1.5;
+}
+.wrap { max-width:720px; margin:0 auto; }
+header { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+.logo { width:44px; height:44px; border-radius:14px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:#fff; font-size:22px;
+  display:flex; align-items:center; justify-content:center; }
+h1 { margin:0; font-size:20px;
+  background:linear-gradient(120deg,var(--pink),var(--purple));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; }
+.card { background:var(--card); border-radius:18px; padding:18px;
+  box-shadow:var(--shadow); margin-bottom:14px; }
+.field { margin-bottom:12px; }
+.field label { display:block; font-size:12px; font-weight:600;
+  color:var(--ink-mute); text-transform:uppercase; letter-spacing:0.04em;
+  margin-bottom:4px; }
+.field input, .field select, .field textarea {
+  width:100%; padding:12px; border:1px solid var(--line);
+  border-radius:10px; font-size:15px; font-family:inherit; background:var(--bg);
+}
+.field textarea { min-height:100px; resize:vertical; }
+.row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.btn { padding:12px 18px; border:0; border-radius:12px;
+  font-weight:600; font-size:14px; cursor:pointer; }
+.btn.primary { background:linear-gradient(135deg,var(--pink),var(--purple)); color:#fff; }
+.btn.ghost { background:transparent; color:var(--ink); border:1px solid var(--line); }
+.result { padding:12px; border-radius:10px; font-size:14px; margin-top:10px; }
+.result.ok { background:#e8f1ec; color:#2d7a5f; }
+.result.err { background:#fee; color:var(--pink); }
+.log-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px; }
+.log-row:last-child { border:0; }
+.log-meta { color:var(--ink-mute); font-size:11px; }
+.preset { display:inline-block; padding:6px 10px; background:#f9f4ec;
+  border:0; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600;
+  margin:0 4px 4px 0; color:var(--ink); }
+.preset:hover { background:var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">📣</div>
+  <div><h1>Push senden</h1>
+    <p style="margin:0; font-size:12px; color:var(--ink-mute);">Benachrichtigung an Pädagog:innen, Eltern oder alle</p></div>
+</header>
+
+<div class="card">
+  <div style="margin-bottom:10px; font-size:13px; color:var(--ink-mute);">Schnellauswahl:</div>
+  <button class="preset" data-preset="reminder">⏰ Termin-Erinnerung</button>
+  <button class="preset" data-preset="closing">🚪 Schließtag-Hinweis</button>
+  <button class="preset" data-preset="event">🎉 Event-Ankündigung</button>
+  <button class="preset" data-preset="urgent">⚠ Dringende Mitteilung</button>
+</div>
+
+<div class="card">
+  <div class="field">
+    <label>Titel</label>
+    <input id="f_title" placeholder="z.B. Sommerfest am Freitag">
+  </div>
+  <div class="field">
+    <label>Text</label>
+    <textarea id="f_body" placeholder="Liebe Eltern, am Freitag ab 15 Uhr feiern wir gemeinsam …"></textarea>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label>Empfänger</label>
+      <select id="f_audience">
+        <option value="paedagogin">👨‍🏫 Pädagog:innen</option>
+        <option value="eltern">👶 Eltern</option>
+        <option value="traegerin">📋 Trägerin</option>
+        <option value="all">📣 Alle</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Click-Ziel-URL (optional)</label>
+      <input id="f_url" value="/accounting/ui/paedagogen/app">
+    </div>
+  </div>
+  <div style="display:flex; gap:8px; justify-content:flex-end;">
+    <button class="btn ghost" id="btn-test">Test an mich</button>
+    <button class="btn primary" id="btn-send">Senden</button>
+  </div>
+  <div id="result"></div>
+</div>
+
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <strong>Letzte Sendungen</strong>
+    <button class="btn ghost" id="btn-refresh-log" style="padding:6px 12px; font-size:12px;">↻</button>
+  </div>
+  <div id="log"></div>
+</div>
+
+</div>
+
+<script>
+const API = "/kita/push";
+const $ = id => document.getElementById(id);
+
+const PRESETS = {
+  reminder: { title: "⏰ Erinnerung: Termin morgen", body: "" },
+  closing: { title: "🚪 KITA geschlossen", body: "Bitte beachten: Am … bleibt die KITA geschlossen." },
+  event: { title: "🎉 Sommerfest am Freitag", body: "Wir freuen uns auf Sie!" },
+  urgent: { title: "⚠ Dringende Mitteilung", body: "" },
+};
+
+document.querySelectorAll(".preset").forEach(b => {
+  b.addEventListener("click", () => {
+    const p = PRESETS[b.dataset.preset];
+    $("f_title").value = p.title;
+    $("f_body").value = p.body;
+  });
+});
+
+async function send(audience) {
+  const payload = {
+    title: $("f_title").value.trim(),
+    body: $("f_body").value.trim(),
+    url: $("f_url").value.trim() || "/",
+    audience: audience || $("f_audience").value,
+    sender: "traegerin",
+  };
+  if (!payload.title) {
+    showResult(false, "Titel fehlt");
+    return;
+  }
+  showResult(null, "Sende …");
+  try {
+    const r = await fetch(API + "/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status + ": " + await r.text());
+    const j = await r.json();
+    showResult(true, `${j.sent} gesendet, ${j.failed} fehlgeschlagen (von ${j.total} Empfänger:innen)`);
+    loadLog();
+  } catch (e) {
+    showResult(false, "Fehler: " + e.message);
+  }
+}
+
+$("btn-send").addEventListener("click", () => send());
+$("btn-test").addEventListener("click", () => send("traegerin"));
+$("btn-refresh-log").addEventListener("click", loadLog);
+
+function showResult(ok, msg) {
+  const cls = ok === null ? "" : (ok ? "ok" : "err");
+  $("result").innerHTML = `<div class="result ${cls}">${msg}</div>`;
+}
+
+async function loadLog() {
+  try {
+    const r = await fetch(API + "/log?limit=20");
+    const j = await r.json();
+    if (!j.log.length) {
+      $("log").innerHTML = `<div style="color:var(--ink-mute); padding:14px 0; font-size:13px;">Noch keine Sendungen.</div>`;
+      return;
+    }
+    $("log").innerHTML = j.log.map(row => `
+      <div class="log-row">
+        <div>
+          <div><strong>${escapeHtml(row.title)}</strong></div>
+          <div class="log-meta">${escapeHtml(row.audience_filter || 'all')} · ${new Date(row.sent_at).toLocaleString("de-DE")}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:#2d7a5f;">${row.sent_count} ✓</div>
+          ${row.failed_count ? `<div style="color:var(--pink);">${row.failed_count} ✗</div>` : ''}
+        </div>
+      </div>
+    `).join("");
+  } catch (e) {
+    $("log").innerHTML = `<div style="color:var(--pink);">Log konnte nicht geladen werden.</div>`;
+  }
+}
+
+function escapeHtml(s) {
+  return (s == null ? "" : String(s)).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+loadLog();
+</script>
+</body>
+</html>

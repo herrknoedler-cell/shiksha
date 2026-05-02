@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#ff4d8d" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="KITA-Team" />
+<link rel="manifest" href="/accounting/ui/paedagogen/manifest.json" />
+<link rel="apple-touch-icon" href="/accounting/ui/kita/app-icon.svg" />
+<title>SHIKSHA · KITA-Team</title>
+<style>
+:root {
+  --holi-pink:#ff4d8d; --holi-turquoise:#00d4d4; --holi-yellow:#ffd93d;
+  --holi-purple:#a855f7; --holi-orange:#ff8c42; --holi-green:#6dd47e;
+  --bg:#fff8f0; --card:#fff; --line:#f0e8dc;
+  --ink:#2a2530; --ink-soft:#5a5060; --ink-mute:#9a8e9e;
+  --shadow:0 4px 16px rgba(255,77,141,0.10);
+}
+* { box-sizing:border-box; }
+html, body { margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:linear-gradient(135deg,#fff8f0 0%,#ffe4f0 50%,#e4f8ff 100%);
+  background-attachment:fixed;
+  color:var(--ink); line-height:1.5; min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:90px;
+}
+.app {
+  max-width:540px; margin:0 auto;
+  padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));
+  width:100%;
+}
+
+header.top {
+  display:flex; align-items:center; gap:12px; padding:14px 8px;
+}
+.logo {
+  width:44px; height:44px;
+  background:linear-gradient(135deg,var(--holi-pink) 0%,var(--holi-purple) 100%);
+  border-radius:14px; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:22px; box-shadow:var(--shadow);
+}
+.title h1 { font-size:18px; font-weight:700; margin:0; }
+.title p { font-size:12px; color:var(--ink-mute); margin:0; }
+
+.tab-bar {
+  position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
+  display:flex; gap:4px;
+  background:rgba(42,37,48,0.95);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  padding:6px; border-radius:22px; box-shadow:0 6px 24px rgba(0,0,0,0.2);
+  z-index:100;
+}
+.tab-btn {
+  background:transparent; border:0; padding:10px 14px; border-radius:16px;
+  color:rgba(255,255,255,0.7); cursor:pointer; font-size:11px; font-weight:600;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  min-width:56px; transition:background .2s,color .2s;
+}
+.tab-btn .ico { font-size:18px; line-height:1; }
+.tab-btn.active {
+  background:linear-gradient(135deg,var(--holi-pink),var(--holi-purple));
+  color:#fff;
+}
+
+.panel { display:none; }
+.panel.active { display:block; animation:fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+.section-card {
+  background:var(--card); border-radius:18px;
+  padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow);
+}
+.section-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:10px; padding-bottom:8px; border-bottom:2px solid var(--line);
+}
+.section-name {
+  font-size:14px; font-weight:700;
+  display:flex; align-items:center; gap:8px;
+}
+.group-pill {
+  display:inline-block; width:14px; height:14px; border-radius:4px;
+}
+.section-counts {
+  display:flex; gap:6px; font-size:11px; color:var(--ink-mute);
+}
+.count-chip {
+  padding:2px 8px; border-radius:6px; background:#f9f4ec;
+  font-weight:600;
+}
+.count-chip.alert { background:#fee; color:var(--holi-pink); }
+.count-chip.ok { background:#e8f1ec; color:#2d7a5f; }
+
+.merge-banner {
+  background:linear-gradient(135deg,#fff7d8,#ffe6f0);
+  padding:8px 12px; border-radius:10px; margin-bottom:8px;
+  font-size:11px; color:var(--holi-orange); font-weight:600;
+}
+
+.avatar-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(72px, 1fr)); gap:10px;
+  padding:6px 0;
+}
+.avatar-card {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; padding:6px 4px; border-radius:10px;
+  transition:background .15s;
+}
+.avatar-card:active { background:#f9f4ec; }
+.avatar-card .name {
+  font-size:11px; font-weight:600;
+  text-align:center; line-height:1.2;
+  max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.legend {
+  display:flex; gap:12px; flex-wrap:wrap;
+  background:var(--card); padding:12px; border-radius:14px;
+  font-size:11px; box-shadow:var(--shadow); margin-bottom:14px;
+}
+.legend-item { display:flex; align-items:center; gap:4px; }
+.legend-dot { width:10px; height:10px; border-radius:50%; }
+
+.empty-state { text-align:center; padding:40px 20px; color:var(--ink-mute); font-size:13px; }
+.empty-state .ico { font-size:48px; margin-bottom:10px; opacity:0.5; }
+
+.poll-status {
+  position:fixed; top:14px; right:14px;
+  display:flex; align-items:center; gap:4px;
+  background:rgba(255,255,255,0.9); backdrop-filter:blur(8px);
+  padding:4px 10px; border-radius:14px;
+  font-size:10px; color:var(--ink-mute);
+  z-index:50;
+}
+.poll-dot { width:6px; height:6px; border-radius:50%; background:var(--holi-green); }
+.poll-dot.refreshing { background:var(--holi-yellow); }
+
+/* Drawer für Avatar-Klick */
+.drawer-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.5);
+  display:none; align-items:flex-end; justify-content:center;
+  z-index:200;
+}
+.drawer-overlay.show { display:flex; }
+.drawer {
+  background:var(--card); width:100%; max-width:540px;
+  border-radius:24px 24px 0 0;
+  padding:20px; max-height:80vh; overflow-y:auto;
+}
+
+.btn { padding:12px 18px; border:0; border-radius:14px; font-size:14px; font-weight:600; cursor:pointer; }
+.btn.primary { background:linear-gradient(135deg,var(--holi-pink),var(--holi-purple)); color:#fff; }
+.btn.ghost { background:transparent; color:var(--ink-soft); border:2px solid var(--line); }
+
+.status-button-row {
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-top:10px;
+}
+.status-btn {
+  padding:10px; border:0; border-radius:10px; font-size:12px; font-weight:600;
+  cursor:pointer; transition:transform .1s;
+}
+.status-btn:active { transform:scale(0.95); }
+.status-btn.present { background:#e8f1ec; color:#2d7a5f; }
+.status-btn.sick { background:#fee; color:var(--holi-pink); }
+.status-btn.absent { background:#f0f0ee; color:var(--ink-mute); }
+
+/* =====================================================
+   APPLE-STYLE KALENDER (Plan-Tab)
+   ===================================================== */
+.cal-wrap {
+  background:var(--card); border-radius:18px;
+  padding:18px 14px 8px; margin-bottom:12px; box-shadow:var(--shadow);
+}
+.cal-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 4px 12px;
+}
+.cal-month {
+  font-size:22px; font-weight:700; letter-spacing:-0.02em;
+  color:var(--holi-pink);
+  display:flex; align-items:center; gap:6px;
+}
+.cal-month .yr { color:var(--ink); font-weight:600; }
+.cal-nav { display:flex; align-items:center; gap:4px; }
+.cal-iconbtn {
+  width:36px; height:36px; border:0; border-radius:50%;
+  background:transparent; color:var(--holi-pink);
+  font-size:20px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .15s;
+}
+.cal-iconbtn:active { background:#fee; }
+.cal-today-btn {
+  background:transparent; border:0; color:var(--holi-pink);
+  font-size:14px; font-weight:600; cursor:pointer; padding:6px 10px;
+  border-radius:8px;
+}
+.cal-today-btn:active { background:#fee; }
+
+.cal-weekdays {
+  display:grid; grid-template-columns:repeat(7, 1fr);
+  padding:0 2px 6px;
+  border-bottom:0.5px solid var(--line);
+}
+.cal-weekday {
+  text-align:center; font-size:11px; font-weight:600;
+  color:var(--ink-mute); text-transform:uppercase; letter-spacing:0.05em;
+}
+.cal-weekday.we { color:#c4b8c8; }
+
+.cal-grid {
+  display:grid; grid-template-columns:repeat(7, 1fr);
+  padding:8px 0 4px;
+}
+.cal-day {
+  aspect-ratio:1 / 1.05;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  padding-top:6px; gap:4px;
+  cursor:pointer; border:0; background:transparent;
+  font-family:inherit; position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.cal-day .num {
+  width:30px; height:30px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; font-weight:500; color:var(--ink);
+  letter-spacing:-0.02em;
+  transition:background .15s, color .15s;
+}
+.cal-day.other .num { color:#d8d0d8; }
+.cal-day.we .num { color:#9a8e9e; }
+.cal-day.we.other .num { color:#e0d8e0; }
+.cal-day.today .num {
+  background:var(--holi-pink); color:#fff; font-weight:600;
+}
+.cal-day.selected:not(.today) .num {
+  background:#fee5ee; color:var(--holi-pink); font-weight:600;
+}
+.cal-day:active .num { transform:scale(0.92); }
+.cal-dots {
+  display:flex; gap:3px; height:5px;
+}
+.cal-dots .dot {
+  width:5px; height:5px; border-radius:50%;
+}
+
+/* Event-Liste unter dem Grid */
+.cal-events-card {
+  background:var(--card); border-radius:18px; box-shadow:var(--shadow);
+  padding:14px 4px 6px; margin-bottom:12px;
+}
+.cal-events-head {
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding:0 14px 10px;
+}
+.cal-events-date {
+  font-size:15px; font-weight:700;
+}
+.cal-events-day {
+  font-size:12px; color:var(--ink-mute);
+}
+.cal-events-list { padding:0; }
+.cal-event-row {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 14px; border-top:0.5px solid var(--line);
+  cursor:pointer; transition:background .12s;
+}
+.cal-event-row:active { background:#f9f4ec; }
+.cal-event-bar {
+  width:4px; align-self:stretch; border-radius:3px; min-height:30px;
+}
+.cal-event-time {
+  font-size:13px; font-weight:600; color:var(--ink-soft);
+  min-width:54px; text-align:right; font-variant-numeric:tabular-nums;
+}
+.cal-event-time .ad { color:var(--ink-mute); font-weight:500; font-size:11px; text-transform:uppercase; }
+.cal-event-body { flex:1; min-width:0; }
+.cal-event-title {
+  font-size:15px; font-weight:500; color:var(--ink);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.cal-event-meta {
+  font-size:12px; color:var(--ink-mute);
+  margin-top:1px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.cal-empty {
+  text-align:center; padding:32px 16px;
+  color:var(--ink-mute); font-size:14px;
+}
+.cal-empty .em { font-size:36px; opacity:0.4; margin-bottom:8px; }
+
+.cal-add-btn {
+  background:linear-gradient(135deg,var(--holi-pink),var(--holi-purple));
+  color:#fff; border:0; cursor:pointer;
+  width:32px; height:32px; border-radius:50%;
+  font-size:20px; font-weight:300; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  margin-left:4px; box-shadow:0 2px 6px rgba(255,77,141,0.3);
+}
+.cal-add-btn:active { transform:scale(0.92); }
+</style>
+</head>
+<body>
+
+<div class="poll-status" id="poll-status">
+  <span class="poll-dot" id="poll-dot"></span>
+  <span id="poll-text">live</span>
+</div>
+
+<div class="app">
+
+<header class="top">
+  <div class="logo">👨‍🏫</div>
+  <div class="title">
+    <h1 id="hello-title">Heute</h1>
+    <p id="hello-meta">— lädt …</p>
+  </div>
+</header>
+
+<!-- ANWESEND-Tab -->
+<div class="panel active" id="panel-attendance">
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#ffd93d"></span>Vormittag</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#ff8c42"></span>Mittag</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#a855f7"></span>Ruhe</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#00d4d4"></span>Nachmittag</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#c8e6c0"></span>VBZ</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#d8d4ce"></span>Pause</div>
+  </div>
+  <div id="attendance-sections"></div>
+</div>
+
+<div class="panel" id="panel-children">
+  <div class="empty-state"><div class="ico">👶</div>Kinder-Profile (kommt) — Stammdaten, Eltern-Kontakt, Abholpersonen, Beobachtungen</div>
+</div>
+
+<div class="panel" id="panel-plan">
+  <div class="cal-wrap">
+    <div class="cal-head">
+      <div class="cal-month">
+        <span id="cal-month-name">Januar</span>
+        <span class="yr" id="cal-year">2026</span>
+      </div>
+      <div class="cal-nav">
+        <button class="cal-today-btn" id="cal-today">Heute</button>
+        <button class="cal-iconbtn" id="cal-prev" aria-label="Zurück">‹</button>
+        <button class="cal-iconbtn" id="cal-next" aria-label="Weiter">›</button>
+        <button class="cal-add-btn" id="cal-add" aria-label="Neues Event">+</button>
+      </div>
+    </div>
+    <div class="cal-weekdays">
+      <div class="cal-weekday">Mo</div>
+      <div class="cal-weekday">Di</div>
+      <div class="cal-weekday">Mi</div>
+      <div class="cal-weekday">Do</div>
+      <div class="cal-weekday">Fr</div>
+      <div class="cal-weekday we">Sa</div>
+      <div class="cal-weekday we">So</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <div class="cal-events-card">
+    <div class="cal-events-head">
+      <div class="cal-events-date" id="cal-sel-date">—</div>
+      <div class="cal-events-day" id="cal-sel-day">—</div>
+    </div>
+    <div class="cal-events-list" id="cal-events-list">
+      <div class="cal-empty"><div class="em">📅</div>Lade Termine …</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-mitteilungen">
+  <div class="empty-state"><div class="ico">✉</div>Mitteilungen der Leitung (kommt)</div>
+</div>
+
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" data-panel="attendance"><span class="ico">📋</span><span>Anwesend</span></button>
+  <button class="tab-btn" data-panel="children"><span class="ico">👶</span><span>Kinder</span></button>
+  <button class="tab-btn" data-panel="plan"><span class="ico">📅</span><span>Plan</span></button>
+  <button class="tab-btn" data-panel="mitteilungen"><span class="ico">✉</span><span>Posten</span></button>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="if(event.target===this)closeDrawer()">
+  <div class="drawer" id="drawer-content"></div>
+</div>
+
+<script src="/accounting/ui/paedagogen/shiksha-avatar.js"></script>
+<script>
+const API = "/kita";
+let STATE = { snapshot: null, lastFetch: 0 };
+
+function $(id) { return document.getElementById(id); }
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// =============================================================
+// TABS
+// =============================================================
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    $(`panel-${btn.dataset.panel}`).classList.add("active");
+  });
+});
+
+// =============================================================
+// ANWESENHEITS-VIEW
+// =============================================================
+const GROUP_RING_COLORS = {}; // wird aus Sektionen abgeleitet
+const PALETTE = ["#ff4d8d", "#00d4d4", "#ffd93d", "#a855f7", "#ff8c42", "#6dd47e"];
+
+async function loadAnwesenheit() {
+  const dot = $("poll-dot");
+  dot.classList.add("refreshing");
+  try {
+    const res = await fetch(API + "/anwesenheit/today", { headers: {"X-Org-Slug":"kita_pilot"} });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    STATE.snapshot = data;
+    STATE.lastFetch = Date.now();
+    renderAnwesenheit(data);
+    dot.classList.remove("refreshing");
+    $("poll-text").textContent = "live · " + new Date().toLocaleTimeString("de-DE", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  } catch (e) {
+    console.warn("anwesenheit poll", e);
+    $("poll-text").textContent = "offline";
+  }
+}
+
+function renderAnwesenheit(data) {
+  const today = new Date(data.date);
+  $("hello-title").textContent = today.toLocaleDateString("de-DE", {weekday:"long", day:"2-digit", month:"long"});
+  const totalKids = data.sections.reduce((s,sec) => s + sec.counts.kids_total, 0);
+  const totalPresent = data.sections.reduce((s,sec) => s + sec.counts.kids_present, 0);
+  $("hello-meta").textContent = `${totalPresent}/${totalKids} Kinder anwesend`;
+
+  // Gruppen-Farben fix zuweisen
+  data.sections.forEach((sec, i) => {
+    if (!GROUP_RING_COLORS[sec.group_id]) {
+      GROUP_RING_COLORS[sec.group_id] = PALETTE[i % PALETTE.length];
+    }
+  });
+
+  // Sektionen rendern
+  const container = $("attendance-sections");
+  container.innerHTML = data.sections.map(sec => renderSection(sec, data)).join("");
+
+  // Avatare nach DOM-Insert rendern
+  document.querySelectorAll(".avatar-card[data-avatar-config]").forEach(el => {
+    const cfg = JSON.parse(el.dataset.avatarConfig);
+    const target = el.querySelector(".avatar-svg");
+    target.innerHTML = "";
+    ShikshaAvatar.render(target, cfg);
+  });
+
+  // Avatar-Click → Drawer
+  document.querySelectorAll(".avatar-card[data-person-id]").forEach(el => {
+    el.addEventListener("click", () => openDrawer(el.dataset.personId, el.dataset.personType, el.dataset.assignmentIds));
+  });
+}
+
+function renderSection(sec, data) {
+  const ringColor = GROUP_RING_COLORS[sec.group_id];
+  const kidStatus = sec.counts.kids_present === 0 && sec.counts.kids_total > 0 ? 'alert' : 'ok';
+  const paedStatus = sec.counts.has_paedagoge ? 'ok' : 'alert';
+  const mergeBanner = sec.merged_into
+    ? `<div class="merge-banner">→ Wird zu „${escapeHtml(sec.merged_into.merged_name)}" am Nachmittag</div>`
+    : "";
+
+  const allPeople = [...sec.staff, ...sec.children];
+  const avatarsHtml = allPeople.map(p => {
+    const slices = (p.slices || []).map(s => ({
+      area: s.area, color: s.color,
+      status: s.status,
+      title: `${s.area} · ${s.status}` + (s.note ? ` · ${s.note}` : ""),
+      duration: 1, // gleichmäßig — später aus time_from/time_to
+    }));
+    const isAbsent = !p.slices.length || p.slices.every(s => s.status === "absent" || s.status === "sick");
+    const cfg = {
+      name: p.name, slices, size: 60, ringColor,
+      absent: isAbsent,
+    };
+    return `<div class="avatar-card" data-person-id="${p.id}" data-person-type="${p.type}" data-avatar-config='${JSON.stringify(cfg).replace(/'/g, "&apos;")}'>
+      <div class="avatar-svg" style="width:60px; height:60px;"></div>
+      <div class="name">${escapeHtml(p.name.split(' ')[0])}${p.type === 'staff' ? ' 👨‍🏫' : ''}</div>
+    </div>`;
+  }).join("");
+
+  return `<div class="section-card" style="border-left:5px solid ${ringColor};">
+    <div class="section-header">
+      <div class="section-name">
+        <span class="group-pill" style="background:${ringColor};"></span>
+        ${escapeHtml(sec.group_name)}
+      </div>
+      <div class="section-counts">
+        <span class="count-chip ${kidStatus}">${sec.counts.kids_present}/${sec.counts.kids_total} Kinder</span>
+        <span class="count-chip ${paedStatus}">${sec.counts.has_paedagoge ? '✓ Päd.' : '⚠ Päd. fehlt'}</span>
+      </div>
+    </div>
+    ${mergeBanner}
+    ${allPeople.length ? `<div class="avatar-grid">${avatarsHtml}</div>` : `<div class="empty-state" style="padding:14px;">Niemand zugeordnet</div>`}
+  </div>`;
+}
+
+// =============================================================
+// DRAWER (Person-Detail + Status ändern)
+// =============================================================
+function openDrawer(personId, personType, assignmentIds) {
+  const snapshot = STATE.snapshot;
+  if (!snapshot) return;
+  let person = null;
+  for (const sec of snapshot.sections) {
+    const list = personType === "staff" ? sec.staff : sec.children;
+    person = list.find(p => String(p.id) === String(personId));
+    if (person) break;
+  }
+  if (!person) return;
+
+  $("drawer-content").innerHTML = `
+    <h2 style="margin:0 0 4px; font-size:20px; background:linear-gradient(120deg,var(--holi-pink),var(--holi-purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+      ${escapeHtml(person.name)}
+    </h2>
+    <p style="font-size:13px; color:var(--ink-mute); margin:0 0 14px;">
+      ${person.type === "staff" ? `${person.role} · ${person.weekly_hours}h/Wo` : `Geb. ${person.birth_year}`}
+    </p>
+    ${person.slices?.length ? `
+      <div style="margin-bottom:14px;">
+        <strong style="font-size:12px; color:var(--ink-mute); text-transform:uppercase;">Heute</strong>
+        <ul style="margin:6px 0 0; padding-left:20px; font-size:13px;">
+          ${person.slices.map(s => `<li>${s.area} · <em>${s.status}</em>${s.note ? ' — ' + escapeHtml(s.note) : ''}</li>`).join("")}
+        </ul>
+      </div>
+    ` : '<div style="color:var(--ink-mute); font-size:13px; margin-bottom:14px;">Keine Tagesplanung</div>'}
+    <div style="font-size:12px; color:var(--ink-mute); margin-bottom:6px;">Status schnell ändern:</div>
+    <div class="status-button-row">
+      <button class="status-btn present" onclick="quickChangeStatus('${personId}','${personType}','present')">✓ Anwesend</button>
+      <button class="status-btn sick" onclick="quickChangeStatus('${personId}','${personType}','sick')">🤒 Krank</button>
+      <button class="status-btn absent" onclick="quickChangeStatus('${personId}','${personType}','absent')">⊘ Abwesend</button>
+    </div>
+    <div style="margin-top:14px; text-align:right;">
+      <button class="btn ghost" onclick="closeDrawer()">Schließen</button>
+    </div>
+  `;
+  $("drawer-overlay").classList.add("show");
+}
+
+function closeDrawer() { $("drawer-overlay").classList.remove("show"); }
+
+async function quickChangeStatus(personId, personType, newStatus) {
+  // Anlegen oder Update — Backend prüft selbst
+  const today = new Date().toISOString().slice(0,10);
+  const payload = {
+    work_date: today,
+    person_type: personType,
+    [personType === "staff" ? "legacy_staff_id" : "legacy_child_id"]: parseInt(personId),
+    area: "vormittag",
+    status: newStatus,
+    created_by: "paedagogin",
+  };
+  try {
+    await fetch(API + "/anwesenheit/assign", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","X-Org-Slug":"kita_pilot"},
+      body: JSON.stringify(payload),
+    });
+    closeDrawer();
+    await loadAnwesenheit();
+  } catch (e) { alert("Fehler: " + e.message); }
+}
+
+// =============================================================
+// KALENDER (Apple-Style Plan-Tab)
+// =============================================================
+const CAL_MONTH_NAMES = ["Januar","Februar","März","April","Mai","Juni",
+                         "Juli","August","September","Oktober","November","Dezember"];
+const CAL_DAY_LONG    = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+
+let CAL = {
+  cursor: new Date(),     // gibt den angezeigten Monat vor
+  selected: new Date(),   // ausgewählter Tag
+  events: [],             // Events des angezeigten Monats
+  loaded: false,
+};
+
+function _calFmt(d) {
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function _calIsSame(a, b) {
+  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+}
+function _calIsToday(d) { return _calIsSame(d, new Date()); }
+function _calAdd(d, n) { const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+
+async function calLoadMonth() {
+  const c = CAL.cursor;
+  const from = _calFmt(new Date(c.getFullYear(), c.getMonth(), 1));
+  const to   = _calFmt(new Date(c.getFullYear(), c.getMonth()+1, 0));
+  try {
+    const r = await fetch(`${API}/calendar/events?from_date=${from}&to_date=${to}&audience=paedagogin`,
+                         { headers: {"X-Org-Slug":"kita_pilot"} });
+    const j = await r.json();
+    CAL.events = j.events || [];
+  } catch (e) {
+    console.warn("calendar load", e);
+    CAL.events = [];
+  }
+  CAL.loaded = true;
+  calRender();
+}
+
+function calEventsOn(date) {
+  const ds = _calFmt(date);
+  return CAL.events.filter(e => e.start_date === ds);
+}
+
+function calRender() {
+  const c = CAL.cursor;
+  $("cal-month-name").textContent = CAL_MONTH_NAMES[c.getMonth()];
+  $("cal-year").textContent = c.getFullYear();
+
+  // Grid: 6 Reihen × 7 Spalten
+  const first = new Date(c.getFullYear(), c.getMonth(), 1);
+  const startOff = (first.getDay()+6) % 7;  // Mo=0
+  const start = _calAdd(first, -startOff);
+  const cells = [];
+  for (let i=0; i<42; i++) {
+    const d = _calAdd(start, i);
+    const evs = calEventsOn(d);
+    const isOther = d.getMonth() !== c.getMonth();
+    const isWE = (d.getDay()===0 || d.getDay()===6);
+    const cls = ["cal-day"];
+    if (isOther) cls.push("other");
+    if (isWE) cls.push("we");
+    if (_calIsToday(d)) cls.push("today");
+    if (_calIsSame(d, CAL.selected)) cls.push("selected");
+    const dots = evs.slice(0,3).map(e => `<span class="dot" style="background:${e.color}"></span>`).join("");
+    cells.push(`<button class="${cls.join(' ')}" data-date="${_calFmt(d)}">
+      <span class="num">${d.getDate()}</span>
+      <span class="cal-dots">${dots}</span>
+    </button>`);
+  }
+  $("cal-grid").innerHTML = cells.join("");
+
+  // Day-Click → Selection updaten
+  $("cal-grid").querySelectorAll(".cal-day").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const [y,m,d] = btn.dataset.date.split("-").map(Number);
+      const newSel = new Date(y, m-1, d);
+      CAL.selected = newSel;
+      // Wenn anderer Monat: Cursor mitziehen + neu laden
+      if (newSel.getMonth() !== CAL.cursor.getMonth() || newSel.getFullYear() !== CAL.cursor.getFullYear()) {
+        CAL.cursor = new Date(newSel);
+        calLoadMonth();
+      } else {
+        calRender();
+      }
+    });
+  });
+
+  calRenderEventsList();
+}
+
+function calRenderEventsList() {
+  const sel = CAL.selected;
+  $("cal-sel-date").textContent = `${sel.getDate()}. ${CAL_MONTH_NAMES[sel.getMonth()]}`;
+  $("cal-sel-day").textContent = CAL_DAY_LONG[(sel.getDay()+6)%7];
+
+  const evs = calEventsOn(sel).sort((a,b) => (a.start_time||"") < (b.start_time||"") ? -1 : 1);
+  const listEl = $("cal-events-list");
+  if (!CAL.loaded) {
+    listEl.innerHTML = `<div class="cal-empty"><div class="em">📅</div>Lade Termine …</div>`;
+    return;
+  }
+  if (evs.length === 0) {
+    listEl.innerHTML = `<div class="cal-empty"><div class="em">🌿</div>Keine Termine</div>`;
+    return;
+  }
+  listEl.innerHTML = evs.map(e => {
+    const time = e.all_day
+      ? `<span class="ad">Ganztägig</span>`
+      : (e.start_time||"").slice(0,5);
+    const meta = [
+      e.label,
+      e.location,
+      e.age_at_event ? `wird ${e.age_at_event}` : null,
+    ].filter(Boolean).join(" · ");
+    return `<div class="cal-event-row" data-event-id="${e.id}">
+      <div class="cal-event-bar" style="background:${e.color}"></div>
+      <div class="cal-event-time">${time}</div>
+      <div class="cal-event-body">
+        <div class="cal-event-title">${escapeHtml(e.title)}</div>
+        <div class="cal-event-meta">${escapeHtml(meta)}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  listEl.querySelectorAll(".cal-event-row").forEach(row => {
+    row.addEventListener("click", () => calOpenEvent(row.dataset.eventId));
+  });
+}
+
+function calNav(deltaMonths) {
+  const c = CAL.cursor;
+  CAL.cursor = new Date(c.getFullYear(), c.getMonth() + deltaMonths, 1);
+  // Selektion auf den 1. des neuen Monats wenn vorher nicht in dem Monat
+  if (CAL.selected.getMonth() !== CAL.cursor.getMonth() || CAL.selected.getFullYear() !== CAL.cursor.getFullYear()) {
+    CAL.selected = new Date(CAL.cursor);
+  }
+  calLoadMonth();
+}
+
+function calGoToday() {
+  const t = new Date();
+  CAL.cursor = new Date(t);
+  CAL.selected = new Date(t);
+  calLoadMonth();
+}
+
+function calOpenEvent(eid) {
+  const e = CAL.events.find(x => x.id === eid);
+  if (!e) return;
+  const meta = [e.label, e.location, e.all_day ? "Ganztägig" : ((e.start_time||"").slice(0,5) + (e.end_time ? "–"+e.end_time.slice(0,5) : ""))]
+    .filter(Boolean).join(" · ");
+  $("drawer-content").innerHTML = `
+    <div style="height:5px; width:48px; background:var(--line); border-radius:3px; margin:0 auto 14px;"></div>
+    <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:6px;">
+      <div style="width:5px; align-self:stretch; border-radius:3px; background:${e.color}; min-height:40px;"></div>
+      <div style="flex:1;">
+        <h2 style="margin:0; font-size:20px; font-weight:700;">${escapeHtml(e.title)}</h2>
+        <p style="font-size:13px; color:var(--ink-mute); margin:4px 0 0;">${escapeHtml(meta)}</p>
+      </div>
+    </div>
+    ${e.description ? `<p style="font-size:14px; color:var(--ink-soft); margin:14px 0 4px; white-space:pre-wrap;">${escapeHtml(e.description)}</p>` : ""}
+    <div style="margin-top:18px; text-align:right;">
+      <button class="btn ghost" onclick="closeDrawer()">Schließen</button>
+    </div>
+  `;
+  $("drawer-overlay").classList.add("show");
+}
+
+function calOpenAdd() {
+  // Minimal-Quick-Add — Mitarbeiter:innen können Events anlegen
+  $("drawer-content").innerHTML = `
+    <div style="height:5px; width:48px; background:var(--line); border-radius:3px; margin:0 auto 14px;"></div>
+    <h2 style="margin:0 0 14px; font-size:20px; font-weight:700;">Neuer Termin</h2>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <input id="qa-title" placeholder="Titel" style="padding:12px; border:1px solid var(--line); border-radius:10px; font-size:15px; font-family:inherit;">
+      <select id="qa-type" style="padding:12px; border:1px solid var(--line); border-radius:10px; font-size:15px; font-family:inherit;">
+        <option value="meeting">Meeting</option>
+        <option value="parent_meeting">Elterngespräch</option>
+        <option value="training">Fortbildung</option>
+        <option value="event">Veranstaltung</option>
+        <option value="celebration">Feier</option>
+        <option value="other">Sonstiges</option>
+      </select>
+      <input id="qa-date" type="date" value="${_calFmt(CAL.selected)}" style="padding:12px; border:1px solid var(--line); border-radius:10px; font-size:15px; font-family:inherit;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <input id="qa-from" type="time" placeholder="Von" style="padding:12px; border:1px solid var(--line); border-radius:10px; font-size:15px; font-family:inherit;">
+        <input id="qa-to" type="time" placeholder="Bis" style="padding:12px; border:1px solid var(--line); border-radius:10px; font-size:15px; font-family:inherit;">
+      </div>
+      <input id="qa-location" placeholder="Ort (optional)" style="padding:12px; border:1px solid var(--line); border-radius:10px; font-size:15px; font-family:inherit;">
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
+      <button class="btn ghost" onclick="closeDrawer()">Abbrechen</button>
+      <button class="btn primary" id="qa-save">Speichern</button>
+    </div>
+  `;
+  $("drawer-overlay").classList.add("show");
+  $("qa-save").addEventListener("click", async () => {
+    const payload = {
+      title: $("qa-title").value.trim(),
+      event_type: $("qa-type").value,
+      start_date: $("qa-date").value,
+      start_time: $("qa-from").value || null,
+      end_time: $("qa-to").value || null,
+      all_day: !$("qa-from").value,
+      location: $("qa-location").value || null,
+      visible_traegerin: true,
+      visible_paedagogin: true,
+      visible_eltern: false,
+      created_by: "paedagogin",
+    };
+    if (!payload.title) { alert("Titel fehlt"); return; }
+    try {
+      const r = await fetch(`${API}/calendar/events`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json","X-Org-Slug":"kita_pilot"},
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      closeDrawer();
+      await calLoadMonth();
+    } catch (e) { alert("Fehler: " + e.message); }
+  });
+}
+
+// Bindings
+$("cal-prev").addEventListener("click", () => calNav(-1));
+$("cal-next").addEventListener("click", () => calNav(+1));
+$("cal-today").addEventListener("click", () => calGoToday());
+$("cal-add").addEventListener("click", () => calOpenAdd());
+
+// Erst-Render (zeigt sofort das leere Grid — auch ohne Daten)
+calRender();
+// Dann tatsächlich Daten laden, sobald der Plan-Tab erstmals geöffnet wird (lazy)
+let CAL_FIRST_LOAD = false;
+document.querySelector('[data-panel="plan"]').addEventListener("click", () => {
+  if (!CAL_FIRST_LOAD) { CAL_FIRST_LOAD = true; calLoadMonth(); }
+});
+
+// =============================================================
+// LIVE-POLLING (15s)
+// =============================================================
+loadAnwesenheit();
+setInterval(loadAnwesenheit, 15000);
+
+// Service-Worker für PWA (gleicher wie Eltern-App)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/accounting/ui/kita/service-worker.js").catch(() => {});
+}
+</script>
+
+</body>
+</html>

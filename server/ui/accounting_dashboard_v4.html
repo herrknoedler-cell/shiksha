@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA · Accounting V4</title>
+<style>
+:root {
+  --bg: #f7f7f5; --card: #ffffff; --line: #e6e4de; --line-strong: #c6c2b8;
+  --ink: #1a1a1a; --ink-soft: #55524b; --ink-mute: #7a7a74;
+  --accent: #2d7a5f; --accent-soft: #e8f1ec;
+  --warn: #8a6a2a; --warn-soft: #f5ebd8;
+  --alert: #a0391f; --alert-soft: #f5e1da;
+  --info: #4a6a80; --info-soft: #e8eef1;
+  --positive: #4a8050; --positive-soft: #e3f0e6;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.app { max-width: 1280px; margin: 0 auto; padding: 24px 24px 80px; }
+
+header.top { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 16px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+.brand { display: flex; flex-direction: column; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); }
+h1 { font-size: 22px; font-weight: 600; margin: 2px 0 0; letter-spacing: -0.005em; }
+.org-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: #fafaf8; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; color: var(--ink-soft); }
+.org-pill::before { content: ""; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tab { padding: 10px 14px; background: transparent; border: 0; border-bottom: 2px solid transparent; font-size: 14px; color: var(--ink-mute); cursor: pointer; font-weight: 500; }
+.tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.tab .badge { display: inline-block; margin-left: 4px; padding: 1px 6px; font-size: 10px; background: var(--ink); color: #fff; border-radius: 999px; font-weight: 700; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+.card h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+.card .lede { font-size: 13px; color: var(--ink-mute); margin: 0 0 16px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.kpi .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-mute); }
+.kpi .val { font-size: 22px; font-weight: 700; font-family: var(--mono); margin-top: 4px; }
+.kpi .sub { font-size: 11px; color: var(--ink-soft); margin-top: 4px; }
+
+table.list { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.list th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-mute); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--line); background: #fafaf8; position: sticky; top: 0; }
+table.list td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.list tr:hover td { background: #fafaf8; }
+table.list .amount { font-family: var(--mono); text-align: right; font-weight: 600; }
+table.list .amount.in { color: var(--accent); }
+table.list .amount.out { color: var(--alert); }
+table.list .iban { color: var(--ink-mute); font-family: var(--mono); font-size: 11px; }
+table.list .purpose { color: var(--ink-soft); font-size: 12px; max-width: 360px; }
+
+select.acct, select.cat { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 12px; background: var(--card); max-width: 220px; }
+select.acct.set { background: var(--accent-soft); border-color: var(--accent); }
+select.cat option { font-family: -apple-system, sans-serif; }
+
+.filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.filter-bar select, .filter-bar input { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; background: var(--card); }
+.filter-bar input { min-width: 220px; }
+.filter-bar .stretch { flex: 1; }
+.filter-bar .count { font-size: 12px; color: var(--ink-mute); }
+
+button.primary { padding: 8px 14px; background: var(--ink); color: #fff; border: 0; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+button.ghost { padding: 7px 12px; background: transparent; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 6px; font-size: 13px; cursor: pointer; }
+
+.dropzone { border: 2px dashed var(--line-strong); border-radius: 12px; padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.15s; background: #fafaf8; }
+.dropzone:hover, .dropzone.drag { border-color: var(--ink); background: var(--accent-soft); }
+.dropzone .icon { font-size: 36px; margin-bottom: 10px; }
+.dropzone .lbl { font-size: 15px; font-weight: 500; }
+.dropzone .sub { font-size: 12px; color: var(--ink-mute); margin-top: 6px; }
+.dropzone input[type="file"] { display: none; }
+
+.upload-result { margin-top: 12px; padding: 12px 14px; border-radius: 8px; font-size: 13px; }
+.upload-result.ok { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.upload-result.err { background: var(--alert-soft); color: var(--alert); border: 1px solid var(--alert); }
+.upload-list { list-style: none; padding: 0; margin: 8px 0 0; font-size: 12px; font-family: var(--mono); }
+.upload-list li { padding: 4px 0; }
+.upload-list li::before { content: "• "; }
+
+.acct-group { margin-bottom: 18px; }
+.acct-group h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-mute); margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.acct-row { display: grid; grid-template-columns: 80px 1fr 60px; gap: 12px; padding: 6px 0; font-size: 13px; align-items: baseline; }
+.acct-row .num { font-family: var(--mono); color: var(--ink-mute); }
+.acct-row .name { color: var(--ink); }
+.acct-row .vat { font-size: 11px; color: var(--ink-soft); text-align: right; font-family: var(--mono); }
+.acct-row .desc { font-size: 11px; color: var(--ink-mute); grid-column: 2; margin-top: -2px; }
+
+.empty { padding: 32px; text-align: center; color: var(--ink-mute); font-size: 13px; }
+.loading { padding: 32px; text-align: center; color: var(--ink-mute); font-size: 13px; }
+
+footer.bot { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-mute); }
+
+@media (max-width: 800px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<header class="top">
+  <div class="brand">
+    <span class="eyebrow">SHIKSHA · ACCOUNTING V4</span>
+    <h1>Buchhaltung</h1>
+  </div>
+  <span class="org-pill">Lunchbox Gastro GmbH · Hypo Vorarlberg</span>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-panel="overview">Übersicht</button>
+  <button class="tab" data-panel="transactions">Bank-Buchungen <span class="badge" id="badge-tx">·</span></button>
+  <button class="tab" data-panel="invoices">Rechnungen <span class="badge" id="badge-inv">·</span></button>
+  <button class="tab" data-panel="upload">PDF-Upload</button>
+  <button class="tab" data-panel="cashbook">Kassabuch <span class="badge" id="badge-cb">·</span></button>
+  <button class="tab" data-panel="suppliers">Lieferanten <span class="badge" id="badge-sup">·</span></button>
+  <button class="tab" data-panel="accounts">Konten-Plan <span class="badge" id="badge-acc">·</span></button>
+</div>
+
+<!-- ============================================================ -->
+<!-- ÜBERSICHT -->
+<!-- ============================================================ -->
+<div class="panel active" id="panel-overview">
+  <div class="card">
+    <h2>Stand</h2>
+    <p class="lede">Live-Status aus dem Server.</p>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="lbl">Bank-Buchungen</div><div class="val" id="kpi-tx">—</div><div class="sub" id="kpi-tx-sub">lade …</div></div>
+      <div class="kpi"><div class="lbl">Offene Rechnungen</div><div class="val" id="kpi-inv">—</div><div class="sub" id="kpi-inv-sub">lade …</div></div>
+      <div class="kpi"><div class="lbl">Konten</div><div class="val" id="kpi-acc">—</div><div class="sub" id="kpi-acc-sub">lade …</div></div>
+      <div class="kpi"><div class="lbl">Ohne Konto</div><div class="val" id="kpi-noacc">—</div><div class="sub" id="kpi-noacc-sub">lade …</div></div>
+    </div>
+    <div style="margin-top:8px;">
+      <button class="ghost" id="btn-reload">Neu laden</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- BANK-BUCHUNGEN -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-transactions">
+  <div class="card">
+    <h2>Bank-Buchungen</h2>
+    <p class="lede">Konto und Kategorie pro Buchung zuweisen. Wird sofort gespeichert.</p>
+
+    <div class="filter-bar">
+      <input type="search" id="tx-search" placeholder="Suche: Empfänger, Verwendungszweck, IBAN …" />
+      <select id="tx-filter-cat">
+        <option value="">Alle Kategorien</option>
+        <option value="business">Betrieblich</option>
+        <option value="private">Privat</option>
+        <option value="shareholder_loan">Gesellschafter-Darlehen</option>
+        <option value="ignore">Ignorieren</option>
+        <option value="__none__">Ohne Kategorie</option>
+      </select>
+      <select id="tx-filter-acc">
+        <option value="">Alle Konten</option>
+        <option value="__none__">Ohne Konto</option>
+      </select>
+      <span class="stretch"></span>
+      <span class="count" id="tx-count">— von —</span>
+    </div>
+
+    <div style="max-height: 65vh; overflow: auto;">
+      <table class="list" id="tx-table">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Empfänger</th>
+            <th>Verwendungszweck</th>
+            <th class="amount">Betrag</th>
+            <th>Kategorie</th>
+            <th>Konto</th>
+          </tr>
+        </thead>
+        <tbody id="tx-tbody">
+          <tr><td colspan="6" class="loading">lade Buchungen …</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- RECHNUNGEN -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-invoices">
+  <div class="card">
+    <h2>Rechnungen</h2>
+    <p class="lede">Eingangs- und Ausgangsrechnungen mit Konto-Zuweisung.</p>
+
+    <div class="filter-bar">
+      <input type="search" id="inv-search" placeholder="Suche: Lieferant, Rechnungs-Nr …" />
+      <select id="inv-filter-dir">
+        <option value="">Alle Richtungen</option>
+        <option value="incoming">Eingang</option>
+        <option value="outgoing">Ausgang</option>
+      </select>
+      <select id="inv-filter-acc">
+        <option value="">Alle Konten</option>
+        <option value="__none__">Ohne Konto</option>
+      </select>
+      <span class="stretch"></span>
+      <span class="count" id="inv-count">— von —</span>
+    </div>
+
+    <div style="overflow: auto; max-height: 70vh;">
+      <table class="list" id="inv-table">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Lieferant</th>
+            <th>Rechnungs-Nr.</th>
+            <th class="amount">Brutto</th>
+            <th class="amount">Netto</th>
+            <th class="amount">MwSt.</th>
+            <th>Konto</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="inv-tbody">
+          <tr><td colspan="8" class="loading">lade Rechnungen …</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:8px; font-size:11px; color:var(--ink-mute);">
+      Doppelklick auf Datum, Rechnungs-Nr. oder Beträge zum Bearbeiten · Tab oder Enter speichert
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PDF-UPLOAD -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-upload">
+  <div class="card">
+    <h2>Rechnungen hochladen</h2>
+    <p class="lede">Mehrere PDFs gleichzeitig — werden einzeln durch OCR & Extraktion geschickt.</p>
+
+    <label class="dropzone" id="dropzone">
+      <div class="icon">📥</div>
+      <div class="lbl">PDFs hierhin ziehen oder klicken</div>
+      <div class="sub">accept: application/pdf · mehrere Dateien gleichzeitig</div>
+      <input type="file" id="file-input" accept="application/pdf" multiple />
+    </label>
+
+    <div id="upload-status"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- KASSABUCH -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-cashbook">
+  <div class="card">
+    <h2>Kassabuch</h2>
+    <p class="lede">Bareinnahmen und -ausgaben mit Beleg-Foto. Saldo läuft live mit.</p>
+
+    <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom:12px;">
+      <div class="kpi"><div class="lbl">Eingänge</div><div class="val" id="cb-total-in" style="color:var(--accent);">—</div></div>
+      <div class="kpi"><div class="lbl">Ausgänge</div><div class="val" id="cb-total-out" style="color:var(--alert);">—</div></div>
+      <div class="kpi"><div class="lbl">Saldo</div><div class="val" id="cb-balance">—</div></div>
+    </div>
+
+    <div class="card" style="background:#fafaf8; padding:14px; margin-bottom:14px;">
+      <strong style="font-size:13px;">+ Neuer Eintrag</strong>
+      <div style="display:grid; grid-template-columns: 110px 1fr 110px 110px 80px 1fr 110px; gap:8px; margin-top:8px; align-items:center;">
+        <input type="date" id="cb-date" />
+        <input type="text" id="cb-desc" placeholder="Beschreibung *" />
+        <input type="text" id="cb-in" placeholder="Eingang €" />
+        <input type="text" id="cb-out" placeholder="Ausgang €" />
+        <input type="text" id="cb-vat" placeholder="USt %" />
+        <select id="cb-account"><option value="">— Konto —</option></select>
+        <button class="primary" id="cb-add">Hinzufügen</button>
+      </div>
+      <div style="margin-top:8px; font-size:12px; color:var(--ink-mute);">
+        Beleg-Foto kannst Du nach dem Anlegen pro Zeile hochladen.
+      </div>
+    </div>
+
+    <div style="overflow:auto; max-height: 55vh;">
+      <table class="list" id="cb-table">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Beleg-Nr.</th>
+            <th>Beschreibung</th>
+            <th class="amount">Eingang</th>
+            <th class="amount">Ausgang</th>
+            <th class="amount">USt</th>
+            <th>Konto</th>
+            <th class="amount">Saldo</th>
+            <th>Beleg</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="cb-tbody">
+          <tr><td colspan="10" class="empty">Noch keine Einträge.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- LIEFERANTEN -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-suppliers">
+  <div class="card">
+    <h2>Lieferanten</h2>
+    <p class="lede">Stammdaten aus Bank-Buchungen automatisch erkannt. IBAN, UID und Standard-Konto pflegen.</p>
+
+    <div class="filter-bar">
+      <input type="search" id="sup-search" placeholder="Suche: Name …" />
+      <button class="ghost" id="sup-rematch">Auto-Match</button>
+      <button class="primary" id="sup-add">+ Lieferant</button>
+      <span class="stretch"></span>
+      <span class="count" id="sup-count">— Lieferanten</span>
+    </div>
+
+    <div style="max-height: 65vh; overflow: auto;">
+      <table class="list" id="sup-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>IBAN</th>
+            <th>UID</th>
+            <th>Standard-Konto</th>
+            <th class="amount">Buchungen</th>
+            <th class="amount">Rechnungen</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="sup-tbody">
+          <tr><td colspan="7" class="loading">lade Lieferanten …</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- KONTEN-PLAN -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-accounts">
+  <div class="card">
+    <h2>Konten-Plan</h2>
+    <p class="lede">Standard-Kontenrahmen für Lunchbox Gastro GmbH (EKR-orientiert).</p>
+    <div id="acc-groups">
+      <div class="loading">lade Konten …</div>
+    </div>
+  </div>
+</div>
+
+<footer class="bot">
+  SHIKSHA · Accounting V4 · doppelte Buchhaltung · live gegen <code id="api-base">/accounting</code>
+</footer>
+
+</div>
+
+<script>
+// =============================================================
+// CONFIG
+// =============================================================
+const API = "/accounting";
+const ORG = "lunchbox";
+
+// State (in-memory)
+let STATE = {
+  accounts: [],       // {id, number, name, type, vat_rate, description}
+  accountsById: {},
+  transactions: [],   // bank transactions
+  invoices: [],       // accounting invoices
+};
+
+const TYPE_LABELS = {
+  asset: "Aktiva",
+  liability: "Passiva",
+  equity: "Eigenkapital",
+  revenue: "Erträge",
+  expense: "Aufwendungen",
+};
+const CAT_LABELS = {
+  business: "Betrieblich",
+  private: "Privat",
+  shareholder_loan: "Gesellschafter-Darlehen",
+  ignore: "Ignorieren",
+};
+
+// =============================================================
+// TAB SWITCHING
+// =============================================================
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("panel-" + tab.dataset.panel).classList.add("active");
+  });
+});
+
+// =============================================================
+// FORMAT HELPERS
+// =============================================================
+function fmtAmount(v) {
+  if (v == null) return "—";
+  const sign = v >= 0 ? "+" : "−";
+  return sign + Math.abs(v).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "€";
+}
+function fmtDate(s) {
+  if (!s) return "—";
+  const d = new Date(s);
+  if (isNaN(d)) return s;
+  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" });
+}
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[c]));
+}
+
+// =============================================================
+// API CLIENT
+// =============================================================
+async function apiGet(path) {
+  const res = await fetch(API + path, { headers: { "X-Org-Slug": ORG }});
+  if (!res.ok) throw new Error(`GET ${path} → ${res.status}`);
+  return res.json();
+}
+async function apiPatch(path, body) {
+  const res = await fetch(API + path, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "X-Org-Slug": ORG },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`PATCH ${path} → ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+async function apiPostFiles(path, files) {
+  const fd = new FormData();
+  for (const f of files) fd.append("files", f);
+  const res = await fetch(API + path, {
+    method: "POST",
+    headers: { "X-Org-Slug": ORG },
+    body: fd,
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
+// =============================================================
+// LOAD DATA
+// =============================================================
+async function loadAccounts() {
+  const data = await apiGet("/accounts");
+  STATE.accounts = data.accounts || [];
+  STATE.accountsById = {};
+  STATE.accounts.forEach(a => { STATE.accountsById[a.id] = a; });
+  renderAccountsPanel();
+  populateAccountFilters();
+  populateCashbookAccountDropdown();
+  document.getElementById("kpi-acc").textContent = STATE.accounts.length;
+  document.getElementById("kpi-acc-sub").textContent = "in 5 Typen";
+  document.getElementById("badge-acc").textContent = STATE.accounts.length;
+}
+async function loadTransactions() {
+  try {
+    const data = await apiGet("/transactions?limit=1000");
+    STATE.transactions = data.transactions || data.items || [];
+  } catch (e) {
+    console.warn("transactions", e);
+    STATE.transactions = [];
+  }
+  renderTransactions();
+  document.getElementById("kpi-tx").textContent = STATE.transactions.length;
+  const noAcc = STATE.transactions.filter(t => !t.account_id).length;
+  document.getElementById("kpi-tx-sub").textContent = `${noAcc} ohne Konto`;
+  document.getElementById("badge-tx").textContent = STATE.transactions.length;
+  updateNoAccountKpi();
+}
+async function loadInvoices() {
+  try {
+    // V4 = Brutto/Netto/MwSt + auto-compute + User-Edits priorisiert
+    const data = await apiGet("/invoices/v4");
+    STATE.invoices = data.invoices || data.items || [];
+  } catch (e) {
+    console.warn("v4 fehlgeschlagen, fallback v3", e);
+    try {
+      const data = await apiGet("/invoices/v3");
+      STATE.invoices = data.invoices || data.items || [];
+    } catch (e2) {
+      STATE.invoices = [];
+    }
+  }
+  renderInvoices();
+  document.getElementById("kpi-inv").textContent = STATE.invoices.length;
+  const total = STATE.invoices.reduce((s, i) => s + (i.outstanding_amount || 0), 0);
+  document.getElementById("kpi-inv-sub").textContent = total.toLocaleString("de-DE", { maximumFractionDigits: 0 }) + "€ offen";
+  document.getElementById("badge-inv").textContent = STATE.invoices.length;
+  updateNoAccountKpi();
+}
+function updateNoAccountKpi() {
+  const noTx = STATE.transactions.filter(t => !t.account_id).length;
+  const noInv = STATE.invoices.filter(i => !i.account_id).length;
+  document.getElementById("kpi-noacc").textContent = noTx + noInv;
+  document.getElementById("kpi-noacc-sub").textContent = `${noTx} Buchungen · ${noInv} Rechnungen`;
+}
+
+// =============================================================
+// ACCOUNTS PANEL
+// =============================================================
+function renderAccountsPanel() {
+  const container = document.getElementById("acc-groups");
+  if (!STATE.accounts.length) {
+    container.innerHTML = '<div class="empty">Keine Konten gefunden.</div>';
+    return;
+  }
+  const groups = {};
+  STATE.accounts.forEach(a => {
+    if (!groups[a.type]) groups[a.type] = [];
+    groups[a.type].push(a);
+  });
+  const order = ["asset", "liability", "equity", "revenue", "expense"];
+  let html = "";
+  for (const type of order) {
+    if (!groups[type]) continue;
+    const accs = groups[type].sort((a,b) => a.number.localeCompare(b.number));
+    html += `<div class="acct-group"><h3>${TYPE_LABELS[type] || type} · ${accs.length}</h3>`;
+    accs.forEach(a => {
+      html += `<div class="acct-row">
+        <span class="num">${escapeHtml(a.number)}</span>
+        <span class="name">${escapeHtml(a.name)}${a.description ? `<div class="desc">${escapeHtml(a.description)}</div>` : ""}</span>
+        <span class="vat">${a.vat_rate != null ? a.vat_rate + "%" : ""}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function populateAccountFilters() {
+  const txSel = document.getElementById("tx-filter-acc");
+  const invSel = document.getElementById("inv-filter-acc");
+  const opts = STATE.accounts.map(a =>
+    `<option value="${a.id}">${escapeHtml(a.number)} ${escapeHtml(a.name)}</option>`
+  ).join("");
+  // append after first 2 options
+  txSel.innerHTML = `<option value="">Alle Konten</option><option value="__none__">Ohne Konto</option>` + opts;
+  invSel.innerHTML = `<option value="">Alle Konten</option><option value="__none__">Ohne Konto</option>` + opts;
+}
+
+function accountSelect(currentId, onChange) {
+  // build a select element string
+  let html = `<select class="acct ${currentId ? 'set' : ''}" data-current="${currentId || ''}">`;
+  html += `<option value="">— Konto wählen —</option>`;
+  const order = ["asset", "liability", "equity", "revenue", "expense"];
+  for (const type of order) {
+    const accs = STATE.accounts.filter(a => a.type === type).sort((a,b) => a.number.localeCompare(b.number));
+    if (!accs.length) continue;
+    html += `<optgroup label="${TYPE_LABELS[type]}">`;
+    accs.forEach(a => {
+      const sel = a.id === currentId ? " selected" : "";
+      html += `<option value="${a.id}"${sel}>${escapeHtml(a.number)} ${escapeHtml(a.name)}</option>`;
+    });
+    html += `</optgroup>`;
+  }
+  html += `</select>`;
+  return html;
+}
+
+// =============================================================
+// TRANSACTIONS
+// =============================================================
+function renderTransactions() {
+  const tbody = document.getElementById("tx-tbody");
+  const search = document.getElementById("tx-search").value.toLowerCase().trim();
+  const filterCat = document.getElementById("tx-filter-cat").value;
+  const filterAcc = document.getElementById("tx-filter-acc").value;
+
+  let rows = STATE.transactions;
+  if (search) {
+    rows = rows.filter(t =>
+      (t.counterparty_name || "").toLowerCase().includes(search) ||
+      (t.purpose || "").toLowerCase().includes(search) ||
+      (t.counterparty_iban || "").toLowerCase().includes(search)
+    );
+  }
+  if (filterCat) {
+    if (filterCat === "__none__") rows = rows.filter(t => !t.category);
+    else rows = rows.filter(t => t.category === filterCat);
+  }
+  if (filterAcc) {
+    if (filterAcc === "__none__") rows = rows.filter(t => !t.account_id);
+    else rows = rows.filter(t => t.account_id === filterAcc);
+  }
+
+  document.getElementById("tx-count").textContent = `${rows.length} von ${STATE.transactions.length}`;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty">Keine Buchungen.</td></tr>`;
+    return;
+  }
+
+  // sort newest first
+  rows = rows.slice().sort((a,b) => (b.value_date || "").localeCompare(a.value_date || ""));
+
+  tbody.innerHTML = rows.slice(0, 500).map(t => {
+    const inout = (t.amount || 0) >= 0 ? "in" : "out";
+    return `<tr data-tx-id="${t.id}">
+      <td>${fmtDate(t.value_date)}</td>
+      <td>${escapeHtml(t.counterparty_name || "—")}<div class="iban">${escapeHtml(t.counterparty_iban || "")}</div></td>
+      <td class="purpose">${escapeHtml(t.purpose || "")}</td>
+      <td class="amount ${inout}">${fmtAmount(t.amount)}</td>
+      <td>${categorySelect(t.category)}</td>
+      <td>${accountSelect(t.account_id)}</td>
+    </tr>`;
+  }).join("");
+
+  // wire change handlers
+  tbody.querySelectorAll("tr").forEach(tr => {
+    const txId = tr.dataset.txId;
+    const accSel = tr.querySelector("select.acct");
+    const catSel = tr.querySelector("select.cat");
+    accSel.addEventListener("change", async () => {
+      try {
+        await apiPatch(`/transactions/${txId}/account`, { account_id: accSel.value || null });
+        accSel.classList.toggle("set", !!accSel.value);
+        const tx = STATE.transactions.find(x => x.id === txId);
+        if (tx) tx.account_id = accSel.value || null;
+        updateNoAccountKpi();
+      } catch (e) {
+        alert("Fehler beim Speichern: " + e.message);
+      }
+    });
+    catSel.addEventListener("change", async () => {
+      try {
+        await apiPatch(`/transactions/${txId}/categorize`, { category: catSel.value || null });
+        const tx = STATE.transactions.find(x => x.id === txId);
+        if (tx) tx.category = catSel.value || null;
+      } catch (e) {
+        alert("Fehler beim Speichern: " + e.message);
+      }
+    });
+  });
+}
+
+function categorySelect(current) {
+  const opts = ["", "business", "private", "shareholder_loan", "ignore"];
+  return `<select class="cat">` + opts.map(o => {
+    const lbl = o ? CAT_LABELS[o] : "— Kategorie —";
+    const sel = o === (current || "") ? " selected" : "";
+    return `<option value="${o}"${sel}>${lbl}</option>`;
+  }).join("") + `</select>`;
+}
+
+["tx-search", "tx-filter-cat", "tx-filter-acc"].forEach(id => {
+  document.getElementById(id).addEventListener("input", renderTransactions);
+});
+
+// =============================================================
+// INVOICES
+// =============================================================
+function renderInvoices() {
+  const tbody = document.getElementById("inv-tbody");
+  const search = document.getElementById("inv-search").value.toLowerCase().trim();
+  const filterDir = document.getElementById("inv-filter-dir").value;
+  const filterAcc = document.getElementById("inv-filter-acc").value;
+
+  let rows = STATE.invoices;
+  if (search) {
+    rows = rows.filter(i =>
+      (i.partner || i.customer_name || i.supplier_name || "").toLowerCase().includes(search) ||
+      (i.invoice_number || "").toLowerCase().includes(search) ||
+      (i.iban || "").toLowerCase().includes(search)
+    );
+  }
+  if (filterDir) rows = rows.filter(i => i.direction === filterDir);
+  if (filterAcc) {
+    if (filterAcc === "__none__") rows = rows.filter(i => !i.account_id);
+    else rows = rows.filter(i => i.account_id === filterAcc);
+  }
+
+  document.getElementById("inv-count").textContent = `${rows.length} von ${STATE.invoices.length}`;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty">Keine Rechnungen.</td></tr>`;
+    return;
+  }
+
+  rows = rows.slice().sort((a,b) => (b.invoice_date || "").localeCompare(a.invoice_date || ""));
+
+  tbody.innerHTML = rows.slice(0, 500).map(i => {
+    const dateStr = i.invoice_date || "";
+    const numStr = i.invoice_number || "";
+    const fmtMoney = v => v > 0 ? v.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "";
+    const fileLink = i.has_file
+      ? `<a href="${API}/invoices/${i.id}/file" target="_blank" style="color:var(--accent); text-decoration:none; margin-right:4px;" title="PDF öffnen">📎</a>`
+      : "";
+    return `<tr data-inv-id="${i.id}">
+      <td><span class="edit" data-key="invoice_date" data-val="${escapeHtml(dateStr)}">${dateStr ? fmtDate(dateStr) : "—"}</span></td>
+      <td>${supplierSelect(i.supplier_id, i.partner || i.customer_name)}</td>
+      <td>${fileLink}<span class="edit" data-key="invoice_number" data-val="${escapeHtml(numStr)}">${escapeHtml(numStr || "—")}</span></td>
+      <td class="amount"><span class="edit" data-key="amount_total" data-val="${i.amount_total || ''}">${fmtMoney(i.amount_total) || "—"}</span></td>
+      <td class="amount"><span class="edit" data-key="amount_net" data-val="${i.amount_net || ''}">${fmtMoney(i.amount_net) || "—"}</span></td>
+      <td class="amount"><span class="edit" data-key="amount_tax" data-val="${i.amount_tax || ''}">${fmtMoney(i.amount_tax) || "—"}</span></td>
+      <td>${accountSelect(i.account_id)}</td>
+      <td><button class="ghost inv-del" title="Rechnung löschen" style="padding:3px 8px; color:var(--alert);">×</button></td>
+    </tr>`;
+  }).join("");
+
+  // Lösch-Buttons
+  tbody.querySelectorAll(".inv-del").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const tr = e.target.closest("tr");
+      const invId = tr.dataset.invId;
+      const inv = STATE.invoices.find(x => x.id === invId);
+      const label = `${inv?.invoice_number || invId.slice(0,8)} · ${inv?.partner || ''}`;
+      if (!confirm(`Rechnung "${label}" wirklich löschen?\nDas PDF wird auch entfernt.`)) return;
+      try {
+        const res = await fetch(API + `/invoices/${invId}`, {
+          method: "DELETE", headers: { "X-Org-Slug": ORG }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await loadInvoices();
+      } catch (err) {
+        alert("Fehler beim Löschen: " + err.message);
+      }
+    });
+  });
+
+  // Inline-Edit: Doppelklick auf .edit-Span → Input-Feld
+  tbody.querySelectorAll("span.edit").forEach(span => {
+    span.style.cursor = "text";
+    span.style.borderBottom = "1px dashed var(--line-strong)";
+    span.style.padding = "2px 4px";
+    span.addEventListener("dblclick", () => startEdit(span));
+  });
+
+  tbody.querySelectorAll("tr").forEach(tr => {
+    const invId = tr.dataset.invId;
+    const accSel = tr.querySelector("select.acct:not(.sup)");
+    if (accSel) {
+      accSel.addEventListener("change", async () => {
+        try {
+          await apiPatch(`/invoices/${invId}/account`, { account_id: accSel.value || null });
+          accSel.classList.toggle("set", !!accSel.value);
+          const inv = STATE.invoices.find(x => x.id === invId);
+          if (inv) inv.account_id = accSel.value || null;
+          updateNoAccountKpi();
+        } catch (e) {
+          alert("Fehler beim Speichern: " + e.message);
+        }
+      });
+    }
+    const supSel = tr.querySelector("select.sup");
+    if (supSel) {
+      supSel.addEventListener("change", async () => {
+        try {
+          await apiPatch(`/invoices/${invId}/supplier`, { supplier_id: supSel.value || null });
+          supSel.classList.toggle("set", !!supSel.value);
+          const inv = STATE.invoices.find(x => x.id === invId);
+          if (inv) inv.supplier_id = supSel.value || null;
+          // Lieferanten-Counter aktualisieren
+          await loadSuppliers();
+        } catch (e) {
+          alert("Fehler beim Speichern: " + e.message);
+        }
+      });
+    }
+  });
+}
+
+// =============================================================
+// INLINE EDIT für Rechnungs-Felder
+// =============================================================
+function startEdit(span) {
+  const key = span.dataset.key;
+  const val = span.dataset.val || "";
+  const tr = span.closest("tr");
+  const invId = tr.dataset.invId;
+
+  // Input bauen
+  const input = document.createElement("input");
+  input.type = (key === "amount_total" || key === "amount_net" || key === "amount_tax") ? "text" : "text";
+  input.value = val;
+  input.placeholder = key === "invoice_date" ? "TT.MM.JJJJ" : "";
+  input.style.cssText = "width:100%; padding:2px 4px; border:1px solid var(--ink); border-radius:3px; font-family:var(--mono); font-size:12px; background:#fff;";
+
+  span.replaceWith(input);
+  input.focus();
+  input.select();
+
+  let saved = false;
+  const save = async () => {
+    if (saved) return;
+    saved = true;
+    const newVal = input.value.trim();
+    // Geld-Werte normalisieren: 1.234,56 oder 1234,56 → 1234.56
+    let toSave = newVal;
+    if ((key === "amount_total" || key === "amount_net" || key === "amount_tax") && newVal) {
+      toSave = newVal.replace(/[€\s]/g, "").replace(/\./g, "").replace(",", ".");
+      const f = parseFloat(toSave);
+      if (isNaN(f)) {
+        alert("Ungültiger Betrag: " + newVal);
+        cancel();
+        return;
+      }
+      toSave = String(f);
+    }
+    try {
+      await apiPatch(`/invoices/${invId}/fields`, {
+        field_key: key,
+        field_value: toSave || null,
+      });
+      // Re-render diese Zeile mit neuem Wert
+      await loadInvoices();
+    } catch (e) {
+      alert("Fehler beim Speichern: " + e.message);
+      cancel();
+    }
+  };
+  const cancel = () => {
+    if (saved) return;
+    saved = true;
+    const newSpan = document.createElement("span");
+    newSpan.className = "edit";
+    newSpan.dataset.key = key;
+    newSpan.dataset.val = val;
+    newSpan.textContent = span.textContent;
+    newSpan.style.cssText = "cursor:text; border-bottom:1px dashed var(--line-strong); padding:2px 4px;";
+    newSpan.addEventListener("dblclick", () => startEdit(newSpan));
+    input.replaceWith(newSpan);
+  };
+
+  input.addEventListener("blur", save);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); save(); }
+    if (e.key === "Escape") { e.preventDefault(); cancel(); }
+  });
+}
+
+function supplierSelect(currentId, fallbackName) {
+  const list = (STATE.suppliers || []).slice().sort((a,b) => a.name.localeCompare(b.name));
+  let html = `<select class="acct sup ${currentId ? 'set' : ''}">`;
+  html += `<option value="">— ${escapeHtml(fallbackName || 'Lieferant wählen')} —</option>`;
+  list.forEach(s => {
+    const sel = s.id === currentId ? " selected" : "";
+    const meta = s.iban ? ` (${s.iban.slice(0,11)}…)` : "";
+    html += `<option value="${s.id}"${sel}>${escapeHtml(s.name)}${meta}</option>`;
+  });
+  html += `</select>`;
+  return html;
+}
+
+["inv-search", "inv-filter-dir", "inv-filter-acc"].forEach(id => {
+  document.getElementById(id).addEventListener("input", renderInvoices);
+});
+
+// =============================================================
+// PDF UPLOAD
+// =============================================================
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("file-input");
+const uploadStatus = document.getElementById("upload-status");
+
+dropzone.addEventListener("click", (e) => {
+  if (e.target.tagName !== "INPUT") fileInput.click();
+});
+dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("drag"); });
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
+dropzone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropzone.classList.remove("drag");
+  if (e.dataTransfer.files && e.dataTransfer.files.length) {
+    handleUpload(e.dataTransfer.files);
+  }
+});
+fileInput.addEventListener("change", () => {
+  if (fileInput.files.length) handleUpload(fileInput.files);
+});
+
+async function handleUpload(files, force = false) {
+  const list = Array.from(files).filter(f => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf"));
+  if (!list.length) {
+    uploadStatus.innerHTML = `<div class="upload-result err">Keine PDFs gefunden.</div>`;
+    return;
+  }
+  uploadStatus.innerHTML = `<div class="upload-result">Upload läuft … ${list.length} Datei(en).${force ? " (mit force)" : ""}</div>`;
+  try {
+    // V3: Hash-basierte Duplikat-Erkennung + File-Persist
+    const path = force ? "/invoices/bulk-upload-v3?force=true" : "/invoices/bulk-upload-v3";
+    const result = await apiPostFiles(path, list);
+    if (result.ok) {
+      const items = result.data.results || [];
+      const okCount = items.filter(r => r.ok).length;
+      const dups = items.filter(r => r.duplicate);
+      const errs = items.filter(r => !r.ok && !r.duplicate);
+
+      let html = `<div class="upload-result ${okCount > 0 ? 'ok' : 'err'}">`;
+      html += `<strong>${okCount} importiert</strong>`;
+      if (dups.length) html += `, <strong>${dups.length} Duplikate</strong>`;
+      if (errs.length) html += `, ${errs.length} Fehler`;
+      html += `.</div>`;
+
+      if (items.length) {
+        html += `<ul class="upload-list">`;
+        items.forEach(r => {
+          const icon = r.ok ? "✓" : (r.duplicate ? "⊘" : "✗");
+          const note = r.error ? " — " + escapeHtml(r.error) : "";
+          html += `<li>${icon} ${escapeHtml(r.filename || "?")}${note}</li>`;
+        });
+        html += `</ul>`;
+      }
+
+      // Confirm-Dialog wenn Duplikate
+      if (dups.length && !force) {
+        html += `<div style="margin-top:12px;padding:12px;background:var(--warn-soft);border-radius:8px;">
+          <strong>${dups.length} Datei(en) wurden bereits hochgeladen.</strong><br>
+          <button class="primary" id="dup-force" style="margin-top:8px;">Trotzdem hochladen (force)</button>
+          <button class="ghost" id="dup-skip" style="margin-top:8px;">Abbrechen</button>
+        </div>`;
+      }
+
+      uploadStatus.innerHTML = html;
+
+      // Refresh invoices
+      await loadInvoices();
+
+      // Wire force button
+      const dupBtn = document.getElementById("dup-force");
+      if (dupBtn) {
+        dupBtn.addEventListener("click", async () => {
+          const dupFiles = list.filter(f => dups.some(d => d.filename === f.name));
+          if (dupFiles.length) await handleUpload(dupFiles, true);
+        });
+        document.getElementById("dup-skip").addEventListener("click", () => {
+          uploadStatus.innerHTML = '';
+        });
+      }
+    } else {
+      uploadStatus.innerHTML = `<div class="upload-result err">Server-Fehler ${result.status}: ${escapeHtml(JSON.stringify(result.data))}</div>`;
+    }
+  } catch (e) {
+    uploadStatus.innerHTML = `<div class="upload-result err">Fehler: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+// =============================================================
+// SUPPLIERS
+// =============================================================
+async function loadSuppliers() {
+  try {
+    const data = await apiGet("/suppliers");
+    STATE.suppliers = data.suppliers || [];
+  } catch (e) {
+    console.warn("suppliers", e);
+    STATE.suppliers = [];
+  }
+  document.getElementById("badge-sup").textContent = STATE.suppliers.length;
+  renderSuppliers();
+}
+
+function renderSuppliers() {
+  const tbody = document.getElementById("sup-tbody");
+  const search = document.getElementById("sup-search").value.toLowerCase().trim();
+  let rows = STATE.suppliers || [];
+  if (search) {
+    rows = rows.filter(s =>
+      (s.name || "").toLowerCase().includes(search) ||
+      (s.iban || "").toLowerCase().includes(search)
+    );
+  }
+  document.getElementById("sup-count").textContent = `${rows.length} Lieferanten`;
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty">Keine Lieferanten.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(s => `<tr data-sup-id="${s.id}">
+    <td><strong>${escapeHtml(s.name)}</strong>${s.notes ? `<div class="iban">${escapeHtml(s.notes)}</div>` : ""}</td>
+    <td><input class="sup-iban" data-field="iban" value="${escapeHtml(s.iban || "")}" placeholder="IBAN" /></td>
+    <td><input class="sup-uid" data-field="uid_number" value="${escapeHtml(s.uid_number || "")}" placeholder="ATU…" /></td>
+    <td>${supplierAccountSelect(s.default_account_id)}</td>
+    <td class="amount">${s.transaction_count || 0}</td>
+    <td class="amount">${s.invoice_count || 0}</td>
+    <td><button class="ghost sup-del">×</button></td>
+  </tr>`).join("");
+
+  tbody.querySelectorAll("tr").forEach(tr => {
+    const sid = tr.dataset.supId;
+    tr.querySelectorAll("input.sup-iban, input.sup-uid").forEach(inp => {
+      inp.addEventListener("blur", async () => {
+        try {
+          await apiPatch(`/suppliers/${sid}`, { [inp.dataset.field]: inp.value || null });
+          inp.style.background = "var(--accent-soft)";
+          setTimeout(() => inp.style.background = "", 800);
+        } catch (e) { alert("Fehler: " + e.message); }
+      });
+    });
+    tr.querySelector("select.sup-acct").addEventListener("change", async (ev) => {
+      try { await apiPatch(`/suppliers/${sid}`, { default_account_id: ev.target.value || null }); }
+      catch (e) { alert("Fehler: " + e.message); }
+    });
+    tr.querySelector(".sup-del").addEventListener("click", async () => {
+      if (!confirm(`Lieferant "${rows.find(x=>x.id===sid)?.name}" löschen?`)) return;
+      try {
+        await fetch(API + `/suppliers/${sid}`, { method: "DELETE", headers: { "X-Org-Slug": ORG }});
+        await loadSuppliers();
+        await loadInvoices();
+      } catch (e) { alert("Fehler: " + e.message); }
+    });
+  });
+}
+
+function supplierAccountSelect(currentId) {
+  let html = `<select class="acct sup-acct ${currentId ? 'set' : ''}">`;
+  html += `<option value="">— kein Standard —</option>`;
+  const order = ["expense", "asset", "liability", "equity", "revenue"];
+  for (const type of order) {
+    const accs = (STATE.accounts || []).filter(a => a.type === type).sort((a,b) => a.number.localeCompare(b.number));
+    if (!accs.length) continue;
+    html += `<optgroup label="${TYPE_LABELS[type]}">`;
+    accs.forEach(a => {
+      const sel = a.id === currentId ? " selected" : "";
+      html += `<option value="${a.id}"${sel}>${escapeHtml(a.number)} ${escapeHtml(a.name)}</option>`;
+    });
+    html += `</optgroup>`;
+  }
+  html += `</select>`;
+  return html;
+}
+
+document.getElementById("sup-search").addEventListener("input", renderSuppliers);
+document.getElementById("sup-rematch").addEventListener("click", async () => {
+  try {
+    const res = await fetch(API + "/suppliers/auto-match", { method: "POST", headers: { "X-Org-Slug": ORG }});
+    const data = await res.json();
+    alert(`Auto-Match: ${data.matched_invoices} Rechnungen, ${data.matched_transactions} Bank-Buchungen verknüpft.`);
+    await loadSuppliers();
+    await loadInvoices();
+  } catch (e) { alert("Fehler: " + e.message); }
+});
+document.getElementById("sup-add").addEventListener("click", async () => {
+  const name = prompt("Name des Lieferanten:");
+  if (!name) return;
+  const iban = prompt("IBAN (optional):") || null;
+  try {
+    await fetch(API + "/suppliers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Org-Slug": ORG },
+      body: JSON.stringify({ name: name.trim(), iban }),
+    });
+    await loadSuppliers();
+  } catch (e) { alert("Fehler: " + e.message); }
+});
+
+// =============================================================
+// KASSABUCH
+// =============================================================
+async function loadCashbook() {
+  try {
+    const data = await apiGet("/cashbook");
+    STATE.cashbook = data;
+  } catch (e) {
+    STATE.cashbook = { entries: [], total_in: 0, total_out: 0, balance: 0 };
+  }
+  renderCashbook();
+  document.getElementById("badge-cb").textContent = STATE.cashbook.entries?.length || 0;
+}
+
+function renderCashbook() {
+  const data = STATE.cashbook || { entries: [], total_in: 0, total_out: 0, balance: 0 };
+  const fmt = v => v.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "€";
+
+  document.getElementById("cb-total-in").textContent = fmt(data.total_in || 0);
+  document.getElementById("cb-total-out").textContent = fmt(data.total_out || 0);
+  const bal = data.balance || 0;
+  const balEl = document.getElementById("cb-balance");
+  balEl.textContent = fmt(bal);
+  balEl.style.color = bal >= 0 ? "var(--accent)" : "var(--alert)";
+
+  const tbody = document.getElementById("cb-tbody");
+  if (!data.entries?.length) {
+    tbody.innerHTML = `<tr><td colspan="10" class="empty">Noch keine Einträge.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.entries.map(e => {
+    const fmtAmount = v => v > 0 ? v.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "";
+    const receiptBtn = e.has_receipt
+      ? `<a href="${API}/cashbook/${e.id}/receipt" target="_blank" style="color:var(--accent); text-decoration:none;" title="${escapeHtml(e.receipt_name||'')}">📎 anzeigen</a>`
+      : `<label style="cursor:pointer; color:var(--ink-mute);">📷 Beleg<input type="file" class="cb-file" accept="image/*,application/pdf" style="display:none;" data-id="${e.id}"></label>`;
+    return `<tr data-cb-id="${e.id}">
+      <td>${fmtDate(e.entry_date)}</td>
+      <td><code style="font-size:11px;">${escapeHtml(e.document_no || '—')}</code></td>
+      <td>${escapeHtml(e.description)}${e.supplier_name ? `<div class="iban">${escapeHtml(e.supplier_name)}</div>` : ''}</td>
+      <td class="amount" style="color:var(--accent); font-weight:600;">${fmtAmount(e.amount_in)}</td>
+      <td class="amount" style="color:var(--alert); font-weight:600;">${fmtAmount(e.amount_out)}</td>
+      <td class="amount" style="font-size:11px; color:var(--ink-mute);">${e.vat_rate ? e.vat_rate + '%' : ''} ${e.vat_amount ? '·' + fmtAmount(e.vat_amount) : ''}</td>
+      <td style="font-size:11px;">${escapeHtml(e.account_label || '—')}</td>
+      <td class="amount" style="font-weight:700;">${fmt(e.saldo)}</td>
+      <td>${receiptBtn}</td>
+      <td><button class="ghost cb-del" style="padding:3px 8px; color:var(--alert);">×</button></td>
+    </tr>`;
+  }).join("");
+
+  // Wire delete
+  tbody.querySelectorAll(".cb-del").forEach(btn => {
+    btn.addEventListener("click", async (ev) => {
+      const eid = ev.target.closest("tr").dataset.cbId;
+      if (!confirm("Eintrag löschen?")) return;
+      try {
+        await fetch(API + `/cashbook/${eid}`, { method:"DELETE", headers:{"X-Org-Slug":ORG} });
+        await loadCashbook();
+      } catch (e) { alert(e.message); }
+    });
+  });
+  // Wire receipt upload
+  tbody.querySelectorAll(".cb-file").forEach(inp => {
+    inp.addEventListener("change", async (ev) => {
+      const eid = ev.target.dataset.id;
+      const file = ev.target.files[0];
+      if (!file) return;
+      const fd = new FormData();
+      fd.append("file", file);
+      try {
+        const res = await fetch(API + `/cashbook/${eid}/receipt`, {
+          method:"POST", headers:{"X-Org-Slug":ORG}, body: fd
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await loadCashbook();
+      } catch (e) { alert("Beleg-Upload: " + e.message); }
+    });
+  });
+}
+
+// "+ Neuer Eintrag" Form
+document.getElementById("cb-add").addEventListener("click", async () => {
+  const desc = document.getElementById("cb-desc").value.trim();
+  if (!desc) { alert("Beschreibung fehlt"); return; }
+  const parseAmt = v => {
+    if (!v) return 0;
+    return parseFloat(v.replace(/[€\s]/g,"").replace(/\./g,"").replace(",",".") ) || 0;
+  };
+  const amount_in = parseAmt(document.getElementById("cb-in").value);
+  const amount_out = parseAmt(document.getElementById("cb-out").value);
+  if (amount_in === 0 && amount_out === 0) { alert("Eingang oder Ausgang muss > 0 sein"); return; }
+  const vat_raw = document.getElementById("cb-vat").value.trim().replace("%","");
+  const vat_rate = vat_raw ? parseFloat(vat_raw) : null;
+  const account_id = document.getElementById("cb-account").value || null;
+  const entry_date = document.getElementById("cb-date").value || new Date().toISOString().slice(0,10);
+
+  try {
+    await fetch(API + "/cashbook", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","X-Org-Slug":ORG},
+      body: JSON.stringify({ entry_date, description: desc, amount_in, amount_out, vat_rate, account_id }),
+    });
+    // Form reset
+    document.getElementById("cb-desc").value = "";
+    document.getElementById("cb-in").value = "";
+    document.getElementById("cb-out").value = "";
+    document.getElementById("cb-vat").value = "";
+    await loadCashbook();
+  } catch (e) { alert(e.message); }
+});
+
+function populateCashbookAccountDropdown() {
+  const sel = document.getElementById("cb-account");
+  if (!sel) return;
+  const order = ["expense","asset","liability","equity","revenue"];
+  let html = `<option value="">— Konto —</option>`;
+  for (const t of order) {
+    const accs = (STATE.accounts || []).filter(a => a.type === t).sort((a,b) => a.number.localeCompare(b.number));
+    if (!accs.length) continue;
+    html += `<optgroup label="${TYPE_LABELS[t]}">`;
+    accs.forEach(a => { html += `<option value="${a.id}">${escapeHtml(a.number)} ${escapeHtml(a.name)}</option>`; });
+    html += `</optgroup>`;
+  }
+  sel.innerHTML = html;
+}
+
+// Heute als Default-Datum
+document.addEventListener("DOMContentLoaded", () => {
+  const cbDate = document.getElementById("cb-date");
+  if (cbDate) cbDate.value = new Date().toISOString().slice(0,10);
+});
+
+// =============================================================
+// BOOT
+// =============================================================
+async function boot() {
+  document.getElementById("api-base").textContent = API;
+  try {
+    await loadAccounts();
+  } catch (e) {
+    console.error(e);
+    document.getElementById("kpi-acc").textContent = "✗";
+    document.getElementById("kpi-acc-sub").textContent = "Fehler: " + e.message;
+  }
+  await Promise.all([
+    loadTransactions().catch(e => console.error(e)),
+    loadInvoices().catch(e => console.error(e)),
+    loadSuppliers().catch(e => console.error(e)),
+    loadCashbook().catch(e => console.error(e)),
+  ]);
+}
+document.getElementById("btn-reload").addEventListener("click", boot);
+boot();
+</script>
+
+</body>
+</html>

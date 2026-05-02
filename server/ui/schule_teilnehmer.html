@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA · Mein Studio</title>
+<style>
+:root {
+  --bg: #f0eee9;
+  --phone-bg: #ffffff;
+  --ink: #1a1a1a;
+  --ink-soft: #55524b;
+  --ink-mute: #8a8780;
+  --line: #ece9e2;
+  --accent: #2d7a5f;
+  --accent-soft: #e8f1ec;
+  --warn-soft: #f5ebd8;
+  --warn: #8a6a2a;
+  --alert-soft: #f5e1da;
+  --alert: #a0391f;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* PHONE-FRAME */
+.phone-stage {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.phone {
+  width: 380px;
+  height: 760px;
+  background: #1a1a1a;
+  border-radius: 38px;
+  padding: 8px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.18), 0 6px 12px rgba(0,0,0,0.08);
+  position: relative;
+}
+.phone-screen {
+  background: var(--phone-bg);
+  border-radius: 30px;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.notch {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92px;
+  height: 24px;
+  background: #1a1a1a;
+  border-radius: 0 0 14px 14px;
+  z-index: 100;
+}
+
+/* STATUS BAR */
+.status-bar {
+  height: 38px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 28px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* APP HEADER */
+.app-header {
+  padding: 12px 22px 16px;
+}
+.app-greeting {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-mute);
+}
+.app-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 4px 0 0;
+}
+
+/* CONTENT */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 18px 100px;
+}
+
+/* HERO CARD */
+.hero {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 16px;
+}
+.hero .when {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.6);
+}
+.hero .what {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 4px 0 8px;
+  line-height: 1.2;
+}
+.hero .where {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+}
+.hero .who {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  margin-top: 2px;
+}
+
+/* SOFT CARD */
+.soft-card {
+  background: var(--phone-bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+.soft-card .lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+}
+.soft-card .val {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.soft-card .sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.soft-card.tinted {
+  background: var(--accent-soft);
+  border-color: transparent;
+}
+.soft-card.tinted .val { color: var(--accent); }
+.soft-card.warn { background: var(--warn-soft); border-color: transparent; }
+.soft-card.warn .val { color: var(--warn); }
+.soft-card.alert { background: var(--alert-soft); border-color: transparent; }
+.soft-card.alert .val { color: var(--alert); }
+
+/* SCHEDULE LIST */
+.session-row {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.session-row:last-child { border-bottom: 0; }
+.session-time {
+  text-align: center;
+  width: 56px;
+  flex-shrink: 0;
+}
+.session-time .day {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-mute);
+}
+.session-time .date {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: var(--ink);
+  line-height: 1;
+}
+.session-time .hour {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+.session-info { flex: 1; }
+.session-info .name {
+  font-size: 15px;
+  font-weight: 600;
+}
+.session-info .meta {
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin-top: 2px;
+}
+.session-status {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+.session-status.ok { background: var(--accent-soft); color: var(--accent); }
+.session-status.shifted { background: var(--warn-soft); color: var(--warn); }
+
+/* PROGRESS BAR */
+.progress-track {
+  height: 8px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+/* BOTTOM NAV */
+.tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 76px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--line);
+  display: flex;
+  padding-bottom: 14px;
+  z-index: 50;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink-mute);
+  font-size: 11px;
+  font-weight: 500;
+}
+.tab-item.active { color: var(--ink); }
+.tab-item .dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+}
+.tab-item.active .dot { opacity: 1; color: #fff; background: var(--ink); }
+
+/* FOTO BUTTON */
+.foto-fab {
+  position: absolute;
+  bottom: 96px;
+  right: 18px;
+  width: 56px;
+  height: 56px;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+/* PANELS */
+.panel-app { display: none; }
+.panel-app.active { display: block; }
+
+/* SHIKSHA SPRACHE */
+.sprache {
+  font-size: 16px;
+  line-height: 1.5;
+  background: #fff8d6;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+
+/* WEATHER ALERT */
+.weather-alert {
+  background: var(--alert-soft);
+  border: 1px solid #f0c8b8;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.weather-alert .head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--alert);
+}
+.weather-alert .body {
+  font-size: 14px;
+  margin-top: 6px;
+  color: var(--ink);
+}
+.weather-alert .actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.weather-alert button {
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.weather-alert button.primary { background: var(--ink); color: #fff; }
+.weather-alert button.secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+
+/* SECTION HEADER */
+.section-h {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  margin: 18px 0 8px;
+  font-weight: 600;
+}
+
+/* VARIANT LABEL */
+.phone-label {
+  text-align: center;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  margin-top: 12px;
+  font-weight: 600;
+}
+</style>
+</head>
+<body>
+
+<div class="phone-stage">
+
+<!-- ============================================================ -->
+<!-- PHONE 1 — YOGA-SCHÜLERIN ANNA, HEUTE-VIEW -->
+<!-- ============================================================ -->
+<div>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="phone-screen">
+    <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+    <div class="app-header">
+      <div class="app-greeting">Studio Lichtquelle</div>
+      <h1 class="app-title">Hi Anna 🌿</h1>
+    </div>
+
+    <div class="app-content">
+
+      <div class="sprache">
+        Heute Abend Vinyasa mit Mira. Schon dritte Woche in Folge — Bewegung steht dir gut.
+      </div>
+
+      <div class="hero">
+        <div class="when">heute · 18:30</div>
+        <div class="what">Vinyasa Power</div>
+        <div class="where">Studio A · Sonne</div>
+        <div class="who">mit Mira</div>
+      </div>
+
+      <div class="section-h">Deine Karte</div>
+      <div class="soft-card tinted">
+        <div class="lbl">10er-Karte</div>
+        <div class="val">7 Stunden frei</div>
+        <div class="sub">Gültig bis 4. September</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 70%;"></div>
+        </div>
+      </div>
+
+      <div class="section-h">Diese Woche</div>
+      <div class="soft-card">
+        <div class="session-row">
+          <div class="session-time"><div class="day">Mi</div><div class="date">29</div><div class="hour">18:30</div></div>
+          <div class="session-info"><div class="name">Vinyasa Power</div><div class="meta">Mira · Studio A</div></div>
+          <div class="session-status ok">heute</div>
+        </div>
+        <div class="session-row">
+          <div class="session-time"><div class="day">Fr</div><div class="date">01</div><div class="hour">18:30</div></div>
+          <div class="session-info"><div class="name">Vinyasa Power</div><div class="meta">Mira · Studio A</div></div>
+          <div class="session-status ok">geplant</div>
+        </div>
+        <div class="session-row">
+          <div class="session-time"><div class="day">Sa</div><div class="date">02</div><div class="hour">14:00</div></div>
+          <div class="session-info"><div class="name">Workshop Atem &amp; Meditation</div><div class="meta">noch nicht angemeldet</div></div>
+          <div class="session-status shifted">offen</div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="foto-fab" title="Foto schicken">📷</button>
+
+    <nav class="tab-bar">
+      <button class="tab-item active"><div class="dot">H</div>Heute</button>
+      <button class="tab-item"><div class="dot">P</div>Plan</button>
+      <button class="tab-item"><div class="dot">M</div>Mein Kram</button>
+    </nav>
+
+  </div>
+</div>
+<div class="phone-label">Yoga · Heute</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHONE 2 — SURF-SCHÜLER JAMES, WETTER-VERSCHIEBUNG -->
+<!-- ============================================================ -->
+<div>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="phone-screen">
+    <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+    <div class="app-header">
+      <div class="app-greeting">Inselwellen Sylt</div>
+      <h1 class="app-title">Hi James 🌊</h1>
+    </div>
+
+    <div class="app-content">
+
+      <div class="weather-alert">
+        <div class="head">⚠ Wetter morgen</div>
+        <div class="body">
+          Wind 38 kn aus NW, Welle 1.6m — über unserer Anfänger-Schwelle. Wir schieben den Mittagskurs auf <strong>Mittwoch 14:00</strong>.
+        </div>
+        <div class="actions">
+          <button class="primary">Passt für mich</button>
+          <button class="secondary">Anders, bitte</button>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="when">heute · 10:00</div>
+        <div class="what">5-Tage-Camp Tag 1</div>
+        <div class="where">Brandenburger Strand</div>
+        <div class="who">mit Lars · Wetsuit XL bereit</div>
+      </div>
+
+      <div class="section-h">Dein Camp</div>
+      <div class="soft-card">
+        <div class="session-row">
+          <div class="session-time"><div class="day">Mo</div><div class="date">27</div><div class="hour">10:00</div></div>
+          <div class="session-info"><div class="name">Day 1 · Basics</div><div class="meta">Pop-up, Paddeln, Etiquette</div></div>
+          <div class="session-status ok">heute</div>
+        </div>
+        <div class="session-row">
+          <div class="session-time"><div class="day">Di</div><div class="date">28</div><div class="hour">10:00</div></div>
+          <div class="session-info"><div class="name">Day 2 · First Wave</div><div class="meta">Pia · Anfängerwelle</div></div>
+          <div class="session-status ok">geplant</div>
+        </div>
+        <div class="session-row">
+          <div class="session-time"><div class="day">Mi</div><div class="date">29</div><div class="hour">10:00</div></div>
+          <div class="session-info"><div class="name">Day 3 · Take-off</div><div class="meta">+ Theorie-Block am Mittag</div></div>
+          <div class="session-status shifted">verschoben</div>
+        </div>
+      </div>
+
+      <div class="section-h">Dein Equipment</div>
+      <div class="soft-card tinted">
+        <div class="lbl">Bereit für dich</div>
+        <div class="val">Wetsuit XL · Board 9'0</div>
+        <div class="sub">Im Lager Westerland · Lars hat's vorbereitet</div>
+      </div>
+
+    </div>
+
+    <button class="foto-fab" title="Foto schicken">📷</button>
+
+    <nav class="tab-bar">
+      <button class="tab-item active"><div class="dot">H</div>Heute</button>
+      <button class="tab-item"><div class="dot">P</div>Plan</button>
+      <button class="tab-item"><div class="dot">M</div>Mein Kram</button>
+    </nav>
+
+  </div>
+</div>
+<div class="phone-label">Surf · Wetter</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHONE 3 — KIND/GUARDIAN: SANDRA SIEHT LUKAS' KURS -->
+<!-- ============================================================ -->
+<div>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="phone-screen">
+    <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+    <div class="app-header">
+      <div class="app-greeting">Lichtquelle · für Lukas</div>
+      <h1 class="app-title">Hi Sandra ✨</h1>
+    </div>
+
+    <div class="app-content">
+
+      <div class="sprache">
+        Lukas Kinder-Yoga am Samstag — alles bereit. Foto-Einverständnis hast du erteilt, danke.
+      </div>
+
+      <div class="hero">
+        <div class="when">Samstag · 10:00</div>
+        <div class="what">Kinder-Yoga 6–10</div>
+        <div class="where">Studio B · Mond</div>
+        <div class="who">mit Tara</div>
+      </div>
+
+      <div class="section-h">Lukas Block</div>
+      <div class="soft-card tinted">
+        <div class="lbl">8er-Block Kinder-Yoga</div>
+        <div class="val">6 Stunden frei</div>
+        <div class="sub">Gültig bis 2. Mai · 2 schon besucht</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 25%;"></div>
+        </div>
+      </div>
+
+      <div class="section-h">Was du erteilt hast</div>
+      <div class="soft-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0;">
+          <span style="font-size:14px;">Kursteilnahme</span>
+          <span style="font-size:11px; color: var(--accent); font-weight:600;">✓ erteilt</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0;">
+          <span style="font-size:14px;">Foto / Video für Studio-IG</span>
+          <span style="font-size:11px; color: var(--accent); font-weight:600;">✓ erteilt</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0;">
+          <span style="font-size:14px;">Datenweitergabe an Dritte</span>
+          <span style="font-size:11px; color: var(--ink-mute); font-weight:600;">— nein</span>
+        </div>
+      </div>
+
+      <div class="section-h">Brauchst du was?</div>
+      <div class="soft-card warn">
+        <div class="lbl">Mira fragt</div>
+        <div class="val">Hat Lukas eine eigene Matte?</div>
+        <div class="sub">Mitnehmen oder zur Studio-Matte greifen — beides okay</div>
+      </div>
+
+    </div>
+
+    <button class="foto-fab" title="Foto schicken">📷</button>
+
+    <nav class="tab-bar">
+      <button class="tab-item active"><div class="dot">H</div>Heute</button>
+      <button class="tab-item"><div class="dot">P</div>Plan</button>
+      <button class="tab-item"><div class="dot">M</div>Mein Kram</button>
+    </nav>
+
+  </div>
+</div>
+<div class="phone-label">Eltern · Kinder-Kurs</div>
+</div>
+
+</div>
+
+<div style="text-align: center; margin-top: 30px; font-size: 11px; color: #999; max-width: 600px; margin-left: auto; margin-right: auto;">
+  SHIKSHA · SCHULE.EDITION · Teilnehmer-App · Mockup im Workspace · 25.04.2026<br>
+  Drei Sichten: Erwachsene Stammschülerin (Yoga) · Surf-Gast mit Wetter-Verschiebung · Eltern eines Kinder-Yoga-Schülers
+</div>
+
+</body>
+</html>

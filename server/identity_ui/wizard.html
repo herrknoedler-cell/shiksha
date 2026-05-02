@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#ff4d8d" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Identität" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="/accounting/ui/identity/manifest.json" />
+<link rel="apple-touch-icon" href="/accounting/ui/kita/app-icon.svg" />
+<title>SHIKSHA · Identitäts-Erfassung</title>
+<style>
+:root {
+  --holi-pink:#ff4d8d; --holi-turquoise:#00d4d4; --holi-yellow:#ffd93d;
+  --holi-purple:#a855f7; --holi-orange:#ff8c42; --holi-green:#6dd47e;
+  --bg:#fff8f0; --card:#fff; --line:#f0e8dc; --line-strong:#e0d5c0;
+  --ink:#2a2530; --ink-soft:#5a5060; --ink-mute:#9a8e9e;
+  --shadow:0 4px 16px rgba(255,77,141,0.10);
+}
+* { box-sizing:border-box; }
+html, body { margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:linear-gradient(135deg,#fff8f0 0%,#ffe4f0 50%,#e4f8ff 100%);
+  background-attachment:fixed;
+  color:var(--ink); line-height:1.55;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.app {
+  max-width:540px; margin:0 auto;
+  padding:max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  min-height:100vh; min-height:100dvh;
+  display:flex; flex-direction:column; width:100%;
+}
+
+header.top { display:flex; align-items:center; gap:12px; padding:14px 8px; }
+.logo {
+  width:44px; height:44px;
+  background:linear-gradient(135deg,var(--holi-pink) 0%,var(--holi-purple) 100%);
+  border-radius:14px; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:22px; box-shadow:var(--shadow);
+}
+.title h1 { font-size:18px; font-weight:700; margin:0; }
+.title p { font-size:12px; color:var(--ink-mute); margin:0; }
+
+.progress { display:flex; gap:6px; padding:0 8px 16px; }
+.progress-dot { flex:1; height:6px; border-radius:3px; background:var(--line); transition:background .3s; }
+.progress-dot.active { background:var(--holi-pink); }
+.progress-dot.done { background:var(--holi-turquoise); }
+
+.step {
+  background:var(--card); border-radius:20px;
+  padding:24px 20px; box-shadow:var(--shadow);
+  margin-bottom:16px; display:none;
+}
+.step.active { display:block; }
+
+.step-num {
+  display:inline-block; font-size:11px; font-weight:700;
+  color:var(--holi-pink); text-transform:uppercase; letter-spacing:0.1em;
+  margin-bottom:4px;
+}
+.step h2 {
+  font-size:22px; font-weight:700; margin:0 0 6px; letter-spacing:-0.02em;
+  background:linear-gradient(120deg,var(--holi-pink),var(--holi-purple));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.step .lede { font-size:14px; color:var(--ink-soft); margin:0 0 18px; }
+
+.field { margin-bottom:14px; }
+.field label {
+  display:block; font-size:12px; font-weight:600;
+  color:var(--ink-soft); margin-bottom:4px;
+  text-transform:uppercase; letter-spacing:0.04em;
+}
+.field input, .field select {
+  width:100%; max-width:100%; padding:14px 16px;
+  border:2px solid var(--line); border-radius:14px;
+  font-size:16px; font-family:inherit; background:#fff;
+  box-sizing:border-box;
+}
+.field input:focus, .field select:focus {
+  outline:none; border-color:var(--holi-pink);
+  box-shadow:0 0 0 4px rgba(255,77,141,0.15);
+}
+
+/* CAPTURE */
+.capture-frame {
+  position:relative; background:#1a1a1a; border-radius:18px; overflow:hidden;
+  aspect-ratio: 4 / 3; margin-bottom:14px;
+}
+.capture-frame video, .capture-frame img, .capture-frame canvas {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.capture-overlay {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  border:3px dashed rgba(255,255,255,0.6);
+  border-radius:14px;
+  pointer-events:none;
+}
+.capture-overlay.id { width:80%; aspect-ratio: 1.586; } /* ID-Card-Format */
+.capture-overlay.selfie { width:60%; aspect-ratio: 1; border-radius:50%; }
+.capture-hint {
+  position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,0.7); color:#fff; padding:8px 14px;
+  border-radius:20px; font-size:12px; backdrop-filter:blur(8px);
+  white-space:nowrap;
+}
+.capture-controls {
+  display:flex; gap:10px; align-items:center; justify-content:center;
+}
+.btn-cap {
+  width:64px; height:64px; border-radius:50%;
+  background:linear-gradient(135deg,var(--holi-pink) 0%,var(--holi-purple) 100%);
+  color:#fff; border:0; cursor:pointer;
+  font-size:24px; box-shadow:0 4px 16px rgba(255,77,141,0.4);
+}
+.btn-cap:active { transform:scale(0.92); }
+.btn-cap:disabled { background:#ccc; box-shadow:none; }
+
+.preview-card {
+  background:#f9f4ec; padding:14px; border-radius:14px;
+  margin-bottom:14px; display:flex; gap:12px; align-items:center;
+}
+.preview-card img {
+  width:80px; height:80px; object-fit:cover; border-radius:10px;
+  border:2px solid var(--holi-green);
+}
+.preview-card .info { flex:1; font-size:13px; }
+.preview-card .info strong { display:block; color:var(--ink); }
+.preview-card .info small { color:var(--ink-mute); }
+.preview-card .check { font-size:24px; color:var(--holi-green); }
+
+.consent-box {
+  background:#fffbf0; border:2px dashed var(--holi-yellow);
+  border-radius:14px; padding:16px;
+  font-size:13px; color:var(--ink-soft); line-height:1.7;
+  margin:14px 0;
+}
+.consent-toggle {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px; background:#fff;
+  border:2px solid var(--line); border-radius:14px; cursor:pointer;
+}
+.consent-toggle.checked { border-color:var(--holi-green); background:#f0fff5; }
+.consent-toggle .check {
+  width:28px; height:28px; border-radius:8px;
+  border:2px solid var(--line-strong);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+}
+.consent-toggle.checked .check {
+  background:var(--holi-green); color:#fff; border-color:var(--holi-green);
+}
+
+.actions { display:flex; gap:10px; margin-top:24px; }
+.btn {
+  flex:1; padding:16px 20px; border:0; border-radius:16px;
+  font-size:16px; font-weight:700; cursor:pointer; font-family:inherit;
+}
+.btn:active { transform:scale(0.98); }
+.btn.primary {
+  background:linear-gradient(135deg,var(--holi-pink) 0%,var(--holi-purple) 100%);
+  color:#fff; box-shadow:0 4px 16px rgba(255,77,141,0.4);
+}
+.btn.primary:disabled { background:#ddd; box-shadow:none; opacity:0.6; }
+.btn.ghost { background:transparent; color:var(--ink-soft); border:2px solid var(--line); }
+
+.success-card {
+  background:linear-gradient(135deg,var(--holi-turquoise) 0%,var(--holi-green) 100%);
+  color:#fff; padding:32px 24px; border-radius:24px; text-align:center;
+}
+.success-card .icon { font-size:56px; margin-bottom:12px; }
+.success-card h2 { font-size:24px; margin:0 0 8px; -webkit-text-fill-color:#fff; background:none; }
+.success-card p { font-size:15px; margin:0; opacity:0.95; }
+
+.extracted-grid {
+  display:grid; grid-template-columns:1fr 2fr; gap:6px 12px;
+  font-size:13px; padding:14px; background:#f9f4ec;
+  border-radius:12px; margin:12px 0;
+}
+.extracted-grid dt { color:var(--ink-mute); font-weight:600; }
+.extracted-grid dd { margin:0; color:var(--ink); font-weight:500; }
+
+.error-msg {
+  background:#fee; color:#a0391f;
+  padding:10px 14px; border-radius:10px; font-size:13px;
+  margin:8px 0;
+}
+
+footer.bot { text-align:center; padding:16px 8px; font-size:11px; color:var(--ink-mute); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<header class="top">
+  <div class="logo">🪪</div>
+  <div class="title">
+    <h1>Identitäts-Erfassung</h1>
+    <p id="hello-context">Abholberechtigung anlegen</p>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="progress-dot active" data-step="1"></div>
+  <div class="progress-dot" data-step="2"></div>
+  <div class="progress-dot" data-step="3"></div>
+  <div class="progress-dot" data-step="4"></div>
+  <div class="progress-dot" data-step="5"></div>
+</div>
+
+<!-- Install-Hint (nur Browser, nicht standalone) -->
+<div id="install-hint" style="display:none; margin-bottom:14px; padding:12px 16px; background:linear-gradient(135deg,#a855f7,#ff4d8d); color:#fff; border-radius:14px; font-size:13px;">
+  <strong>📲 Tipp für Vollbild-Modus:</strong>
+  Über das <strong>Teilen-Symbol ⬆️</strong> "Zum Home-Bildschirm" hinzufügen.
+  Vom Icon getippt läuft der Wizard ohne URL-Bar — wie eine echte App.
+  <button onclick="this.parentElement.style.display='none'" style="background:transparent; border:0; color:#fff; font-size:18px; float:right; padding:0 4px; cursor:pointer; margin-top:-2px;">×</button>
+</div>
+
+<!-- 1: Stammdaten + Consent -->
+<div class="step active" data-step="1">
+  <div class="step-num">Schritt 1 von 5</div>
+  <h2>Person & Einwilligung</h2>
+  <p class="lede">Wer wird erfasst? Bitte vor der Erfassung einwilligen.</p>
+
+  <div class="field">
+    <label>Voller Name *</label>
+    <input type="text" id="full-name" placeholder="Max Mustermann" required />
+  </div>
+  <div class="field">
+    <label>Telefon</label>
+    <input type="tel" id="phone" placeholder="0664 …" />
+  </div>
+  <div class="field">
+    <label>E-Mail</label>
+    <input type="email" id="email" placeholder="…" />
+  </div>
+  <div class="field">
+    <label>Rolle</label>
+    <select id="role">
+      <option value="pickup_person">Abholperson (KITA)</option>
+      <option value="parent">Eltern</option>
+      <option value="renter">Mieter (CHARTER/SURFSCHULE)</option>
+      <option value="participant">Teilnehmer:in</option>
+    </select>
+  </div>
+
+  <div class="consent-box">
+    <strong>Datenschutz (Art. 9 DSGVO):</strong><br><br>
+    • Ausweis-Fotos werden verschlüsselt gespeichert<br>
+    • Daten dienen ausschließlich zur Identitäts-Verifikation<br>
+    • Speicherdauer: max. 12 Monate nach letztem Gebrauch<br>
+    • Sie können jederzeit Auskunft / Löschung verlangen<br>
+    • Zugriff nur durch autorisierte Mitarbeiter mit Audit-Log
+  </div>
+  <div class="consent-toggle" id="consent-toggle" onclick="toggleConsent()">
+    <div class="check" id="consent-check">·</div>
+    <div style="flex:1;"><strong>Ich willige ein</strong>
+      <div style="font-size:12px; color:var(--ink-mute); margin-top:2px;">und bestätige die Erfassung meiner Identitätsdaten</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" id="btn-step2" onclick="goStep(2)" disabled>Weiter →</button>
+  </div>
+</div>
+
+<!-- 2: Vorderseite -->
+<div class="step" data-step="2">
+  <div class="step-num">Schritt 2 von 5</div>
+  <h2>Vorderseite scannen</h2>
+  <p class="lede">Personalausweis oder Reisepass — Vorderseite mit Foto.</p>
+
+  <div class="capture-frame" id="frame-front">
+    <video id="video-front" autoplay playsinline></video>
+    <div class="capture-overlay id"></div>
+    <div class="capture-hint">Ausweis im Rahmen platzieren</div>
+  </div>
+
+  <div class="capture-controls">
+    <button class="btn-cap" id="cap-front" onclick="captureFront()">📸</button>
+  </div>
+
+  <div id="preview-front-wrap" style="display:none;">
+    <div class="preview-card">
+      <img id="preview-front-img" />
+      <div class="info"><strong>Vorderseite</strong><small id="preview-front-meta">erfasst</small></div>
+      <div class="check">✓</div>
+    </div>
+    <div style="text-align:center; margin-top:6px;">
+      <button class="btn ghost" style="padding:8px 14px; font-size:12px;" onclick="retake('front')">↻ Neu aufnehmen</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="goStep(1)">← Zurück</button>
+    <button class="btn primary" id="btn-step3" onclick="goStep(3)" disabled>Weiter →</button>
+  </div>
+</div>
+
+<!-- 3: Rückseite (MRZ) -->
+<div class="step" data-step="3">
+  <div class="step-num">Schritt 3 von 5</div>
+  <h2>Rückseite scannen</h2>
+  <p class="lede">Rückseite mit MRZ (maschinenlesbare Zone unten). Bei Reisepass: Hauptseite mit MRZ.</p>
+
+  <div class="capture-frame" id="frame-back">
+    <video id="video-back" autoplay playsinline></video>
+    <div class="capture-overlay id"></div>
+    <div class="capture-hint">MRZ-Zeilen sichtbar — gut belichtet</div>
+  </div>
+
+  <div class="capture-controls">
+    <button class="btn-cap" id="cap-back" onclick="captureBack()">📸</button>
+  </div>
+
+  <div id="preview-back-wrap" style="display:none;">
+    <div class="preview-card">
+      <img id="preview-back-img" />
+      <div class="info"><strong>Rückseite + MRZ</strong><small id="preview-back-meta">erfasst</small></div>
+      <div class="check">✓</div>
+    </div>
+    <dl class="extracted-grid" id="extracted-grid" style="display:none;"></dl>
+    <div style="text-align:center; margin-top:6px;">
+      <button class="btn ghost" style="padding:8px 14px; font-size:12px;" onclick="retake('back')">↻ Neu aufnehmen</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="goStep(2)">← Zurück</button>
+    <button class="btn primary" id="btn-step4" onclick="goStep(4)" disabled>Weiter →</button>
+  </div>
+</div>
+
+<!-- 4: Selfie -->
+<div class="step" data-step="4">
+  <div class="step-num">Schritt 4 von 5</div>
+  <h2>Selfie</h2>
+  <p class="lede">Bitte Gesicht im Kreis platzieren — gut belichtet, ohne Brille/Maske wenn möglich.</p>
+
+  <div class="capture-frame" id="frame-selfie">
+    <video id="video-selfie" autoplay playsinline></video>
+    <div class="capture-overlay selfie"></div>
+    <div class="capture-hint">Direkt in die Kamera schauen</div>
+  </div>
+
+  <div class="capture-controls">
+    <button class="btn-cap" id="cap-selfie" onclick="captureSelfie()">📸</button>
+  </div>
+
+  <div id="preview-selfie-wrap" style="display:none;">
+    <div class="preview-card">
+      <img id="preview-selfie-img" style="border-radius:50%;" />
+      <div class="info"><strong>Selfie</strong><small>erfasst</small></div>
+      <div class="check">✓</div>
+    </div>
+    <div style="text-align:center; margin-top:6px;">
+      <button class="btn ghost" style="padding:8px 14px; font-size:12px;" onclick="retake('selfie')">↻ Neu aufnehmen</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="goStep(3)">← Zurück</button>
+    <button class="btn primary" id="btn-step5" onclick="goStep(5)" disabled>Weiter →</button>
+  </div>
+</div>
+
+<!-- 5: Übersicht + Submit -->
+<div class="step" data-step="5">
+  <div class="step-num">Schritt 5 von 5</div>
+  <h2>Bestätigen & Speichern</h2>
+  <p class="lede">Nochmal prüfen, dann absenden. Mitarbeiter:in verifiziert anschließend.</p>
+
+  <div id="summary"></div>
+
+  <div id="error-area"></div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="goStep(4)">← Zurück</button>
+    <button class="btn primary" id="btn-submit" onclick="submitAll()">✓ Absenden</button>
+  </div>
+</div>
+
+<!-- 6: Erfolg -->
+<div class="step" data-step="6">
+  <div class="success-card">
+    <div class="icon">🎉</div>
+    <h2>Erfasst!</h2>
+    <p>Die Identität wartet auf Bestätigung durch eine:n Mitarbeiter:in.</p>
+  </div>
+  <div style="text-align:center; margin-top:20px;">
+    <a id="back-link" href="#" style="color:var(--holi-pink); font-weight:600; font-size:14px;">Zurück zum Dashboard</a>
+  </div>
+</div>
+
+<footer class="bot">SHIKSHA · Identity · DSGVO-konform · EU-Hosting</footer>
+
+</div>
+
+<script>
+const API = "/identity";
+const params = new URLSearchParams(location.search);
+const RETURN_URL = params.get("return") || "/accounting/ui/kita/dashboard";
+const EDITION = params.get("edition") || "kita";
+const TARGET_TYPE = params.get("target_type") || "child";
+const TARGET_ID = params.get("target_id") || null;
+
+document.getElementById("back-link").href = RETURN_URL;
+if (params.get("context_label")) {
+  document.getElementById("hello-context").textContent = params.get("context_label");
+}
+
+// Install-Hint: nur zeigen wenn nicht als installierte PWA gestartet
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
+if (!isStandalone) {
+  setTimeout(() => {
+    const hint = document.getElementById("install-hint");
+    if (hint) hint.style.display = "block";
+  }, 1500);
+}
+
+let CONSENT = false;
+let captured = { front: null, back: null, selfie: null };
+let extractedFields = {};
+let activeStream = null;
+
+function $(id) { return document.getElementById(id); }
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function toggleConsent() {
+  CONSENT = !CONSENT;
+  const tg = $("consent-toggle");
+  const ck = $("consent-check");
+  tg.classList.toggle("checked", CONSENT);
+  ck.textContent = CONSENT ? "✓" : "·";
+  $("btn-step2").disabled = !(CONSENT && $("full-name").value.trim());
+}
+$("full-name").addEventListener("input", () => {
+  $("btn-step2").disabled = !(CONSENT && $("full-name").value.trim());
+});
+
+async function goStep(n) {
+  // Stop active stream
+  if (activeStream) {
+    activeStream.getTracks().forEach(t => t.stop());
+    activeStream = null;
+  }
+  document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(`.step[data-step="${n}"]`).forEach(s => s.classList.add("active"));
+  document.querySelectorAll(".progress-dot").forEach(d => {
+    const dn = parseInt(d.dataset.step);
+    d.classList.toggle("active", dn === n);
+    d.classList.toggle("done", dn < n);
+  });
+  window.scrollTo(0, 0);
+
+  // Re-evaluate Weiter-Buttons + Vorschauen basierend auf Capture-State
+  // (verhindert dass nach Zurück-Navigation der Weiter-Button ausgegraut bleibt)
+  $("btn-step3").disabled = !captured.front;
+  $("btn-step4").disabled = !captured.back;
+  $("btn-step5").disabled = !captured.selfie;
+  if (captured.front) $("preview-front-wrap").style.display = "block";
+  if (captured.back) $("preview-back-wrap").style.display = "block";
+  if (captured.selfie) $("preview-selfie-wrap").style.display = "block";
+
+  // Start camera for current step
+  try {
+    if (n === 2) await startCamera("video-front", "environment");
+    if (n === 3) await startCamera("video-back", "environment");
+    if (n === 4) await startCamera("video-selfie", "user");
+  } catch (e) {
+    console.warn("Camera-Start-Fehler:", e);
+  }
+  if (n === 5) renderSummary();
+}
+
+async function startCamera(videoId, facingMode) {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode, width: { ideal: 1280 }, height: { ideal: 960 } },
+      audio: false,
+    });
+    activeStream = stream;
+    $(videoId).srcObject = stream;
+  } catch (e) {
+    console.error("camera", e);
+    alert("Kamera konnte nicht aktiviert werden: " + e.message);
+  }
+}
+
+function snapToBlob(videoId) {
+  return new Promise(resolve => {
+    const v = $(videoId);
+    const canvas = document.createElement("canvas");
+    canvas.width = v.videoWidth || 1280;
+    canvas.height = v.videoHeight || 960;
+    canvas.getContext("2d").drawImage(v, 0, 0);
+    canvas.toBlob(b => resolve({ blob: b, dataUrl: canvas.toDataURL("image/jpeg", 0.85) }), "image/jpeg", 0.85);
+  });
+}
+
+async function captureFront() {
+  const r = await snapToBlob("video-front");
+  captured.front = r.blob;
+  $("preview-front-img").src = r.dataUrl;
+  $("preview-front-wrap").style.display = "block";
+  $("btn-step3").disabled = false;
+}
+
+async function captureBack() {
+  const r = await snapToBlob("video-back");
+  captured.back = r.blob;
+  $("preview-back-img").src = r.dataUrl;
+  $("preview-back-wrap").style.display = "block";
+  $("btn-step4").disabled = false;
+}
+
+async function captureSelfie() {
+  const r = await snapToBlob("video-selfie");
+  captured.selfie = r.blob;
+  $("preview-selfie-img").src = r.dataUrl;
+  $("preview-selfie-wrap").style.display = "block";
+  $("btn-step5").disabled = false;
+}
+
+async function retake(which) {
+  // Reset Capture-State + Vorschau verstecken
+  captured[which] = null;
+  if (which === "front") {
+    $("preview-front-wrap").style.display = "none";
+    $("btn-step3").disabled = true;
+    await startCamera("video-front", "environment");
+  } else if (which === "back") {
+    $("preview-back-wrap").style.display = "none";
+    $("extracted-grid").style.display = "none";
+    $("btn-step4").disabled = true;
+    await startCamera("video-back", "environment");
+  } else if (which === "selfie") {
+    $("preview-selfie-wrap").style.display = "none";
+    $("btn-step5").disabled = true;
+    await startCamera("video-selfie", "user");
+  }
+}
+
+function renderSummary() {
+  const summary = $("summary");
+  let html = `<div class="extracted-grid">
+    <dt>Name</dt><dd>${escapeHtml($("full-name").value)}</dd>
+    <dt>Telefon</dt><dd>${escapeHtml($("phone").value || '—')}</dd>
+    <dt>E-Mail</dt><dd>${escapeHtml($("email").value || '—')}</dd>
+    <dt>Rolle</dt><dd>${escapeHtml($("role").options[$("role").selectedIndex].text)}</dd>
+    <dt>Einwilligung</dt><dd>${CONSENT ? '✓ erteilt' : '✗ fehlt'}</dd>
+    <dt>Vorderseite</dt><dd>${captured.front ? '✓ erfasst' : '—'}</dd>
+    <dt>Rückseite + MRZ</dt><dd>${captured.back ? '✓ erfasst' : '—'}</dd>
+    <dt>Selfie</dt><dd>${captured.selfie ? '✓ erfasst' : '—'}</dd>
+  </div>`;
+  summary.innerHTML = html;
+}
+
+async function safeFetch(url, options, stepLabel) {
+  /** Wrapper mit Stack-Tracing + Status-Code im Error. */
+  let res, body;
+  try {
+    res = await fetch(url, options);
+  } catch (e) {
+    throw new Error(`[${stepLabel}] Netzwerk: ${e.message}`);
+  }
+  try {
+    body = await res.json();
+  } catch (e) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`[${stepLabel}] Server antwortet kein JSON (${res.status}): ${text.slice(0,200)}`);
+  }
+  if (!res.ok) {
+    const detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail || body);
+    throw new Error(`[${stepLabel}] HTTP ${res.status}: ${detail}`);
+  }
+  return body;
+}
+
+async function submitAll() {
+  const errArea = $("error-area");
+  errArea.innerHTML = "";
+  if (!CONSENT) { errArea.innerHTML = `<div class="error-msg">Einwilligung fehlt</div>`; return; }
+  if (!captured.front || !captured.back || !captured.selfie) {
+    errArea.innerHTML = `<div class="error-msg">Bitte alle 3 Fotos erfassen</div>`;
+    return;
+  }
+
+  const btn = $("btn-submit");
+  btn.disabled = true;
+  btn.textContent = "Sende …";
+
+  try {
+    // 1. Person anlegen
+    btn.textContent = "1/4 Person anlegen …";
+    const personData = await safeFetch(API + "/persons", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Org-Slug": "kita_pilot" },
+      body: JSON.stringify({
+        full_name: $("full-name").value.trim(),
+        contact_phone: $("phone").value.trim() || null,
+        contact_email: $("email").value.trim() || null,
+        edition: EDITION,
+        person_role: $("role").value,
+        consent_given: true,
+        consent_text: "Standard DSGVO-Einwilligung Identitäts-Erfassung",
+      }),
+    }, "Person anlegen");
+    const personId = personData.id;
+
+    // 2. Bilder hochladen
+    let i = 0;
+    for (const [kind, blob] of [
+      ["id_front", captured.front],
+      ["id_back", captured.back],
+      ["selfie", captured.selfie],
+    ]) {
+      i++;
+      btn.textContent = `${i+1}/4 Upload ${kind} …`;
+      if (!blob) throw new Error(`Foto ${kind} fehlt — bitte Schritt erneut machen`);
+      const fd = new FormData();
+      fd.append("file", blob, `${kind}.jpg`);
+      const upData = await safeFetch(
+        `${API}/persons/${personId}/upload?doc_kind=${kind}`,
+        { method: "POST", headers: { "X-Org-Slug": "kita_pilot" }, body: fd },
+        `Upload ${kind}`
+      );
+      if (kind === "id_back" && upData.extracted_fields) {
+        extractedFields = upData.extracted_fields;
+      }
+    }
+
+    // 3. Optional: Berechtigung anlegen
+    if (TARGET_ID) {
+      btn.textContent = "4/4 Berechtigung …";
+      await safeFetch(API + "/authorizations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Org-Slug": "kita_pilot" },
+        body: JSON.stringify({
+          person_id: personId,
+          edition: EDITION,
+          target_type: TARGET_TYPE,
+          target_id: TARGET_ID,
+          role: "pickup",
+          granted_by: $("full-name").value,
+        }),
+      }, "Berechtigung");
+    }
+
+    goStep(6);
+  } catch (e) {
+    console.error("Submit-Fehler:", e);
+    errArea.innerHTML = `<div class="error-msg" style="font-family: var(--mono, monospace); font-size:12px; line-height:1.5;">${escapeHtml(e.message)}</div>`;
+    btn.disabled = false;
+    btn.textContent = "✓ Absenden";
+  }
+}
+</script>
+
+</body>
+</html>

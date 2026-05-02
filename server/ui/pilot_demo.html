@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA — Pilot-Walkthrough</title>
+<style>
+:root {
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --line: #e6e4de;
+  --line-strong: #c6c2b8;
+  --ink: #1a1a1a;
+  --ink-soft: #55524b;
+  --ink-mute: #7a7a74;
+  --accent: #2d7a5f;
+  --accent-soft: #e8f1ec;
+  --warn: #8a6a2a;
+  --warn-soft: #f5ebd8;
+  --alert: #a0391f;
+  --alert-soft: #f5e1da;
+  --info: #4a6a80;
+  --info-soft: #e8eef1;
+  --learn: #6a4faf;
+  --learn-soft: #efeaf5;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* SLIDE-CONTAINER */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  padding: 64px 80px;
+  background: var(--bg);
+}
+.slide.active { display: flex; }
+
+/* COMMON SLIDE STRUCTURE */
+.slide-eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+  margin-bottom: 8px;
+}
+.slide-title {
+  font-size: 42px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 12px;
+  max-width: 920px;
+}
+.slide-lede {
+  font-size: 19px;
+  color: var(--ink-soft);
+  margin: 0 0 32px;
+  max-width: 720px;
+  line-height: 1.5;
+}
+
+/* TITLE SLIDE */
+.slide-title-page {
+  justify-content: center;
+  align-items: flex-start;
+}
+.slide-title-page .slide-title { font-size: 64px; }
+.slide-title-page .slide-lede { font-size: 22px; max-width: 800px; }
+.brand-tag {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+  margin-bottom: 24px;
+}
+
+/* PAUSE-SLIDE — black + white text */
+.slide.pause {
+  background: var(--ink);
+  color: #fff;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.slide.pause .question {
+  font-size: 48px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  max-width: 900px;
+  line-height: 1.2;
+}
+.slide.pause .meta {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 32px;
+}
+
+/* DEMO-SLIDE — embed iframe of mockup */
+.slide.demo {
+  padding: 32px 40px 80px;
+}
+.slide.demo .slide-title { font-size: 28px; margin-bottom: 8px; }
+.slide.demo .slide-lede { font-size: 16px; margin-bottom: 16px; }
+.slide.demo .demo-frame {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+}
+.slide.demo .demo-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* CONTENT-SLIDE — split layout */
+.slide.split {
+  flex-direction: row;
+  gap: 40px;
+}
+.slide.split > .col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* CARD-LIST */
+.card-list { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
+.card-list .card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 22px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.card-list .card .num {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  min-width: 28px;
+}
+.card-list .card .body { flex: 1; }
+.card-list .card h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.card-list .card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* QUOTE-LIKE */
+.shiksha-quote {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--ink);
+  border-radius: 0 12px 12px 0;
+  padding: 24px 28px;
+  font-size: 22px;
+  line-height: 1.4;
+  max-width: 800px;
+  margin: 16px 0;
+}
+.shiksha-quote.alert { border-left-color: var(--alert); }
+.shiksha-quote.warn { border-left-color: var(--warn); }
+.shiksha-quote.accent { border-left-color: var(--accent); }
+.shiksha-quote strong { font-weight: 600; }
+
+/* PILL-ROW */
+.pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
+.pill-row .pill {
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 500;
+}
+.pill-row .pill.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+}
+
+/* COMPARE TABLE */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  max-width: 920px;
+}
+.compare .col-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 22px 24px;
+}
+.compare .col-card h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  font-weight: 700;
+}
+.compare .col-card.versus { border-color: var(--line-strong); }
+.compare .col-card.shiksha {
+  background: var(--ink);
+  color: #fff;
+  border: 0;
+}
+.compare .col-card ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.compare .col-card.shiksha ul li::marker { color: rgba(255,255,255,0.6); }
+.compare .col-card.versus ul li::marker { color: var(--ink-mute); }
+
+/* FOOTER (Slide-Nav) */
+.deck-nav {
+  position: fixed;
+  bottom: 16px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 8px 6px 14px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--ink-soft);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  z-index: 100;
+}
+.deck-nav .nav-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.deck-nav .nav-btn:disabled { background: var(--line); cursor: not-allowed; }
+.deck-nav .progress {
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+}
+
+/* CHEATSHEET (versteckt, einklappbar) */
+.cheat {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.97);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 18px;
+  max-width: 300px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  z-index: 99;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  display: none;
+}
+.cheat.visible { display: block; }
+.cheat h5 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.cheat ul { margin: 0; padding-left: 16px; }
+.cheat li { margin-bottom: 2px; }
+.cheat-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  background: rgba(255,255,255,0.9);
+}
+
+/* PRINT STYLES (PDF-Export) */
+@media print {
+  body, .slide { overflow: visible; }
+  .slide { page-break-after: always; display: flex !important; height: 100vh; }
+  .deck-nav, .cheat-toggle, .cheat { display: none !important; }
+}
+
+/* RESPONSIVE — wenn der Bildschirm enger ist */
+@media (max-width: 900px) {
+  .slide { padding: 40px 28px; }
+  .slide-title { font-size: 32px; }
+  .slide-title-page .slide-title { font-size: 44px; }
+  .slide.pause .question { font-size: 32px; }
+  .slide.split { flex-direction: column; }
+  .compare { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<button class="cheat-toggle" onclick="document.getElementById('cheat').classList.toggle('visible')">Notes</button>
+
+<div class="cheat" id="cheat">
+<h5>Operator-Notiz für dich</h5>
+<ul>
+<li><b>1:</b> Begrüßung, ehrlich + warm</li>
+<li><b>2:</b> Pause-Slide: lass IHN antworten, schreib mit</li>
+<li><b>3:</b> Foto-Flow live: iPhone rausholen, machen</li>
+<li><b>4:</b> Pause: konkrete Schmerz-Frage</li>
+<li><b>5:</b> Sprache statt Listen — Wert-Argument</li>
+<li><b>6:</b> Pause: was würde anders sein?</li>
+<li><b>7-8:</b> Patterns + Lernen zeigen</li>
+<li><b>9:</b> Vergleich Wettbewerb (vorsichtig!)</li>
+<li><b>10:</b> Pilot-Konditionen klar</li>
+<li><b>11:</b> Pause: ist das was?</li>
+<li><b>12:</b> Outro + nächste Schritte</li>
+</ul>
+<p style="margin: 8px 0 0; font-size: 11px; color: var(--ink-mute);">
+Pfeil-Tasten zum Navigieren · Esc für Vollbild
+</p>
+</div>
+
+<div class="deck">
+
+<!-- ============================================================ -->
+<!-- SLIDE 1: TITLE -->
+<!-- ============================================================ -->
+<section class="slide active slide-title-page" data-slide="1">
+  <div class="brand-tag">SHIKSHA · Pilot-Vorgespräch</div>
+  <h1 class="slide-title">Foto.<br>Versteht.<br>Spricht.</h1>
+  <p class="slide-lede">
+    Eine kurze Begegnung mit einem System, das ich seit Sommer 2025 baue —
+    weil mich Bürokratie um Mitternacht im eigenen Betrieb fertig gemacht hat.
+  </p>
+  <div style="margin-top: 32px; font-size: 13px; color: var(--ink-mute);">
+    Thomas Knödler · shiksha.tun.zone · +43 664 50 510 78
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2: PAUSE — Was nervt dich? -->
+<!-- ============================================================ -->
+<section class="slide pause" data-slide="2">
+  <div class="meta">Frage 1 — bitte ehrlich</div>
+  <div class="question">
+    Was kostet dich gerade<br>am meisten Zeit,<br>was nicht direkt deine Arbeit ist?
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3: WAS SHIKSHA TUT -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="3">
+  <div class="slide-eyebrow">In 30 Sekunden</div>
+  <h2 class="slide-title">Foto. Verstehen. Vorschlag.</h2>
+  <p class="slide-lede">
+    Du fotografierst irgendein Geschäftsdokument — Anmeldung, Lieferschein,
+    Mahnung, Behördenpost. SHIKSHA liest, erkennt, ordnet zu, schlägt vor.
+  </p>
+
+  <div class="card-list">
+    <div class="card">
+      <div class="num">1</div>
+      <div class="body">
+        <h3>Foto machen</h3>
+        <p>iPhone, Browser, ein Dokument. Auch Mahnung im Handabriss-Format. HEIC, JPG, PDF — egal.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">2</div>
+      <div class="body">
+        <h3>SHIKSHA versteht</h3>
+        <p>OCR + Klassifikation + Entity-Match. „Mahnung von ARAG, 1.488 €, fällig 9. Mai. Soll ich das deinem Surf-Studio zuordnen?"</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">3</div>
+      <div class="body">
+        <h3>Du bestätigst, fertig</h3>
+        <p>Yes oder Nein. Das System macht NICHTS ohne dein Okay. Drei Sekunden, statt drei Minuten Buchhaltung.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4: LIVE-DEMO Foto-Flow (im Gespräch zur shiksha.tun.zone/foto wechseln) -->
+<!-- ============================================================ -->
+<section class="slide demo" data-slide="4">
+  <div class="slide-eyebrow">Live · jetzt</div>
+  <h2 class="slide-title">Schau wie das aussieht.</h2>
+  <p class="slide-lede">
+    Wir machen das jetzt zusammen. Ich tippe den Browser auf, du kannst gerne mitlesen.
+  </p>
+  <div class="demo-frame">
+    <iframe src="../schule_edition/ui/operator_eingabemasken.html#panel-anmeldung"
+            title="SHIKSHA Operator UI"></iframe>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5: PAUSE — Was würde sich ändern? -->
+<!-- ============================================================ -->
+<section class="slide pause" data-slide="5">
+  <div class="meta">Frage 2</div>
+  <div class="question">
+    Wenn das morgen für dich liefe —<br>was würdest du zuerst<br>damit machen?
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6: SPRACHE STATT LISTEN -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="6">
+  <div class="slide-eyebrow">Worin der Unterschied liegt</div>
+  <h2 class="slide-title">Wir sprechen mit dir.<br>Nicht in Tabellen.</h2>
+  <p class="slide-lede">
+    Andere Systeme zeigen dir 14 Felder mit Confidence-Prozenten.
+    SHIKSHA spricht in Sätzen, wie ein Mitarbeiter, der's kapiert hat.
+  </p>
+
+  <div class="shiksha-quote accent">
+    Drei Sachen heute: <strong>Werner zahlt nicht</strong>,
+    <strong>Klara hat probiert</strong>, und
+    <strong>Annas Karte läuft bald</strong>.
+    Sonst alles ruhig.
+  </div>
+
+  <p style="font-size: 14px; color: var(--ink-mute); max-width: 720px;">
+    Das ist die echte Tageszusammenfassung aus dem Operator-Dashboard.
+    Drei Schmerzpunkte plus „sonst ist's gut". Mehr braucht's morgens nicht.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 7: PATTERNS — was SHIKSHA über die Zeit lernt -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="7">
+  <div class="slide-eyebrow">Was SHIKSHA über Wochen lernt</div>
+  <h2 class="slide-title">Es bleibt nicht beim einzelnen Foto.</h2>
+  <p class="slide-lede">
+    Aus deinen täglichen Aktionen erkennt SHIKSHA Muster — und zeigt sie dir
+    erst, wenn sie wirklich Muster sind.
+  </p>
+
+  <div class="card-list">
+    <div class="card">
+      <div class="num">⟲</div>
+      <div class="body">
+        <h3>Wiederkehrer</h3>
+        <p>„Familie Schmidt — dritter Sommer in Folge. Stamm­gast. Persönlich begrüßen?"</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">📅</div>
+      <div class="body">
+        <h3>Saisonal</h3>
+        <p>„Pool-Inspektion immer Mitte April. Soll ich ab März die Vorbereitung anstoßen?"</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">⚠</div>
+      <div class="body">
+        <h3>Wiederholung</h3>
+        <p>„Pitch B07 — dritte Strom-Anomalie in zwölf Monaten. Vielleicht ein Defekt am Pitch selbst?"</p>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top: 16px; font-size: 13px; color: var(--ink-mute);">
+    Wichtig: SHIKSHA macht <em>nichts</em> automatisch. Jedes Muster muss
+    von dir bestätigt werden, bevor es im System aktiv wird.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 8: SAFEGUARDING — die Schutz-Schicht -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="8">
+  <div class="slide-eyebrow">Worauf wir besonders achten</div>
+  <h2 class="slide-title">Schutzkonzept ist nicht Bürokratie.</h2>
+  <p class="slide-lede">
+    Bei Kindern, Pool, Spielplatz, Aufsichtspflicht hat SHIKSHA ein eigenes Modul,
+    das mitdenkt — Background-Checks, Konsente, Erste-Hilfe-Lizenzen.
+  </p>
+
+  <div class="shiksha-quote warn">
+    <strong>Lukas darf morgen nicht fotografiert werden</strong> —
+    Mama hat den Konsent für Foto-Verwendung nicht erteilt.
+    Soll ich Sandra eine Nachricht schicken?
+  </div>
+
+  <p style="font-size: 14px; color: var(--ink-soft); max-width: 720px; margin-top: 16px;">
+    Kein anderes System, das ich kenne, verbindet Operator-Alltag mit
+    Schutzkonzept-Logik so eng. Das ist eine SHIKSHA-Stärke, gerade für
+    Familienbetrieb-Camping und Kinder-Yoga.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 9: VERGLEICH (vorsichtig!) -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="9">
+  <div class="slide-eyebrow">Wo SHIKSHA hingehört</div>
+  <h2 class="slide-title">Wir wollen nicht ersetzen.<br>Wir sitzen darüber.</h2>
+  <p class="slide-lede">
+    Du hast vielleicht schon Eversports oder Camping.care. Das ist gut so.
+    Wir verstehen, was passiert — die anderen verwalten, was passiert ist.
+  </p>
+
+  <div class="compare">
+    <div class="col-card versus">
+      <h4>Buchungs-/PMS-Systeme</h4>
+      <ul>
+        <li>Reservierung managen</li>
+        <li>Rechnung schreiben</li>
+        <li>Belegungsplan zeigen</li>
+        <li>Standardberichte</li>
+        <li>14 Felder pro Maske</li>
+      </ul>
+    </div>
+    <div class="col-card shiksha">
+      <h4>SHIKSHA — drüber</h4>
+      <ul>
+        <li>Foto-basiert verstehen</li>
+        <li>Patterns erkennen</li>
+        <li>Sprachlich kommunizieren</li>
+        <li>Recommended Focus geben</li>
+        <li>3-6 Wörter pro UI-Stelle</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="font-size: 14px; color: var(--ink-mute); max-width: 720px; margin-top: 24px;">
+    Du behältst, was funktioniert. Wir kümmern uns um den Teil, der bisher
+    in deiner Mailbox, deinem Schuhkarton und in deinem Kopf war.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 10: PILOT-KONDITIONEN -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="10">
+  <div class="slide-eyebrow">Mein Angebot</div>
+  <h2 class="slide-title">Zwölf Monate kostenlos.<br>Du prägst das Produkt.</h2>
+
+  <div class="card-list">
+    <div class="card">
+      <div class="num">€0</div>
+      <div class="body">
+        <h3>12 Monate Pilot-Phase</h3>
+        <p>Vollzugang zur Edition (SCHULE oder CAMPING). Keine Setup-Kosten, keine Lizenz, kein Lock-in. Datenexport jederzeit.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">⏱</div>
+      <div class="body">
+        <h3>Persönliche Begleitung</h3>
+        <p>Onboarding-Tag bei dir vor Ort. 30-Min-Calls wöchentlich für 8 Wochen, dann zweiwöchentlich. Direkter Draht zu mir.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">✎</div>
+      <div class="body">
+        <h3>Mitgestalten</h3>
+        <p>Deine Wünsche fließen in die Edition. Was du brauchst, baut SHIKSHA. Co-Branding, falls du es möchtest.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">⤓</div>
+      <div class="body">
+        <h3>Nach 12 Monaten</h3>
+        <p>Vorzugs-Konditionen für 24 weitere Monate (50 % unter Markt). Kein Druck, keine Verpflichtung. Wenn's nicht passt, ist's nicht passt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 11: PAUSE — ist das was für dich? -->
+<!-- ============================================================ -->
+<section class="slide pause" data-slide="11">
+  <div class="meta">Frage 3</div>
+  <div class="question">
+    Ist das was,<br>oder eher nicht?
+  </div>
+  <div style="margin-top: 32px; font-size: 14px; color: rgba(255,255,255,0.5); max-width: 600px; text-align: center;">
+    Beide Antworten sind okay. Ich suche keine Höflichkeit, ich suche Passung.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 12: OUTRO -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="12">
+  <div class="slide-eyebrow">Wie es weitergeht</div>
+  <h2 class="slide-title">Wenn ja: hier sind die nächsten drei Schritte.</h2>
+
+  <div class="card-list">
+    <div class="card">
+      <div class="num">1</div>
+      <div class="body">
+        <h3>Pilot-Vereinbarung anschauen</h3>
+        <p>Ich schicke dir den Vertrag. Lies ihn in Ruhe. Frag deinen Anwalt wenn du willst. Wir reden in 1–2 Wochen drüber.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">2</div>
+      <div class="body">
+        <h3>Onboarding-Tag</h3>
+        <p>Ich komme zu dir vor Ort. Ein Tag. Wir setzen alles auf, machen die ersten Fotos, gucken was sofort passt und was anders muss.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="num">3</div>
+      <div class="body">
+        <h3>Acht Wochen miteinander</h3>
+        <p>30 Minuten pro Woche, kurzer Call. Du nutzt SHIKSHA real, ich höre zu, wir verbessern. Nach 8 Wochen weißt du, ob's das ist.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-end; max-width: 720px;">
+    <div>
+      <div style="font-size: 13px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.06em;">Wenn du nachdenken willst</div>
+      <div style="font-size: 18px; font-weight: 600; margin-top: 4px;">Thomas Knödler</div>
+      <div style="font-size: 14px; color: var(--ink-soft);">+43 664 50 510 78 · shiksha.tun.zone</div>
+    </div>
+    <div style="font-size: 13px; color: var(--ink-mute); font-family: var(--mono); text-align: right;">
+      [Datum] · [Standort]
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- DECK NAVIGATION -->
+<div class="deck-nav">
+  <button class="nav-btn" id="prev" onclick="navSlide(-1)">‹</button>
+  <span class="progress" id="progress">1 / 12</span>
+  <button class="nav-btn" id="next" onclick="navSlide(1)">›</button>
+</div>
+
+<script>
+let current = 1;
+const total = document.querySelectorAll('.slide').length;
+
+function showSlide(n) {
+  if (n < 1) n = 1;
+  if (n > total) n = total;
+  document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+  document.querySelector(`[data-slide="${n}"]`).classList.add('active');
+  current = n;
+  document.getElementById('progress').textContent = `${n} / ${total}`;
+  document.getElementById('prev').disabled = (n === 1);
+  document.getElementById('next').disabled = (n === total);
+}
+
+function navSlide(delta) { showSlide(current + delta); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+    e.preventDefault();
+    navSlide(1);
+  } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+    e.preventDefault();
+    navSlide(-1);
+  } else if (e.key === 'Home') {
+    e.preventDefault();
+    showSlide(1);
+  } else if (e.key === 'End') {
+    e.preventDefault();
+    showSlide(total);
+  } else if (e.key === 'Escape') {
+    document.documentElement.requestFullscreen?.() || document.exitFullscreen?.();
+  } else if (e.key === 'n' || e.key === 'N') {
+    document.getElementById('cheat').classList.toggle('visible');
+  }
+});
+
+showSlide(1);
+</script>
+
+</body>
+</html>

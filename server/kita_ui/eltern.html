@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta name="theme-color" content="#ff4d8d" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="KITA" />
+<link rel="manifest" href="/accounting/ui/kita/manifest.json" />
+<link rel="apple-touch-icon" href="/accounting/ui/kita/app-icon.svg" />
+<title>SHIKSHA · KITA · Eltern</title>
+<style>
+:root {
+  --holi-pink: #ff4d8d; --holi-turquoise: #00d4d4; --holi-yellow: #ffd93d;
+  --holi-purple: #a855f7; --holi-orange: #ff8c42; --holi-green: #6dd47e;
+  --bg: #fff8f0; --card: #ffffff; --line: #f0e8dc;
+  --ink: #2a2530; --ink-soft: #5a5060; --ink-mute: #9a8e9e;
+  --shadow: 0 4px 16px rgba(255,77,141,0.10);
+}
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system,BlinkMacSystemFont,sans-serif;
+  background: linear-gradient(135deg,#fff8f0 0%,#ffe4f0 50%,#e4f8ff 100%);
+  background-attachment: fixed;
+  color: var(--ink); line-height: 1.55;
+  min-height: 100vh; padding-bottom: 80px;
+  -webkit-font-smoothing: antialiased;
+}
+.app { max-width: 540px; margin: 0 auto; padding: 12px; }
+
+header.top {
+  display:flex; align-items:center; gap:12px; padding:14px 8px;
+}
+.logo {
+  width:44px; height:44px;
+  background: linear-gradient(135deg,var(--holi-pink) 0%,var(--holi-purple) 100%);
+  border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:22px;
+  box-shadow: var(--shadow);
+}
+.title h1 { font-size:18px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+.title p { font-size:12px; color:var(--ink-mute); margin:0; }
+
+.greeting-card {
+  background: linear-gradient(135deg, var(--holi-yellow) 0%, var(--holi-orange) 100%);
+  color: var(--ink); padding:20px 22px; border-radius:18px;
+  margin-bottom: 14px; box-shadow: var(--shadow);
+}
+.greeting-card h2 { margin:0 0 4px; font-size:20px; font-weight:700; }
+.greeting-card p { margin:0; font-size:13px; opacity:0.85; }
+
+.tab-bar {
+  position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+  display:flex; gap:4px;
+  background: rgba(42,37,48,0.95);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  padding: 6px; border-radius: 22px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+  z-index: 100;
+}
+.tab-btn {
+  background: transparent; border: 0;
+  padding: 12px 18px; border-radius: 16px;
+  color: rgba(255,255,255,0.7); cursor:pointer;
+  font-size: 11px; font-weight: 600;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  min-width: 64px;
+  transition: background .2s, color .2s;
+}
+.tab-btn .ico { font-size: 18px; line-height:1; }
+.tab-btn.active {
+  background: linear-gradient(135deg,var(--holi-pink),var(--holi-purple));
+  color: #fff;
+}
+
+.panel { display: none; }
+.panel.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+
+.card {
+  background: var(--card); border-radius: 18px;
+  padding: 18px 18px; margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.card h3 {
+  font-size: 14px; margin: 0 0 8px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ink-mute);
+}
+
+/* Notification Item */
+.notif-item {
+  padding: 14px 16px;
+  background: var(--card); border-radius: 14px; margin-bottom: 8px;
+  border-left: 4px solid var(--holi-turquoise);
+  cursor: pointer; transition: transform .1s;
+}
+.notif-item:active { transform: scale(0.98); }
+.notif-item.urgent { border-left-color: var(--holi-pink); background: linear-gradient(to right, #fff0f5 0%, #fff 30%); }
+.notif-item.high { border-left-color: var(--holi-orange); }
+.notif-item.unread { background: linear-gradient(to right, #f0fbff 0%, #fff 50%); }
+.notif-item .head {
+  display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;
+}
+.notif-item .title { font-weight: 700; font-size: 14px; flex:1; }
+.notif-item .time { font-size: 11px; color: var(--ink-mute); }
+.notif-item .body { font-size: 13px; color: var(--ink-soft); line-height:1.5; }
+.notif-item .badge-prio {
+  display:inline-block; padding:2px 8px; border-radius:6px;
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  background: var(--holi-pink); color:#fff; margin-right:6px;
+}
+
+.empty-state {
+  text-align: center; padding: 40px 20px; color: var(--ink-mute);
+  background: var(--card); border-radius: 18px; box-shadow: var(--shadow);
+}
+.empty-state .ico { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
+
+.profile-info {
+  display:flex; align-items:center; gap:14px; margin-bottom: 14px;
+}
+.profile-avatar {
+  width:60px; height:60px;
+  background: linear-gradient(135deg,var(--holi-turquoise) 0%,var(--holi-green) 100%);
+  border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:22px; font-weight:700;
+}
+.profile-name { font-weight:700; font-size:16px; }
+.profile-meta { font-size:12px; color:var(--ink-mute); }
+
+.toggle-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 14px 0; border-bottom: 1px solid var(--line);
+}
+.toggle-row:last-child { border-bottom: 0; }
+.toggle-row .label strong { display:block; font-size:13px; }
+.toggle-row .label small { font-size:11px; color:var(--ink-mute); }
+.toggle {
+  width:44px; height:26px; background:var(--line); border-radius:13px;
+  position:relative; cursor:pointer; transition: background .2s;
+}
+.toggle::after {
+  content:""; position:absolute; top:3px; left:3px;
+  width:20px; height:20px; background:#fff; border-radius:50%;
+  transition: left .2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on { background: var(--holi-green); }
+.toggle.on::after { left:21px; }
+
+.btn {
+  width:100%; padding:14px 18px; border:0; border-radius:14px;
+  font-size:15px; font-weight:700; cursor:pointer;
+  background: linear-gradient(135deg,var(--holi-pink) 0%,var(--holi-purple) 100%);
+  color:#fff; box-shadow: 0 4px 16px rgba(255,77,141,0.4);
+}
+
+#install-banner {
+  position:fixed; left:12px; right:12px; bottom: 90px;
+  background: linear-gradient(135deg,var(--holi-purple) 0%,var(--holi-pink) 100%);
+  color:#fff; padding:14px 16px; border-radius:14px;
+  display:none; align-items:center; gap:12px;
+  box-shadow: 0 8px 24px rgba(168,85,247,0.4);
+  z-index: 99;
+}
+#install-banner.show { display:flex; }
+#install-banner .text { flex:1; font-size:13px; }
+#install-banner .text strong { display:block; font-size:14px; }
+#install-banner button { padding:8px 12px; background:#fff; color:var(--holi-purple); border:0; border-radius:10px; font-weight:700; font-size:12px; cursor:pointer; }
+#install-banner .close { background:transparent; color:#fff; opacity:0.7; padding:6px; }
+
+.error-card {
+  background: linear-gradient(135deg, #ffe0e8, #ffb0c8);
+  padding: 24px; border-radius: 16px; text-align:center;
+  margin-top: 40px;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<header class="top">
+  <div class="logo">K</div>
+  <div class="title">
+    <h1 id="hello-name">Hallo!</h1>
+    <p id="hello-meta">SHIKSHA · KITA</p>
+  </div>
+</header>
+
+<!-- HOME -->
+<div class="panel active" id="panel-home">
+  <div class="greeting-card">
+    <h2>👋 Schön, dass du da bist!</h2>
+    <p id="home-greeting">Hier siehst du alle Mitteilungen rund um dein Kind.</p>
+  </div>
+
+  <div class="card">
+    <h3>📬 Neueste Mitteilungen</h3>
+    <div id="home-notifications">
+      <div class="empty-state" style="box-shadow:none; padding:20px;">
+        <div class="ico">📭</div>
+        <div>Noch keine Mitteilungen.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALLE MITTEILUNGEN -->
+<div class="panel" id="panel-messages">
+  <div class="card">
+    <h3>📬 Alle Mitteilungen</h3>
+    <div id="all-notifications">
+      <div class="empty-state" style="box-shadow:none;">
+        <div class="ico">📭</div>
+        <div>Noch keine Mitteilungen.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFIL -->
+<div class="panel" id="panel-profile">
+  <div class="card">
+    <div class="profile-info">
+      <div class="profile-avatar" id="profile-initial">·</div>
+      <div>
+        <div class="profile-name" id="profile-name">—</div>
+        <div class="profile-meta" id="profile-email">—</div>
+      </div>
+    </div>
+    <div style="font-size:12px; color:var(--ink-mute); margin-top:12px;">Eure Kinder:</div>
+    <div id="profile-children" style="font-weight:600; margin-top:4px;">—</div>
+  </div>
+
+  <div class="card">
+    <h3>🔔 Benachrichtigungen</h3>
+    <div class="toggle-row">
+      <div class="label"><strong>E-Mail</strong><small>Mitteilungen per Mail erhalten</small></div>
+      <div class="toggle on" id="toggle-email"></div>
+    </div>
+    <div class="toggle-row">
+      <div class="label"><strong>Push</strong><small>Benachrichtigung direkt aufs Handy</small></div>
+      <div class="toggle" id="toggle-push"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📲 App installieren</h3>
+    <p style="font-size:13px; color:var(--ink-soft); margin:0 0 12px;">
+      Damit ihr nichts verpasst, könnt ihr die App auf eurem Startbildschirm ablegen.
+    </p>
+    <details>
+      <summary style="cursor:pointer; font-weight:600; padding:6px 0;">📱 Schritt-für-Schritt-Anleitung</summary>
+      <div style="background:#fafaf8; border-radius:10px; padding:12px; margin-top:8px; font-size:13px;">
+        <p style="margin:0 0 4px;"><strong>iPhone (Safari):</strong></p>
+        <ol style="padding-left:18px; margin:0 0 12px;">
+          <li>Tippe auf das Teilen-Symbol ⬆️</li>
+          <li>„Zum Home-Bildschirm" wählen</li>
+          <li>Mit „Hinzufügen" bestätigen</li>
+        </ol>
+        <p style="margin:0 0 4px;"><strong>Android (Chrome):</strong></p>
+        <ol style="padding-left:18px; margin:0;">
+          <li>Drei Punkte oben rechts ⋮</li>
+          <li>„App installieren" wählen</li>
+        </ol>
+      </div>
+    </details>
+  </div>
+</div>
+
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-panel="home">
+    <span class="ico">🏠</span>
+    <span>Start</span>
+  </button>
+  <button class="tab-btn" data-panel="messages">
+    <span class="ico">📬</span>
+    <span>Mitteilungen</span>
+  </button>
+  <button class="tab-btn" data-panel="profile">
+    <span class="ico">👤</span>
+    <span>Profil</span>
+  </button>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <div class="text">
+    <strong>📲 App installieren</strong>
+    Schneller Zugriff vom Startbildschirm
+  </div>
+  <button id="btn-install">Installieren</button>
+  <button class="close" onclick="document.getElementById('install-banner').classList.remove('show')">×</button>
+</div>
+
+<script>
+const API = "/kita";
+const TOKEN = new URLSearchParams(location.search).get("t") || "";
+
+let STATE = { profile: null, notifications: [] };
+
+function $(id) { return document.getElementById(id); }
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function fmtTime(s) {
+  if (!s) return "";
+  const d = new Date(s);
+  const now = new Date();
+  const diffH = (now - d) / 3600000;
+  if (diffH < 1) return "vor wenigen Minuten";
+  if (diffH < 24) return `vor ${Math.floor(diffH)}h`;
+  return d.toLocaleDateString("de-DE", { day:"2-digit", month:"2-digit" });
+}
+
+// =============================================================
+// TABS
+// =============================================================
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    $(`panel-${btn.dataset.panel}`).classList.add("active");
+  });
+});
+
+// =============================================================
+// LOAD PROFILE
+// =============================================================
+async function loadProfile() {
+  if (!TOKEN) {
+    document.querySelector(".app").innerHTML = `
+      <div class="error-card">
+        <h2 style="margin:0 0 10px;">🔒 Kein Zugang</h2>
+        <p style="margin:0; font-size:14px;">Diese App öffnest du am besten über den Link aus der Bestätigungs-E-Mail.</p>
+      </div>`;
+    return;
+  }
+  try {
+    const r = await fetch(API + "/eltern/me?t=" + encodeURIComponent(TOKEN));
+    if (!r.ok) throw new Error("Token ungültig");
+    STATE.profile = await r.json();
+    renderProfile();
+  } catch (e) {
+    document.querySelector(".app").innerHTML = `
+      <div class="error-card">
+        <h2 style="margin:0 0 10px;">⏳ Link abgelaufen</h2>
+        <p style="margin:0; font-size:14px;">Bitte fordert einen neuen Link bei der KITA-Leitung an.</p>
+      </div>`;
+  }
+}
+
+function renderProfile() {
+  const p = STATE.profile;
+  const firstName = (p.full_name || "").split(" ")[0];
+  $("hello-name").textContent = `Hallo ${firstName}!`;
+  $("hello-meta").textContent = p.child_names || "Eltern-Bereich";
+  $("home-greeting").textContent = `Hier findet ihr alles rund um ${p.child_names || 'eure Kinder'}.`;
+
+  $("profile-initial").textContent = (p.full_name || "?").charAt(0).toUpperCase();
+  $("profile-name").textContent = p.full_name;
+  $("profile-email").textContent = p.email;
+  $("profile-children").textContent = p.child_names || "—";
+
+  $("toggle-email").classList.toggle("on", !!p.notification_email_optin);
+  $("toggle-push").classList.toggle("on", !!p.notification_push_optin);
+}
+
+async function loadNotifications() {
+  if (!TOKEN) return;
+  try {
+    const r = await fetch(API + "/eltern/notifications?t=" + encodeURIComponent(TOKEN));
+    if (!r.ok) return;
+    const data = await r.json();
+    STATE.notifications = data.notifications || [];
+    renderNotifications();
+  } catch (e) { console.warn(e); }
+}
+
+function renderNotifications() {
+  const list = STATE.notifications;
+  // Home: nur die neuesten 3
+  const homeContainer = $("home-notifications");
+  const allContainer = $("all-notifications");
+  if (!list.length) {
+    const empty = `<div class="empty-state" style="box-shadow:none; padding:20px;"><div class="ico">📭</div><div>Noch keine Mitteilungen.</div></div>`;
+    homeContainer.innerHTML = empty;
+    allContainer.innerHTML = empty;
+    return;
+  }
+  function renderItem(n) {
+    const prio = n.priority || "normal";
+    const cls = `notif-item ${prio}${!n.opened_at ? ' unread' : ''}`;
+    const prioBadge = (prio === 'urgent' || prio === 'high')
+      ? `<span class="badge-prio" style="background:${prio==='urgent'?'var(--holi-pink)':'var(--holi-orange)'}">${prio}</span>`
+      : '';
+    return `<div class="${cls}">
+      <div class="head"><div class="title">${prioBadge}${escapeHtml(n.title)}</div><div class="time">${fmtTime(n.sent_at)}</div></div>
+      <div class="body">${escapeHtml((n.body || '').slice(0,180))}${(n.body || '').length > 180 ? '…' : ''}</div>
+    </div>`;
+  }
+  homeContainer.innerHTML = list.slice(0, 3).map(renderItem).join("");
+  allContainer.innerHTML = list.map(renderItem).join("");
+}
+
+// =============================================================
+// PWA INSTALL
+// =============================================================
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $("install-banner").classList.add("show");
+});
+$("btn-install").addEventListener("click", async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    $("install-banner").classList.remove("show");
+  }
+});
+
+// Service Worker registrieren
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/accounting/ui/kita/service-worker.js").catch(e => console.warn("SW failed", e));
+}
+
+// =============================================================
+// BOOT
+// =============================================================
+loadProfile().then(() => loadNotifications());
+</script>
+
+</body>
+</html>

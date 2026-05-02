@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SHIKSHA · KITA-Kalender</title>
+<style>
+  :root {
+    --pink: #ff4d8d;
+    --tuerkis: #00d4d4;
+    --gelb: #ffd93d;
+    --lila: #a855f7;
+    --orange: #ff8c42;
+    --gruen: #6dd47e;
+    --rot: #a0391f;
+    --grau: #9a8e9e;
+    --bg: #fff8f0;
+    --card: #ffffff;
+    --ink: #2a2530;
+    --muted: #6b6470;
+    --line: #ece4d8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 16px;
+  }
+  /* Topbar */
+  .topbar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 12px;
+  }
+  .topbar h1 {
+    font-size: 18px; font-weight: 700; flex: 1;
+    background: linear-gradient(90deg, var(--pink), var(--lila));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .nav-btn {
+    background: var(--bg); border: 1px solid var(--line);
+    width: 36px; height: 36px; border-radius: 10px;
+    font-size: 18px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:hover { background: var(--line); }
+  .today-btn {
+    background: var(--ink); color: #fff; border: none;
+    padding: 8px 14px; border-radius: 10px;
+    font-weight: 600; cursor: pointer;
+  }
+  .date-label { font-weight: 700; font-size: 16px; min-width: 180px; text-align: center; }
+
+  /* Views toggle */
+  .view-toggle {
+    display: flex; gap: 4px;
+    background: var(--bg); padding: 4px; border-radius: 12px;
+  }
+  .view-toggle button {
+    border: none; background: transparent;
+    padding: 6px 12px; border-radius: 8px;
+    font-weight: 600; font-size: 13px; cursor: pointer;
+    color: var(--muted);
+  }
+  .view-toggle button.active {
+    background: var(--ink); color: #fff;
+  }
+
+  /* Action row */
+  .actions {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .btn-primary {
+    background: var(--pink); color: #fff; border: none;
+    padding: 10px 16px; border-radius: 10px;
+    font-weight: 600; cursor: pointer;
+  }
+  .btn-secondary {
+    background: var(--card); color: var(--ink); border: 1px solid var(--line);
+    padding: 10px 16px; border-radius: 10px;
+    font-weight: 600; cursor: pointer;
+  }
+  .btn-icon { font-size: 16px; }
+
+  /* Card container */
+  .view-container {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    min-height: 400px;
+  }
+
+  /* === TAG view === */
+  .day-list { display: flex; flex-direction: column; gap: 8px; }
+  .day-event {
+    display: flex; gap: 12px; align-items: center;
+    padding: 12px; border-radius: 12px;
+    background: var(--bg); border-left: 6px solid var(--grau);
+    cursor: pointer; transition: transform 0.1s;
+  }
+  .day-event:hover { transform: translateX(4px); }
+  .day-event-time {
+    font-weight: 700; font-size: 14px; min-width: 90px;
+    color: var(--muted);
+  }
+  .day-event-body { flex: 1; }
+  .day-event-title { font-weight: 600; font-size: 15px; }
+  .day-event-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .empty-state {
+    text-align: center; padding: 40px 20px; color: var(--muted);
+  }
+  .empty-state .emoji { font-size: 48px; }
+  .empty-state .text { margin-top: 12px; font-size: 14px; }
+
+  /* === WOCHE view === */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+  .week-day {
+    background: var(--bg); border-radius: 10px;
+    padding: 10px; min-height: 200px;
+    border-top: 4px solid var(--line);
+  }
+  .week-day.today { border-top-color: var(--pink); background: #fff0f5; }
+  .week-day-name { font-weight: 700; font-size: 12px; color: var(--muted); }
+  .week-day-num { font-weight: 700; font-size: 22px; margin-bottom: 8px; }
+  .week-event {
+    font-size: 11px; padding: 4px 6px; border-radius: 6px;
+    margin-bottom: 4px; color: #fff; cursor: pointer;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* === MONAT view === */
+  .month-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  }
+  .month-head {
+    text-align: center; font-weight: 700; font-size: 12px;
+    color: var(--muted); padding: 6px 0;
+  }
+  .month-cell {
+    background: var(--bg); border-radius: 8px;
+    min-height: 80px; padding: 6px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .month-cell:hover { background: var(--line); }
+  .month-cell.other-month { opacity: 0.35; }
+  .month-cell.today { background: #fff0f5; outline: 2px solid var(--pink); }
+  .month-cell-num {
+    font-weight: 700; font-size: 14px; margin-bottom: 2px;
+  }
+  .month-event-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    margin-right: 2px; margin-bottom: 1px;
+  }
+  .month-event-title {
+    font-size: 10px; padding: 2px 4px; border-radius: 4px;
+    color: #fff; margin-bottom: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* === JAHR view === */
+  .year-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .year-month {
+    background: var(--bg); border-radius: 10px;
+    padding: 10px;
+  }
+  .year-month-name {
+    font-weight: 700; font-size: 13px; margin-bottom: 6px;
+    text-align: center;
+  }
+  .mini-month {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px;
+    font-size: 10px;
+  }
+  .mini-day {
+    text-align: center; padding: 3px 0; border-radius: 3px;
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .mini-day.has-event { font-weight: 700; }
+  .mini-day.today { background: var(--pink); color: #fff; }
+  .mini-day.other { color: var(--line); }
+  .mini-day .dot {
+    position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%;
+  }
+
+  /* === Modal === */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 16px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: #fff; border-radius: 16px;
+    padding: 20px; max-width: 480px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal h2 { margin-bottom: 16px; }
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block; font-weight: 600; font-size: 13px;
+    margin-bottom: 4px; color: var(--muted);
+  }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 10px; border: 1px solid var(--line);
+    border-radius: 8px; font-size: 14px; font-family: inherit;
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .modal-actions {
+    display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;
+  }
+  .modal-actions .btn-delete {
+    background: var(--rot); color: #fff; border: none;
+    padding: 8px 14px; border-radius: 8px; font-weight: 600;
+    cursor: pointer; margin-right: auto;
+  }
+
+  /* Type pills */
+  .type-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .type-pill {
+    padding: 6px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; color: #fff;
+    cursor: pointer; opacity: 0.5;
+    border: 2px solid transparent;
+  }
+  .type-pill.active { opacity: 1; border-color: var(--ink); }
+
+  /* Filters */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 12px;
+  }
+  .filter-pill {
+    padding: 6px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; color: #fff;
+    cursor: pointer; opacity: 0.4;
+  }
+  .filter-pill.active { opacity: 1; }
+
+  /* Mobile responsive */
+  @media (max-width: 720px) {
+    .week-grid { grid-template-columns: 1fr; }
+    .week-day { min-height: 100px; }
+    .field-row { grid-template-columns: 1fr; }
+    .topbar h1 { width: 100%; }
+    .month-cell { min-height: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📅 KITA-Kalender</h1>
+  <button class="nav-btn" onclick="navigate(-1)">◀</button>
+  <button class="today-btn" onclick="goToday()">Heute</button>
+  <button class="nav-btn" onclick="navigate(1)">▶</button>
+  <div class="date-label" id="dateLabel">…</div>
+  <div class="view-toggle">
+    <button data-view="day" onclick="setView('day')">Tag</button>
+    <button data-view="week" onclick="setView('week')">Woche</button>
+    <button data-view="month" class="active" onclick="setView('month')">Monat</button>
+    <button data-view="year" onclick="setView('year')">Jahr</button>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn-primary" onclick="openModal()"><span class="btn-icon">+</span> Neues Event</button>
+  <button class="btn-secondary" onclick="autoBirthdays()">🎂 Geburtstage generieren</button>
+</div>
+
+<div class="filter-bar" id="filterBar"><!-- Type-Filter werden injiziert --></div>
+
+<div class="view-container" id="viewContainer">
+  <div class="empty-state"><div class="emoji">⏳</div><div class="text">Lade Kalender …</div></div>
+</div>
+
+<!-- === MODAL === -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">Neues Event</h2>
+    <div class="field">
+      <label>Titel</label>
+      <input id="evTitle" type="text" placeholder="z.B. Sommerfest">
+    </div>
+    <div class="field">
+      <label>Typ</label>
+      <div class="type-pills" id="typePills"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Von</label>
+        <input id="evStartDate" type="date">
+      </div>
+      <div class="field">
+        <label>Bis (optional)</label>
+        <input id="evEndDate" type="date">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Startzeit</label>
+        <input id="evStartTime" type="time">
+      </div>
+      <div class="field">
+        <label>Endzeit</label>
+        <input id="evEndTime" type="time">
+      </div>
+    </div>
+    <div class="field">
+      <label><input type="checkbox" id="evAllDay"> Ganztägig</label>
+    </div>
+    <div class="field">
+      <label>Wiederholung</label>
+      <select id="evRecurrence">
+        <option value="none">Keine</option>
+        <option value="daily">Täglich</option>
+        <option value="weekly">Wöchentlich</option>
+        <option value="monthly">Monatlich</option>
+        <option value="yearly">Jährlich</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Ort (optional)</label>
+      <input id="evLocation" type="text" placeholder="z.B. Bewegungsraum">
+    </div>
+    <div class="field">
+      <label>Beschreibung</label>
+      <textarea id="evDescription" rows="3"></textarea>
+    </div>
+    <div class="field">
+      <label>Sichtbar für</label>
+      <div>
+        <label><input type="checkbox" id="visTraegerin" checked> Trägerin</label>
+        <label style="margin-left:8px"><input type="checkbox" id="visPaedagogin" checked> Pädagog:innen</label>
+        <label style="margin-left:8px"><input type="checkbox" id="visEltern"> Eltern</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-delete" id="btnDelete" style="display:none" onclick="deleteEvent()">Löschen</button>
+      <button class="btn-secondary" onclick="closeModal()">Abbrechen</button>
+      <button class="btn-primary" onclick="saveEvent()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "/kita/calendar";
+  const MONAT_NAMEN = ["Jänner","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+  const WOCHENTAGE_KURZ = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+
+  let state = {
+    view: "month",
+    cursor: new Date(),
+    eventTypes: [],
+    activeTypes: null,  // null = alle
+    events: [],
+    editingId: null,
+    selectedType: "meeting",
+  };
+
+  // === Helpers ===
+  function fmtDate(d) {
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+  function parseDate(s) {
+    if (!s) return null;
+    const [y,m,d] = s.split("-").map(Number);
+    return new Date(y, m-1, d);
+  }
+  function isToday(d) {
+    const t = new Date();
+    return d.getFullYear()===t.getFullYear() && d.getMonth()===t.getMonth() && d.getDate()===t.getDate();
+  }
+  function startOfWeek(d) {
+    const x = new Date(d);
+    const day = (x.getDay() + 6) % 7;  // Mo=0
+    x.setDate(x.getDate() - day);
+    return x;
+  }
+  function addDays(d, n) {
+    const x = new Date(d);
+    x.setDate(x.getDate() + n);
+    return x;
+  }
+
+  // === API ===
+  async function loadEventTypes() {
+    const r = await fetch(`${API}/event-types`);
+    const j = await r.json();
+    state.eventTypes = j.types;
+    renderTypePills();
+    renderFilterBar();
+  }
+
+  async function loadEvents() {
+    let from, to;
+    if (state.view === "day") {
+      from = to = fmtDate(state.cursor);
+    } else if (state.view === "week") {
+      const sw = startOfWeek(state.cursor);
+      from = fmtDate(sw);
+      to = fmtDate(addDays(sw, 6));
+    } else if (state.view === "month") {
+      const c = state.cursor;
+      from = fmtDate(new Date(c.getFullYear(), c.getMonth(), 1));
+      to = fmtDate(new Date(c.getFullYear(), c.getMonth()+1, 0));
+    } else if (state.view === "year") {
+      from = `${state.cursor.getFullYear()}-01-01`;
+      to = `${state.cursor.getFullYear()}-12-31`;
+    }
+    const url = `${API}/events?from_date=${from}&to_date=${to}`;
+    const r = await fetch(url);
+    const j = await r.json();
+    state.events = j.events || [];
+    render();
+  }
+
+  // === Render ===
+  function setView(v) {
+    state.view = v;
+    document.querySelectorAll(".view-toggle button").forEach(b => {
+      b.classList.toggle("active", b.dataset.view === v);
+    });
+    loadEvents();
+  }
+
+  function navigate(dir) {
+    const c = state.cursor;
+    if (state.view === "day")        c.setDate(c.getDate() + dir);
+    else if (state.view === "week")  c.setDate(c.getDate() + 7*dir);
+    else if (state.view === "month") c.setMonth(c.getMonth() + dir);
+    else if (state.view === "year")  c.setFullYear(c.getFullYear() + dir);
+    state.cursor = new Date(c);
+    loadEvents();
+  }
+
+  function goToday() {
+    state.cursor = new Date();
+    loadEvents();
+  }
+
+  function renderFilterBar() {
+    const bar = document.getElementById("filterBar");
+    bar.innerHTML = state.eventTypes.map(t => `
+      <span class="filter-pill ${state.activeTypes && !state.activeTypes.includes(t.key) ? '' : 'active'}"
+            style="background:${t.color}"
+            onclick="toggleFilter('${t.key}')">${t.label}</span>
+    `).join("");
+  }
+
+  function toggleFilter(key) {
+    if (!state.activeTypes) state.activeTypes = state.eventTypes.map(t => t.key);
+    if (state.activeTypes.includes(key)) {
+      state.activeTypes = state.activeTypes.filter(k => k !== key);
+    } else {
+      state.activeTypes.push(key);
+    }
+    if (state.activeTypes.length === state.eventTypes.length) state.activeTypes = null;
+    renderFilterBar();
+    render();
+  }
+
+  function filterEvents(events) {
+    if (!state.activeTypes) return events;
+    return events.filter(e => state.activeTypes.includes(e.event_type));
+  }
+
+  function renderTypePills() {
+    const c = document.getElementById("typePills");
+    c.innerHTML = state.eventTypes.map(t => `
+      <span class="type-pill ${t.key === state.selectedType ? 'active' : ''}"
+            data-key="${t.key}"
+            style="background:${t.color}"
+            onclick="selectType('${t.key}')">${t.label}</span>
+    `).join("");
+  }
+  function selectType(k) {
+    state.selectedType = k;
+    renderTypePills();
+  }
+
+  function render() {
+    const lbl = document.getElementById("dateLabel");
+    const c = state.cursor;
+    if (state.view === "day") {
+      lbl.textContent = `${WOCHENTAGE_KURZ[(c.getDay()+6)%7]} ${c.getDate()}. ${MONAT_NAMEN[c.getMonth()]} ${c.getFullYear()}`;
+      renderDay();
+    } else if (state.view === "week") {
+      const sw = startOfWeek(c);
+      const ew = addDays(sw, 6);
+      lbl.textContent = `${sw.getDate()}.${sw.getMonth()+1}. – ${ew.getDate()}.${ew.getMonth()+1}.${ew.getFullYear()}`;
+      renderWeek();
+    } else if (state.view === "month") {
+      lbl.textContent = `${MONAT_NAMEN[c.getMonth()]} ${c.getFullYear()}`;
+      renderMonth();
+    } else if (state.view === "year") {
+      lbl.textContent = `${c.getFullYear()}`;
+      renderYear();
+    }
+  }
+
+  function renderDay() {
+    const events = filterEvents(state.events).filter(e => e.start_date === fmtDate(state.cursor));
+    const container = document.getElementById("viewContainer");
+    if (events.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="emoji">🌿</div><div class="text">Heute keine Termine.</div></div>`;
+      return;
+    }
+    container.innerHTML = `<div class="day-list">${events.map(e => `
+      <div class="day-event" style="border-left-color:${e.color}" onclick="openModal('${e.id}')">
+        <div class="day-event-time">${e.all_day ? "Ganztägig" : (e.start_time || "").slice(0,5)}</div>
+        <div class="day-event-body">
+          <div class="day-event-title">${e.title}</div>
+          <div class="day-event-meta">${e.label}${e.location ? ` · ${e.location}` : ""}${e.age_at_event ? ` · wird ${e.age_at_event}` : ""}</div>
+        </div>
+      </div>
+    `).join("")}</div>`;
+  }
+
+  function renderWeek() {
+    const sw = startOfWeek(state.cursor);
+    const days = Array.from({length:7}, (_,i) => addDays(sw, i));
+    const events = filterEvents(state.events);
+    const container = document.getElementById("viewContainer");
+    container.innerHTML = `<div class="week-grid">${days.map(d => {
+      const ds = fmtDate(d);
+      const evs = events.filter(e => e.start_date === ds);
+      return `
+        <div class="week-day ${isToday(d) ? 'today' : ''}">
+          <div class="week-day-name">${WOCHENTAGE_KURZ[(d.getDay()+6)%7]}</div>
+          <div class="week-day-num">${d.getDate()}</div>
+          ${evs.map(e => `
+            <div class="week-event" style="background:${e.color}" onclick="openModal('${e.id}')" title="${e.title}">
+              ${e.all_day ? "" : (e.start_time||"").slice(0,5)+" "}${e.title}
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }).join("")}</div>`;
+  }
+
+  function renderMonth() {
+    const c = state.cursor;
+    const first = new Date(c.getFullYear(), c.getMonth(), 1);
+    const last = new Date(c.getFullYear(), c.getMonth()+1, 0);
+    const startOff = (first.getDay()+6)%7;  // Mo=0
+    const start = addDays(first, -startOff);
+    const totalCells = Math.ceil((startOff + last.getDate()) / 7) * 7;
+    const days = Array.from({length: totalCells}, (_,i) => addDays(start, i));
+    const events = filterEvents(state.events);
+
+    const heads = WOCHENTAGE_KURZ.map(d => `<div class="month-head">${d}</div>`).join("");
+    const cells = days.map(d => {
+      const ds = fmtDate(d);
+      const evs = events.filter(e => e.start_date === ds);
+      const isOther = d.getMonth() !== c.getMonth();
+      return `
+        <div class="month-cell ${isOther ? 'other-month' : ''} ${isToday(d) ? 'today' : ''}"
+             onclick="newEventOnDate('${ds}')">
+          <div class="month-cell-num">${d.getDate()}</div>
+          ${evs.slice(0,3).map(e => `
+            <div class="month-event-title" style="background:${e.color}"
+                 onclick="event.stopPropagation(); openModal('${e.id}')"
+                 title="${e.title}">${e.title}</div>
+          `).join("")}
+          ${evs.length > 3 ? `<div style="font-size:10px;color:var(--muted)">+${evs.length-3} mehr</div>` : ""}
+        </div>
+      `;
+    }).join("");
+
+    document.getElementById("viewContainer").innerHTML = `
+      <div class="month-grid">${heads}${cells}</div>
+    `;
+  }
+
+  function renderYear() {
+    const c = state.cursor;
+    const events = filterEvents(state.events);
+    const months = Array.from({length:12}, (_,m) => {
+      const first = new Date(c.getFullYear(), m, 1);
+      const last = new Date(c.getFullYear(), m+1, 0);
+      const startOff = (first.getDay()+6)%7;
+      const start = addDays(first, -startOff);
+      const totalCells = Math.ceil((startOff + last.getDate()) / 7) * 7;
+      const days = Array.from({length: totalCells}, (_,i) => addDays(start, i));
+      const heads = WOCHENTAGE_KURZ.map(d => `<div style="font-weight:700;color:var(--muted)">${d[0]}</div>`).join("");
+      const dayCells = days.map(d => {
+        const ds = fmtDate(d);
+        const dayEvents = events.filter(e => e.start_date === ds);
+        const isOther = d.getMonth() !== m;
+        const dotColor = dayEvents[0]?.color;
+        return `
+          <div class="mini-day ${isOther ? 'other' : ''} ${isToday(d) ? 'today' : ''} ${dayEvents.length ? 'has-event' : ''}"
+               onclick="goToDateView('${ds}')">${d.getDate()}${dotColor && !isOther ? `<span class="dot" style="background:${dotColor}"></span>` : ""}</div>
+        `;
+      }).join("");
+      return `
+        <div class="year-month">
+          <div class="year-month-name">${MONAT_NAMEN[m]}</div>
+          <div class="mini-month">${heads}${dayCells}</div>
+        </div>
+      `;
+    }).join("");
+    document.getElementById("viewContainer").innerHTML = `<div class="year-grid">${months}</div>`;
+  }
+
+  function goToDateView(ds) {
+    state.cursor = parseDate(ds);
+    setView("day");
+  }
+
+  function newEventOnDate(ds) {
+    openModal(null, ds);
+  }
+
+  // === Modal ===
+  function openModal(eid, presetDate) {
+    const m = document.getElementById("modalBg");
+    state.editingId = eid;
+    document.getElementById("modalTitle").textContent = eid ? "Event bearbeiten" : "Neues Event";
+    document.getElementById("btnDelete").style.display = eid ? "block" : "none";
+
+    if (eid) {
+      const e = state.events.find(x => x.id === eid);
+      if (!e) return;
+      document.getElementById("evTitle").value = e.title || "";
+      state.selectedType = e.event_type || "meeting";
+      document.getElementById("evStartDate").value = e.start_date || "";
+      document.getElementById("evEndDate").value = e.end_date || "";
+      document.getElementById("evStartTime").value = (e.start_time||"").slice(0,5);
+      document.getElementById("evEndTime").value = (e.end_time||"").slice(0,5);
+      document.getElementById("evAllDay").checked = !!e.all_day;
+      document.getElementById("evRecurrence").value = e.recurrence || "none";
+      document.getElementById("evLocation").value = e.location || "";
+      document.getElementById("evDescription").value = e.description || "";
+      document.getElementById("visTraegerin").checked = e.visible_traegerin !== false;
+      document.getElementById("visPaedagogin").checked = e.visible_paedagogin !== false;
+      document.getElementById("visEltern").checked = !!e.visible_eltern;
+    } else {
+      document.getElementById("evTitle").value = "";
+      state.selectedType = "meeting";
+      document.getElementById("evStartDate").value = presetDate || fmtDate(state.cursor);
+      document.getElementById("evEndDate").value = "";
+      document.getElementById("evStartTime").value = "";
+      document.getElementById("evEndTime").value = "";
+      document.getElementById("evAllDay").checked = false;
+      document.getElementById("evRecurrence").value = "none";
+      document.getElementById("evLocation").value = "";
+      document.getElementById("evDescription").value = "";
+      document.getElementById("visTraegerin").checked = true;
+      document.getElementById("visPaedagogin").checked = true;
+      document.getElementById("visEltern").checked = false;
+    }
+    renderTypePills();
+    m.classList.add("show");
+  }
+
+  function closeModal() {
+    document.getElementById("modalBg").classList.remove("show");
+    state.editingId = null;
+  }
+
+  async function saveEvent() {
+    const payload = {
+      title: document.getElementById("evTitle").value.trim(),
+      event_type: state.selectedType,
+      start_date: document.getElementById("evStartDate").value,
+      end_date: document.getElementById("evEndDate").value || null,
+      start_time: document.getElementById("evStartTime").value || null,
+      end_time: document.getElementById("evEndTime").value || null,
+      all_day: document.getElementById("evAllDay").checked,
+      recurrence: document.getElementById("evRecurrence").value,
+      location: document.getElementById("evLocation").value || null,
+      description: document.getElementById("evDescription").value || null,
+      visible_traegerin: document.getElementById("visTraegerin").checked,
+      visible_paedagogin: document.getElementById("visPaedagogin").checked,
+      visible_eltern: document.getElementById("visEltern").checked,
+    };
+    if (!payload.title) { alert("Titel fehlt"); return; }
+    if (!payload.start_date) { alert("Startdatum fehlt"); return; }
+
+    let r;
+    if (state.editingId) {
+      r = await fetch(`${API}/events/${state.editingId}`, {
+        method: "PATCH", headers: {"Content-Type":"application/json"}, body: JSON.stringify(payload)
+      });
+    } else {
+      r = await fetch(`${API}/events`, {
+        method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(payload)
+      });
+    }
+    if (!r.ok) {
+      const txt = await r.text();
+      alert(`Fehler: ${r.status} ${txt}`);
+      return;
+    }
+    closeModal();
+    loadEvents();
+  }
+
+  async function deleteEvent() {
+    if (!state.editingId) return;
+    if (!confirm("Event wirklich löschen?")) return;
+    const r = await fetch(`${API}/events/${state.editingId}`, { method: "DELETE" });
+    if (!r.ok) {
+      alert(`Fehler beim Löschen: ${r.status}`);
+      return;
+    }
+    closeModal();
+    loadEvents();
+  }
+
+  async function autoBirthdays() {
+    if (!confirm("Geburtstage aus Kinder-Liste generieren?\n(Defaultdatum 1. Januar — bitte danach echte Daten setzen)")) return;
+    const r = await fetch(`${API}/auto-birthdays`, { method: "POST" });
+    const j = await r.json();
+    alert(`${j.created} neue Geburtstage angelegt (von ${j.total_children} Kindern).\n${j.note || ""}`);
+    loadEvents();
+  }
+
+  // === Init ===
+  (async () => {
+    await loadEventTypes();
+    await loadEvents();
+  })();
+</script>
+
+</body>
+</html>

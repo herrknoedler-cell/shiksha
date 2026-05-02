@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA · CAMPING — CampState</title>
+<style>
+:root {
+  --bg: #f7f7f5; --card: #ffffff; --line: #e6e4de; --line-strong: #c6c2b8;
+  --ink: #1a1a1a; --ink-soft: #55524b; --ink-mute: #7a7a74;
+  --accent: #2d7a5f; --accent-soft: #e8f1ec;
+  --warn: #8a6a2a; --warn-soft: #f5ebd8;
+  --alert: #a0391f; --alert-soft: #f5e1da;
+  --info: #4a6a80; --info-soft: #e8eef1;
+  --positive: #4a8050; --positive-soft: #e3f0e6;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 28px 24px 64px; }
+
+header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.brand { display: flex; flex-direction: column; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); }
+h1 { font-size: 26px; font-weight: 600; margin: 4px 0 0; letter-spacing: -0.01em; }
+.lede { font-size: 13px; color: var(--ink-soft); margin: 4px 0 0; max-width: 560px; }
+.cs-switcher { display: inline-flex; gap: 4px; border: 1px solid var(--line); border-radius: 8px; padding: 3px; background: #fafaf8; }
+.cs-switcher button { padding: 7px 12px; font-size: 13px; background: transparent; border: 0; border-radius: 5px; cursor: pointer; color: var(--ink-soft); font-weight: 500; }
+.cs-switcher button.active { background: var(--ink); color: #fff; }
+
+.state-card { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; padding: 22px 26px; margin-bottom: 20px; }
+.state-card.alert { border-left-color: var(--alert); }
+.state-card.positive { border-left-color: var(--positive); }
+.state-card .when { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-mute); }
+.state-card .summary { font-size: 17px; line-height: 1.5; margin: 6px 0 0; }
+.state-card .meta { font-size: 11px; color: var(--ink-mute); margin-top: 10px; }
+.occupancy-bar {
+  margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line);
+  display: flex; align-items: center; gap: 12px;
+}
+.occupancy-track { flex: 1; height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.occupancy-fill { height: 100%; background: var(--accent); }
+.occupancy-label { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+
+section { margin-top: 28px; }
+section h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+section .h-sub { font-size: 12px; color: var(--ink-mute); margin: 0 0 12px; }
+
+.grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 16px; }
+
+.signal-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.signal { display: flex; gap: 12px; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.signal:last-child { border-bottom: 0; }
+.sev { font-size: 10px; text-transform: uppercase; font-weight: 700; padding: 3px 8px; border-radius: 3px; letter-spacing: 0.04em; white-space: nowrap; }
+.sev.high { background: var(--alert-soft); color: var(--alert); }
+.sev.mid { background: var(--warn-soft); color: var(--warn); }
+.sev.low { background: var(--info-soft); color: var(--info); }
+.sev.info { background: #f0f0ee; color: var(--ink-mute); }
+.sev.pos { background: var(--positive-soft); color: var(--positive); }
+.signal-text { flex: 1; font-size: 14px; }
+.signal-meta { font-size: 11px; color: var(--ink-mute); margin-top: 3px; font-family: var(--mono); }
+.signal-action { font-size: 12px; color: var(--ink); background: #fafaf8; border: 1px solid var(--line); padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+
+.pattern-list { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.pattern-row { padding: 12px 18px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.pattern-row:last-child { border-bottom: 0; }
+.pattern-text { font-size: 14px; }
+.pattern-text.positive::before { content: "+ "; color: var(--positive); font-weight: 700; }
+.pattern-meta { font-size: 11px; color: var(--ink-mute); font-family: var(--mono); }
+.confidence-bar { height: 4px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 4px; }
+.confidence-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+
+.focus-list { background: var(--ink); color: #fff; border-radius: 10px; overflow: hidden; }
+.focus-list h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(255,255,255,0.6); padding: 14px 18px 6px; margin: 0; }
+.focus-row { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; gap: 12px; align-items: flex-start; }
+.focus-row:last-child { border-bottom: 0; }
+.focus-num { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5); width: 18px; }
+.focus-text { flex: 1; font-size: 14px; }
+.focus-text small { display: block; font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+.drilldown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.drilldown { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
+.drilldown:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+.drilldown .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-mute); }
+.drilldown .val { font-size: 22px; font-weight: 700; font-family: var(--mono); margin-top: 4px; }
+.drilldown .sub { font-size: 11px; color: var(--ink-soft); margin-top: 4px; }
+.drilldown .trend { display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 3px; margin-top: 4px; font-weight: 600; }
+.trend.up { background: var(--positive-soft); color: var(--positive); }
+.trend.down { background: var(--alert-soft); color: var(--alert); }
+.trend.flat { background: #f0f0ee; color: var(--ink-mute); }
+
+.school-panel { display: none; }
+.school-panel.active { display: block; }
+
+footer.bot { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-mute); }
+footer.bot code { font-family: var(--mono); background: #fafaf8; padding: 1px 5px; border-radius: 3px; }
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+  .drilldown-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="brand">
+    <span class="eyebrow">SHIKSHA · CAMPING.EDITION</span>
+    <h1>CampState</h1>
+    <p class="lede">Was los ist. Wer da ist. Was als nächstes wichtig wäre. Sprache, nicht Zahlen.</p>
+  </div>
+  <div class="cs-switcher" id="switcher">
+    <button class="active" data-camp="bayern">Allweglehen Bayern</button>
+    <button data-camp="tirol">Inntalblick Tirol</button>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<!-- BAYERN — Camping Allweglehen -->
+<!-- ============================================================ -->
+<div class="school-panel active" id="panel-bayern">
+
+<div class="state-card alert">
+  <div class="when">25. April 2026 · 10:08</div>
+  <p class="summary">Drei Sachen drücken: <strong>Familie Berger</strong> Anzahlung läuft morgen ab, <strong>Pitch B07</strong> verbraucht 2,4× zu viel Strom, und das Gesundheitsamt hat <strong>zwei Pool-Auflagen</strong> hinterlassen. Sonst Erfreuliches: Familie Schmidt kommt zum dritten Sommer.</p>
+  <div class="meta">3 hohe + 4 mittlere + 2 niedrige Signale · 3 Patterns · review_required = true</div>
+  <div class="occupancy-bar">
+    <div class="occupancy-track"><div class="occupancy-fill" style="width: 8%;"></div></div>
+    <div class="occupancy-label">8% · 1/120 Pitches belegt (Vorsaison)</div>
+  </div>
+</div>
+
+<section>
+  <h2>Empfohlener Fokus</h2>
+  <p class="h-sub">Drei Aktionen mit höchstem Hebel — alles als Vorschlag, alles bestätigungspflichtig.</p>
+  <div class="focus-list">
+    <h3>Heute · vor Mittag</h3>
+    <div class="focus-row">
+      <div class="focus-num">1.</div>
+      <div class="focus-text">
+        Familie Berger an Anzahlung erinnern — Buchung verfällt 27.4.
+        <small>462 €, Reservation R-2026-0398, freundlich, einmalig</small>
+      </div>
+    </div>
+    <div class="focus-row">
+      <div class="focus-num">2.</div>
+      <div class="focus-text">
+        Pool-Auflage A: Schreinerei Brand wegen Antirutsch-Belag bestellen.
+        <small>Frist 1. Juni · vor Pfingsten saisonkritisch</small>
+      </div>
+    </div>
+    <div class="focus-row">
+      <div class="focus-num">3.</div>
+      <div class="focus-text">
+        Bei Familie Hofmann (Pitch B07) kurz Strom-Verbrauch ansprechen.
+        <small>Höflich + lösungsorientiert · evt. Defekt im Wohnwagen</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="grid">
+    <div class="col">
+      <h2 style="margin-bottom: 8px;">Offene Signale</h2>
+      <p class="h-sub">Was gerade auffällt.</p>
+
+      <div class="signal-card">
+        <div class="signal">
+          <span class="sev high">jetzt</span>
+          <div class="signal-text">
+            Familie Berger — Anzahlung 462 € fällig in 24h.
+            <div class="signal-meta">camping.reservation.payment_overdue · R-2026-0398</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev high">jetzt</span>
+          <div class="signal-text">
+            Pool-Auflage A vom Gesundheitsamt: Antirutsch-Belag bis 1.6. erneuern.
+            <div class="signal-meta">camping.safeguarding.pool_inspection_due · GBL-2026-Pool-022</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev high">jetzt</span>
+          <div class="signal-text">
+            Pool-Auflage B: Aufsichtsplan-Doku digital führen, ab dieser Saison lückenlos.
+            <div class="signal-meta">camping.safeguarding.pool_supervision · vorher 2x Lücke</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">heute</span>
+          <div class="signal-text">
+            Pitch B07 verbraucht 28,9 kWh in 3 Tagen — erwartet 12.
+            <div class="signal-meta">camping.utility.unusual_consumption · Faktor 2.4</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">demnächst</span>
+          <div class="signal-text">
+            Pitch C03 Wartung steht aus — Schreinerei Brand letzte Woche da.
+            <div class="signal-meta">camping.pitch.maintenance_overdue · 18 Tage</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">behörde</span>
+          <div class="signal-text">
+            Kurtaxe März 482,40 € — Säumniszuschlag läuft.
+            <div class="signal-meta">camping.behoerde.kurtaxe_overdue · Markt Berchtesgaden</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">wetter</span>
+          <div class="signal-text">
+            Sturm Donnerstag erwartet (45 kn).
+            <div class="signal-meta">camping.weather.storm_warning · 12h Vorlauf</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev low">heute</span>
+          <div class="signal-text">
+            Bäcker Lechner liefert um 06:30, 06:35 angekommen.
+            <div class="signal-meta">camping.partnership.delivery_today · Standard</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev low">no-show</span>
+          <div class="signal-text">
+            Christoph Becker bucht Pitch B08 für Juni — Vorgeschichte: 2× nicht gekommen.
+            <div class="signal-meta">camping.reservation.no_show_pattern · 2 Jahre Historie</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev pos">positiv</span>
+          <div class="signal-text">
+            Familie Schmidt kommt zum dritten Sommer in Folge (Pitch A01, 12.7.–26.7.).
+            <div class="signal-meta">camping.journey.repeat_pattern · Stamm­gast-Status erreicht</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h2 style="margin-bottom: 8px;">Patterns</h2>
+      <p class="h-sub">Was sich wiederholt.</p>
+
+      <div class="pattern-list">
+        <div class="pattern-row">
+          <div class="pattern-text positive">3 Stammgäste-Familien diese Saison.</div>
+          <div class="pattern-meta">pattern.repeat_guests_growing · positive Polarität</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 85%;"></div></div>
+        </div>
+        <div class="pattern-row">
+          <div class="pattern-text">Pitch B07 — Strom-Anomalie zum dritten Mal in 12 Monaten.</div>
+          <div class="pattern-meta">utility.recurring_anomaly_pitch · prüfen ob Pitch-Defekt</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 70%;"></div></div>
+        </div>
+        <div class="pattern-row">
+          <div class="pattern-text">Pool-Inspektionen jährlich Mitte April → früh planen.</div>
+          <div class="pattern-meta">behoerde.seasonal_pattern · saisonal vorhersagbar</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 90%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Drilldowns</h2>
+  <p class="h-sub">Vorsaison-Kennzahlen — Hauptsaison Juli/August.</p>
+  <div class="drilldown-grid">
+    <div class="drilldown">
+      <div class="lbl">Buchungen Hochsaison</div>
+      <div class="val">68%</div>
+      <div class="sub">81 von 120 Pitches reserviert</div>
+      <div class="trend up">+ 7 ggü. Vorjahr</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Stammgast-Quote</div>
+      <div class="val">31%</div>
+      <div class="sub">37 von 120 sind Wiederkehrer</div>
+      <div class="trend up">stark</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Lieferanten-Pflege</div>
+      <div class="val">8/10</div>
+      <div class="sub">aktiv im April</div>
+      <div class="trend flat">normal</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Offen Posten</div>
+      <div class="val">€2.398</div>
+      <div class="sub">Berger + Kurtaxe + Versicherung</div>
+      <div class="trend down">drei aktiv</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- TIROL — Camping Inntalblick -->
+<!-- ============================================================ -->
+<div class="school-panel" id="panel-tirol">
+
+<div class="state-card">
+  <div class="when">25. April 2026 · 10:12</div>
+  <p class="summary">Heute: <strong>Sven Andersson</strong> fragt vor Anreise zwei Sachen, und <strong>Pitch A01</strong> hat hohen Strom (vermutlich Otto's Heizung). Bruno-Hund-Beschwerde Nummer 3 ist da — Familie Maier reden. Sonst Erfreuliches: Familie Bertolini kommt zum zweiten Sommer.</p>
+  <div class="meta">0 hohe + 4 mittlere + 3 niedrige Signale · 2 Patterns</div>
+  <div class="occupancy-bar">
+    <div class="occupancy-track"><div class="occupancy-fill" style="width: 18%;"></div></div>
+    <div class="occupancy-label">18% · 33/180 Pitches (inkl. 8 Dauer­camper schon gestartet)</div>
+  </div>
+</div>
+
+<section>
+  <h2>Empfohlener Fokus</h2>
+  <div class="focus-list">
+    <h3>Heute</h3>
+    <div class="focus-row">
+      <div class="focus-num">1.</div>
+      <div class="focus-text">
+        Sven Andersson antworten — kommt morgen aus Stockholm.
+        <small>Sonnen-Ecken zeigen, Berg-Tour-Empfehlung Berg & Tal Innsbruck</small>
+      </div>
+    </div>
+    <div class="focus-row">
+      <div class="focus-num">2.</div>
+      <div class="focus-text">
+        Mit Familie Maier wegen Bruno reden — dritter Vorfall in drei Saisons.
+        <small>Pitch-Wechsel C10 anbieten; freundlich, mit Klarheit</small>
+      </div>
+    </div>
+    <div class="focus-row">
+      <div class="focus-num">3.</div>
+      <div class="focus-text">
+        Bei Otto Kremser kurz fragen — Strom A01 in 3 Tagen 42 kWh.
+        <small>Vermutlich Heizung im Wohnwagen, Standby. Tipp anbieten.</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="grid">
+    <div class="col">
+      <h2 style="margin-bottom: 8px;">Offene Signale</h2>
+
+      <div class="signal-card">
+        <div class="signal">
+          <span class="sev mid">heute</span>
+          <div class="signal-text">
+            Sven Andersson — 2 Fragen vor Anreise (Sonne, Touren).
+            <div class="signal-meta">camping.guest.pre_arrival_question · Ankunft 26.4.</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">heute</span>
+          <div class="signal-text">
+            Familie Maier (Pitch E01) — Hund Bruno: 3. Beschwerde von Nachbar B16.
+            <div class="signal-meta">camping.safeguarding.dog_repeat_complaint · safeguarding-cross</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">heute</span>
+          <div class="signal-text">
+            Pitch A01 — Otto Kremser Strom 42 kWh / 3 Tage (erwartet 14).
+            <div class="signal-meta">camping.utility.unusual_consumption · Faktor 3.0</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">behörde</span>
+          <div class="signal-text">
+            Tourismusabgabe März — 1.284,50 € fällig.
+            <div class="signal-meta">camping.behoerde.tourismusabgabe_due · Innsbruck-Land</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev low">wetter</span>
+          <div class="signal-text">
+            Mittwoch Dauerregen — kein Sturm.
+            <div class="signal-meta">camping.weather.rain_window · Indoor-Tipps?</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev low">heute</span>
+          <div class="signal-text">
+            Bäcker Tiefenbach um 06:30 — täglich.
+            <div class="signal-meta">camping.partnership.delivery_today</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev pos">positiv</span>
+          <div class="signal-text">
+            Familie Bertolini (Italien) kommt zum zweiten Sommer.
+            <div class="signal-meta">camping.journey.repeat_pattern · 8.8.–22.8.</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h2 style="margin-bottom: 8px;">Patterns</h2>
+      <div class="pattern-list">
+        <div class="pattern-row">
+          <div class="pattern-text">Bruno-Beschwerden: jede Saison genau eine.</div>
+          <div class="pattern-meta">pattern.dog_repeat_complaint · saisonal stabil</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 78%;"></div></div>
+        </div>
+        <div class="pattern-row">
+          <div class="pattern-text">Vorsaison-Anfragen oft Sonnen/Touren-fokussiert.</div>
+          <div class="pattern-meta">pattern.pre_arrival_question_type · Outdoor-Profil</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 65%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Drilldowns</h2>
+  <div class="drilldown-grid">
+    <div class="drilldown"><div class="lbl">Saison</div><div class="val">71%</div><div class="sub">128/180 Pitches reserviert</div><div class="trend up">+ 12 ggü. Vorjahr</div></div>
+    <div class="drilldown"><div class="lbl">Hund-Quote</div><div class="val">42%</div><div class="sub">an Hundewiese-/E-Pitches</div><div class="trend flat">stabil</div></div>
+    <div class="drilldown"><div class="lbl">Internat. Gäste</div><div class="val">38%</div><div class="sub">IT/EN/CZ-Sprachen</div><div class="trend up">+ 6%</div></div>
+    <div class="drilldown"><div class="lbl">Offen Posten</div><div class="val">€1.285</div><div class="sub">Tourismusabgabe März</div><div class="trend flat">normal</div></div>
+  </div>
+</section>
+
+</div>
+
+<footer class="bot">
+  Stand: 25.04.2026 · CAMPING.EDITION V1 · CampState analog SchoolState/ClubState · Cross-Edition <code>safeguarding</code> mit Severity-Boost (Pool, Spielplatz) · alle Aktionen <code>review_required=true</code>
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('#switcher button').forEach(b => {
+  b.addEventListener('click', () => {
+    const target = b.dataset.camp;
+    document.querySelectorAll('#switcher button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.school-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + target).classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

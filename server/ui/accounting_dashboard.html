@@ -1,0 +1,270 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SHIKSHA · Buchhaltung</title>
+<style>
+:root{--ink:#1a1a1a;--soft:#55524b;--mute:#7a7a74;--line:#e6e4de;--card:#fff;--accent:#2d7a5f;--accent-soft:#e8f1ec;--warn:#8a6a2a;--warn-soft:#f5ebd8;--alert:#a0391f;--alert-soft:#f5e1da;--info:#4a6a80;--info-soft:#e8eef1;--bg:#f7f7f5;--mono:"SFMono-Regular",Menlo,monospace}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+.app{max-width:1400px;margin:0 auto;padding:24px 22px 80px}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--mute)}
+h1{font-size:26px;font-weight:600;margin:4px 0 0;letter-spacing:-0.005em}
+.org-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:#fafaf8;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--soft);margin-top:8px}
+.org-pill::before{content:"";width:6px;height:6px;background:var(--accent);border-radius:50%}
+.tabs{display:flex;gap:4px;margin:24px 0 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{padding:10px 14px;background:transparent;border:0;border-bottom:2px solid transparent;font-size:14px;color:var(--mute);cursor:pointer;font-weight:500}
+.tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+.tab .b{display:inline-block;margin-left:4px;padding:1px 6px;font-size:10px;background:var(--alert);color:#fff;border-radius:999px;font-weight:700;font-family:var(--mono)}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px}
+.card h2{font-size:16px;font-weight:600;margin:0 0 4px}
+.card .lede{font-size:13px;color:var(--mute);margin:0 0 16px}
+.empty{text-align:center;padding:48px 24px;color:var(--mute);font-size:14px}
+.empty h3{font-size:18px;color:var(--ink);font-weight:600;margin:0 0 8px}
+.empty .ic{font-size:42px;margin-bottom:14px}
+.dropzone{border:2px dashed #c6c2b8;border-radius:14px;padding:32px;text-align:center;cursor:pointer;background:#fafaf8;transition:all 0.15s}
+.dropzone:hover{border-color:var(--ink);background:var(--accent-soft)}
+.dropzone .ic{font-size:32px;margin-bottom:8px}
+input[type=file]{display:none}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.field label{font-size:12px;color:var(--soft);font-weight:500}
+.field input,.field select,.field textarea{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:#fafaf8;color:var(--ink);width:100%}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+button.primary{padding:10px 18px;background:var(--ink);color:#fff;border:0;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
+button.secondary{padding:10px 18px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:6px;font-size:14px;cursor:pointer}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--mute);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);background:#fafaf8;position:sticky;top:0}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:hover td{background:#fafaf8}
+.amt{text-align:right;font-family:var(--mono);font-weight:500;white-space:nowrap}
+.amt.in{color:var(--accent)}.amt.out{color:var(--alert)}
+.pill{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.pill.open{background:var(--info-soft);color:var(--info)}
+.pill.overdue{background:var(--alert-soft);color:var(--alert)}
+.pill.unmatched{background:var(--warn-soft);color:var(--warn)}
+.pill.matched{background:var(--accent-soft);color:var(--accent)}
+.pill.paid{background:var(--accent-soft);color:var(--accent)}
+.cat-select{padding:4px 8px;border:1px solid var(--line);border-radius:4px;font-size:12px;background:#fff;cursor:pointer;font-family:inherit}
+.cat-select.business{background:#e8f1ec;border-color:var(--accent)}
+.cat-select.private{background:#f0e6f0;border-color:#7a4faf}
+.cat-select.shareholder_loan{background:#fae6c8;border-color:#a0651f}
+.cat-select.ignore{background:#f0f0ee;border-color:var(--mute)}
+.cat-select.matched{background:#e8f1ec;border-color:var(--accent)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--ink);color:#fff;padding:14px 20px;border-radius:10px;font-size:14px;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:100}
+.toast.show{display:block}.toast.err{background:var(--alert)}.toast.ok{background:var(--accent)}
+.summary{background:#fafaf8;border-left:4px solid var(--ink);padding:14px 18px;border-radius:0 8px 8px 0;font-size:15px;margin:0 0 16px}
+.summary.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+.summary.ok{border-left-color:var(--accent);background:var(--accent-soft)}
+.dir-icon{font-size:14px}.dir-icon.in{color:var(--accent)}.dir-icon.out{color:var(--alert)}
+.loading{text-align:center;padding:24px;color:var(--mute);font-size:13px}
+.proposal-row{padding:14px 18px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;display:grid;grid-template-columns:80px 1fr auto;gap:14px;align-items:center}
+.proposal-row.high{border-left:4px solid var(--accent)}
+.proposal-row.mid{border-left:4px solid var(--warn)}
+.proposal-row.low{border-left:4px solid var(--info)}
+.proposal-tier{font-size:10px;font-weight:700;text-transform:uppercase;text-align:center;padding:4px 8px;border-radius:4px;letter-spacing:0.04em}
+.proposal-tier.high{background:var(--accent-soft);color:var(--accent)}
+.proposal-tier.mid{background:var(--warn-soft);color:var(--warn)}
+.proposal-tier.low{background:var(--info-soft);color:var(--info)}
+.proposal-question{font-size:14px;margin-bottom:4px}
+.proposal-meta{font-size:11px;color:var(--mute);font-family:var(--mono)}
+.notes-cell input{padding:4px 6px;font-size:12px;border:1px solid var(--line);border-radius:4px;width:100%;background:#fff;font-family:inherit}
+.tx-purpose{font-size:11px;color:var(--soft);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filter-bar select,.filter-bar input{padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:#fff;font-family:inherit}
+.filter-bar .stat{font-size:12px;color:var(--mute);margin-left:auto}
+@media(max-width:700px){.field-row,.field-row.three{grid-template-columns:1fr}}
+</style></head><body>
+<div class="app">
+<div class="eyebrow">SHIKSHA · ACCOUNTING</div>
+<h1>Buchhaltung</h1>
+<span class="org-pill">Lunchbox Gastro GmbH</span>
+
+<div class="tabs">
+  <button class="tab active" data-p="today">Heute</button>
+  <button class="tab" data-p="bank">Bank-Statement</button>
+  <button class="tab" data-p="proposals">Match-Vorschläge<span class="b" id="prop-count">…</span></button>
+  <button class="tab" data-p="transactions">Bank-Buchungen</button>
+  <button class="tab" data-p="invoices">Rechnungen</button>
+  <button class="tab" data-p="manual">Manuell anlegen</button>
+</div>
+
+<div class="panel active" id="p-today"><div class="card"><h2>Heute</h2><div id="state-summary"><div class="loading">Lade …</div></div></div></div>
+
+<div class="panel" id="p-bank"><div class="card">
+<h2>Bank-Statement importieren</h2>
+<p class="lede">CSV oder CAMT.053 vom Online-Banking-Export.</p>
+<form id="form-bank" enctype="multipart/form-data">
+<div class="field-row"><div class="field"><label>IBAN-Konto (leer = aus Datei)</label><input type="text" name="iban_account" value="" placeholder="optional"/></div><div class="field"><label>Format</label><select name="file_format"><option value="csv">CSV</option><option value="camt053">CAMT.053</option><option value="mt940">MT940</option></select></div></div>
+<label class="dropzone" id="dz-bank"><div class="ic">🏦</div><div><strong>Bank-Datei wählen</strong></div><div style="font-size:12px;color:var(--mute);margin-top:4px" id="bank-fname">CSV / XML / MT940</div><input type="file" name="file" id="bank-file" accept=".csv,.xml,.mt940,.txt"/></label>
+<div style="margin-top:16px"><button type="submit" class="primary">Importieren</button></div>
+</form><div id="bank-result" style="margin-top:16px"></div>
+</div></div>
+
+<div class="panel" id="p-proposals"><div class="card">
+<h2>Match-Vorschläge</h2>
+<p class="lede">SHIKSHA hat unmatchte Bank-Buchungen mit offenen Rechnungen verglichen. Du entscheidest pro Vorschlag.</p>
+<div class="filter-bar"><button class="primary" id="reload-proposals" style="padding:6px 14px;font-size:13px">↻ Neu laden</button><span class="stat" id="proposals-stat"></span></div>
+<div id="proposals-content"><div class="loading">Lade …</div></div>
+</div></div>
+
+<div class="panel" id="p-transactions"><div class="card">
+<h2>Bank-Buchungen</h2>
+<p class="lede">Pro Zeile Kategorie zuweisen — privat, Gesellschafterkredit, Geschäftlich, Ignorieren. Wird sofort gespeichert.</p>
+<div class="filter-bar">
+<select id="filter-cat"><option value="">Alle Kategorien</option><option value="unclassified">Nicht klassifiziert</option><option value="business">Geschäftlich</option><option value="private">Privat</option><option value="shareholder_loan">Gesellschafterkredit</option><option value="ignore">Ignorieren</option><option value="matched">Verknüpft</option></select>
+<select id="filter-status"><option value="">Alle Status</option><option value="unmatched">unmatched</option><option value="matched">matched</option></select>
+<input type="search" id="filter-search" placeholder="Suchen …"/>
+<span class="stat" id="tx-stat"></span>
+</div>
+<div id="transactions-content"><div class="loading">Lade …</div></div>
+</div></div>
+
+<div class="panel" id="p-invoices"><div class="card"><h2>Rechnungen</h2><p class="lede">Manuell + Foto-/PDF-Upload.</p><div id="invoices-content"><div class="loading">Lade …</div></div></div></div>
+
+<div class="panel" id="p-manual"><div class="card"><h2>Rechnung manuell anlegen</h2>
+<form id="form-manual">
+<div class="field-row"><div class="field"><label>Empfänger / Absender</label><input type="text" name="customer_name" required/></div><div class="field"><label>Richtung</label><select name="direction"><option value="incoming">Eingang</option><option value="outgoing">Ausgang</option></select></div></div>
+<div class="field-row three"><div class="field"><label>Typ</label><select name="document_type"><option value="invoice">Rechnung</option><option value="dunning">Mahnung</option></select></div><div class="field"><label>Rechnungs-Nr.</label><input type="text" name="invoice_number"/></div><div class="field"><label>Betrag (EUR)</label><input type="number" name="amount_total" step="0.01" required/></div></div>
+<div class="field-row"><div class="field"><label>Rechnungsdatum</label><input type="date" name="invoice_date"/></div><div class="field"><label>Fälligkeitsdatum</label><input type="date" name="due_date"/></div></div>
+<div class="field"><label>IBAN</label><input type="text" name="iban"/></div>
+<div class="field"><label>Notiz</label><textarea name="notes" rows="2"></textarea></div>
+<div><button type="submit" class="primary">Speichern</button></div>
+</form><div id="manual-result" style="margin-top:16px"></div>
+</div></div>
+
+</div><div class="toast" id="toast"></div>
+
+<script>
+const API='';
+function toast(m,t='ok'){const x=document.getElementById('toast');x.textContent=m;x.className='toast show '+t;setTimeout(()=>x.classList.remove('show'),3000)}
+function fmt(n){return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n||0)}
+function fmtDate(s){if(!s)return'—';return new Date(s).toLocaleDateString('de-DE')}
+function escHtml(s){return(s||'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const CAT_OPTS=[{v:'unclassified',l:'? unklar'},{v:'business',l:'⬇ Geschäftlich'},{v:'private',l:'P Privat'},{v:'shareholder_loan',l:'$ Gesell.kredit'},{v:'ignore',l:'— Ignorieren'},{v:'matched',l:'✓ Verknüpft'}];
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('p-'+t.dataset.p).classList.add('active');
+  loadPanel(t.dataset.p);
+}));
+async function loadPanel(p){
+  if(p==='today')await loadToday();
+  if(p==='proposals')await loadProposals();
+  if(p==='transactions')await loadTransactions();
+  if(p==='invoices')await loadInvoices();
+}
+async function loadToday(){
+  const el=document.getElementById('state-summary');
+  try{
+    const inv=await fetch(API+'/accounting/invoices?limit=1000').then(r=>r.json());
+    const tx=await fetch(API+'/accounting/transactions?limit=1000').then(r=>r.json());
+    const prop=await fetch(API+'/accounting/match-proposals?limit=1').then(r=>r.json());
+    const cats={};tx.transactions.forEach(t=>{cats[t.category||'unclassified']=(cats[t.category||'unclassified']||0)+1});
+    const unclass=cats['unclassified']||0;const biz=cats['business']||0;const matched=tx.transactions.filter(t=>t.status==='matched').length;
+    if(inv.count===0&&tx.count===0)el.innerHTML='<div class="empty"><div class="ic">🌱</div><h3>Noch nichts drin.</h3></div>';
+    else el.innerHTML=`<div class="summary">${tx.count} Bank-Buchungen · ${unclass} unklassifiziert · ${biz} geschäftlich · ${matched} verknüpft · ${inv.count} Rechnungen · ${prop.count} Match-Vorschläge offen</div>`;
+    document.getElementById('prop-count').textContent=prop.count;
+  }catch(e){el.innerHTML='<div class="summary warn">Fehler: '+e.message+'</div>'}
+}
+async function loadTransactions(){
+  const el=document.getElementById('transactions-content');
+  const cat=document.getElementById('filter-cat').value;
+  const status=document.getElementById('filter-status').value;
+  const search=(document.getElementById('filter-search').value||'').toLowerCase();
+  try{
+    let url=API+'/accounting/transactions?limit=2000';
+    if(cat)url+='&category='+encodeURIComponent(cat);
+    if(status)url+='&status='+encodeURIComponent(status);
+    const r=await fetch(url).then(r=>r.json());
+    let txs=r.transactions;
+    if(search)txs=txs.filter(t=>(t.counterparty_name||'').toLowerCase().includes(search)||(t.purpose||'').toLowerCase().includes(search));
+    document.getElementById('tx-stat').textContent=`${txs.length} angezeigt von ${r.count}`;
+    if(txs.length===0){el.innerHTML='<div class="empty"><div class="ic">🏦</div><h3>Keine Buchungen.</h3></div>';return}
+    let html='<table class="tbl"><thead><tr><th>Datum</th><th>Counterparty</th><th>Verwendungszweck</th><th class="amt">Betrag</th><th>Kategorie</th><th>Notiz</th><th>Status</th></tr></thead><tbody>';
+    for(const t of txs){
+      const cls=t.amount>0?'in':'out';const sign=t.amount>0?'+':'';
+      const curCat=t.category||'unclassified';
+      const sel=CAT_OPTS.map(o=>`<option value="${o.v}"${curCat===o.v?' selected':''}>${o.l}</option>`).join('');
+      html+=`<tr data-id="${t.id}">
+<td>${fmtDate(t.value_date)}</td>
+<td>${escHtml(t.counterparty_name||'—')}</td>
+<td><div class="tx-purpose" title="${escHtml(t.purpose||'')}">${escHtml((t.purpose||'').slice(0,50))}</div></td>
+<td class="amt ${cls}">${sign}${fmt(t.amount)}</td>
+<td><select class="cat-select ${curCat}" data-tx="${t.id}">${sel}</select></td>
+<td class="notes-cell"><input type="text" placeholder="—" data-tx="${t.id}" data-notes value="${escHtml(t.notes||'')}"/></td>
+<td><span class="pill ${t.status}">${t.status}</span></td></tr>`;
+    }
+    html+='</tbody></table>';el.innerHTML=html;
+    el.querySelectorAll('.cat-select').forEach(s=>s.addEventListener('change',e=>{updateTx(e.target.dataset.tx,{category:e.target.value});e.target.className='cat-select '+e.target.value}));
+    el.querySelectorAll('[data-notes]').forEach(i=>i.addEventListener('blur',e=>updateTx(e.target.dataset.tx,{notes:e.target.value})));
+  }catch(e){el.innerHTML='<div class="summary warn">Fehler: '+e.message+'</div>'}
+}
+async function updateTx(id,p){
+  try{const r=await fetch(API+'/accounting/transactions/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});if(r.ok)toast('Gespeichert');else toast('Fehler','err')}
+  catch(e){toast('Netzwerk-Fehler','err')}
+}
+document.getElementById('filter-cat').addEventListener('change',loadTransactions);
+document.getElementById('filter-status').addEventListener('change',loadTransactions);
+document.getElementById('filter-search').addEventListener('input',()=>{clearTimeout(window._sd);window._sd=setTimeout(loadTransactions,300)});
+async function loadProposals(){
+  const el=document.getElementById('proposals-content');
+  el.innerHTML='<div class="loading">Match-Engine läuft (kann ~10 Sek dauern) …</div>';
+  try{
+    const r=await fetch(API+'/accounting/match-proposals?limit=200').then(r=>r.json());
+    document.getElementById('proposals-stat').textContent=`${r.count} Vorschläge`;
+    document.getElementById('prop-count').textContent=r.count;
+    if(r.count===0){el.innerHTML='<div class="empty"><div class="ic">🔍</div><h3>Keine Vorschläge.</h3><p>Auto-Match braucht Rechnungen mit Betrag + IBAN. Foto-Uploads ohne extrahierte Felder fallen raus — nutze "Manuell anlegen" um Felder nachzutragen.</p></div>';return}
+    let html='';
+    for(const p of r.proposals){
+      const sign=p.tx_amount>0?'+':'';
+      html+=`<div class="proposal-row ${p.tier}">
+<div class="proposal-tier ${p.tier}">${p.tier==='high'?'sicher':p.tier==='mid'?'prüfen':'unklar'}</div>
+<div><div class="proposal-question">Soll ich Buchung <strong>${sign}${fmt(p.tx_amount)}</strong> bei <strong>${escHtml(p.tx_counterparty||'?')}</strong> der Rechnung <strong>${escHtml(p.invoice_customer||'?')}</strong> über ${fmt(p.invoice_amount)} zuordnen?</div>
+<div class="proposal-meta">${fmtDate(p.tx_value_date)} · score=${p.score} · ${escHtml(p.tx_purpose)}</div></div>
+<div><button class="primary accept-btn" data-tx="${p.tx_id}" data-inv="${p.invoice_id}" data-amt="${p.invoice_amount}">Verknüpfen</button></div></div>`;
+    }
+    el.innerHTML=html;
+    el.querySelectorAll('.accept-btn').forEach(b=>b.addEventListener('click',async e=>{
+      const btn=e.target;btn.disabled=true;btn.textContent='…';
+      try{
+        const r=await fetch(API+'/accounting/match-proposals/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tx_id:btn.dataset.tx,invoice_id:btn.dataset.inv,matched_amount:parseFloat(btn.dataset.amt),confirmed_by:'thomas'})});
+        if(r.ok){toast('Verknüpfung gespeichert');btn.closest('.proposal-row').style.opacity='0.5';btn.textContent='✓ verknüpft'}
+        else{const j=await r.json();toast('Fehler: '+(j.detail||'?'),'err');btn.disabled=false;btn.textContent='Verknüpfen'}
+      }catch(err){toast('Netzwerk-Fehler','err');btn.disabled=false;btn.textContent='Verknüpfen'}
+    }));
+  }catch(e){el.innerHTML='<div class="summary warn">Fehler: '+e.message+'</div>'}
+}
+document.getElementById('reload-proposals').addEventListener('click',loadProposals);
+async function loadInvoices(){
+  const el=document.getElementById('invoices-content');
+  try{
+    const r=await fetch(API+'/accounting/invoices?limit=500').then(r=>r.json());
+    if(r.count===0){el.innerHTML='<div class="empty"><div class="ic">📄</div><h3>Noch keine Rechnungen.</h3></div>';return}
+    let html='<table class="tbl"><thead><tr><th></th><th>Empfänger / Absender</th><th>Rechnungs-Nr.</th><th>Fällig</th><th class="amt">Betrag</th><th class="amt">Offen</th><th>Status</th></tr></thead><tbody>';
+    for(const i of r.invoices){
+      const dirIcon=i.direction==='outgoing'?'<span class="dir-icon in">⬆</span>':'<span class="dir-icon out">⬇</span>';
+      const status=i.accounting_status||'open';
+      const name=i.customer_name||(i.raw_preview?'<em style="color:var(--mute)">'+escHtml(i.raw_preview.slice(0,60))+'…</em>':'—');
+      html+=`<tr><td>${dirIcon}</td><td>${name}</td><td><code style="font-family:var(--mono);font-size:12px">${escHtml(i.invoice_number||i.id.slice(0,12))}</code></td><td>${fmtDate(i.due_date)}</td><td class="amt">${i.amount_total?fmt(i.amount_total):'<em style="color:var(--mute)">offen</em>'}</td><td class="amt">${fmt(i.outstanding_amount)}</td><td><span class="pill ${status}">${status}</span></td></tr>`;
+    }
+    html+='</tbody></table>';el.innerHTML=`<div class="summary">${r.count} Rechnungen</div>`+html;
+  }catch(e){el.innerHTML='<div class="summary warn">Fehler: '+e.message+'</div>'}
+}
+document.getElementById('bank-file').addEventListener('change',e=>{const f=e.target.files[0];if(f)document.getElementById('bank-fname').textContent=f.name});
+document.getElementById('form-bank').addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);const res=document.getElementById('bank-result');
+  res.innerHTML='<div class="loading">Importiere …</div>';
+  try{const r=await fetch(API+'/accounting/statements/upload',{method:'POST',body:fd});const j=await r.json();
+    if(r.ok)res.innerHTML=`<div class="summary ok"><strong>Import erfolgreich.</strong> ${j.imported_new} neue · ${j.skipped_duplicates} Duplikate · ${j.period_from} bis ${j.period_to} · ${j.bank_profile}</div>`;
+    else res.innerHTML='<div class="summary warn">Fehler: '+(j.detail||JSON.stringify(j))+'</div>';
+  }catch(err){res.innerHTML='<div class="summary warn">'+err.message+'</div>'}
+});
+document.getElementById('form-manual').addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);const res=document.getElementById('manual-result');
+  try{const r=await fetch(API+'/accounting/invoices/manual',{method:'POST',body:fd});const j=await r.json();
+    if(r.ok){res.innerHTML=`<div class="summary ok"><strong>Gespeichert.</strong> ID: <code>${j.id}</code></div>`;e.target.reset();}
+    else res.innerHTML='<div class="summary warn">Fehler: '+(j.detail||JSON.stringify(j))+'</div>';
+  }catch(err){res.innerHTML='<div class="summary warn">'+err.message+'</div>'}
+});
+loadToday();
+</script></body></html>

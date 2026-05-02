@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SHIKSHA · KITA · Stammdaten</title>
+<style>
+:root {
+  --pink:#ff4d8d; --turquoise:#00d4d4; --yellow:#ffd93d;
+  --purple:#a855f7; --orange:#ff8c42; --green:#6dd47e;
+  --bg:#fff8f0; --card:#fff; --line:#f0e8dc;
+  --ink:#2a2530; --ink-soft:#5a5060; --ink-mute:#9a8e9e;
+  --shadow:0 4px 16px rgba(255,77,141,0.10);
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; padding:16px;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:linear-gradient(135deg,#fff8f0 0%,#ffe4f0 50%,#e4f8ff 100%);
+  background-attachment:fixed; min-height:100vh;
+  color:var(--ink); line-height:1.5;
+}
+.wrap { max-width:1100px; margin:0 auto; }
+
+header.top { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+.logo { width:48px; height:48px; border-radius:14px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:22px; font-weight:700; box-shadow:var(--shadow); }
+.title h1 { margin:0; font-size:20px;
+  background:linear-gradient(120deg,var(--pink),var(--purple));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; }
+.title p { margin:0; font-size:12px; color:var(--ink-mute); }
+
+.tabs { display:flex; gap:4px; background:var(--card); padding:4px;
+  border-radius:14px; margin-bottom:16px; box-shadow:var(--shadow);
+  width:fit-content; }
+.tab {
+  padding:8px 16px; border-radius:10px; cursor:pointer;
+  font-weight:600; font-size:14px; color:var(--ink-mute);
+  border:0; background:transparent;
+}
+.tab.active { background:linear-gradient(135deg,var(--pink),var(--purple)); color:#fff; }
+
+.action-bar { display:flex; gap:8px; margin-bottom:14px; align-items:center; }
+.btn { padding:10px 16px; border:0; border-radius:12px;
+  font-weight:600; font-size:14px; cursor:pointer; }
+.btn.primary { background:linear-gradient(135deg,var(--pink),var(--purple)); color:#fff; }
+.btn.ghost { background:var(--card); color:var(--ink); border:1px solid var(--line); }
+.search { flex:1; padding:10px 14px; border:1px solid var(--line);
+  border-radius:12px; font-size:14px; font-family:inherit; background:var(--card); }
+
+.grid {
+  display:grid; gap:10px;
+  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+}
+.card-person {
+  background:var(--card); border-radius:14px; padding:14px;
+  box-shadow:var(--shadow); cursor:pointer;
+  transition:transform .12s; display:flex; gap:12px; align-items:flex-start;
+}
+.card-person:hover { transform:translateY(-2px); }
+.card-avatar {
+  width:48px; height:48px; border-radius:50%;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:#fff; font-weight:700; font-size:20px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.card-avatar.staff { background:linear-gradient(135deg,var(--turquoise),var(--green)); }
+.card-info { flex:1; min-width:0; }
+.card-name { font-weight:700; font-size:15px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card-meta { font-size:12px; color:var(--ink-mute); margin-top:2px; }
+.card-tags { display:flex; gap:4px; margin-top:6px; flex-wrap:wrap; }
+.tag {
+  display:inline-block; padding:2px 8px; border-radius:8px;
+  font-size:11px; font-weight:600;
+  background:#f9f4ec; color:var(--ink-soft);
+}
+.tag.warn { background:#fee5d8; color:var(--orange); }
+.tag.alert { background:#fee; color:var(--pink); }
+
+.badge-cake { font-size:14px; }
+
+/* Modal */
+.modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.5);
+  display:none; align-items:center; justify-content:center;
+  z-index:100; padding:14px; }
+.modal-bg.show { display:flex; }
+.modal {
+  background:var(--card); border-radius:18px;
+  width:100%; max-width:560px;
+  max-height:92vh; overflow-y:auto;
+  padding:18px;
+}
+.modal h2 { margin:0 0 12px; font-size:18px;
+  background:linear-gradient(120deg,var(--pink),var(--purple));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; }
+.field-grid { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field.full { grid-column:1 / -1; }
+.field label {
+  font-size:12px; font-weight:600; color:var(--ink-mute);
+  text-transform:uppercase; letter-spacing:0.04em;
+}
+.field input, .field select, .field textarea {
+  padding:10px 12px; border:1px solid var(--line);
+  border-radius:10px; font-size:14px; font-family:inherit;
+  background:var(--bg);
+}
+.field textarea { min-height:60px; resize:vertical; }
+.field-section {
+  font-size:12px; font-weight:700; color:var(--pink);
+  text-transform:uppercase; letter-spacing:0.05em;
+  margin:14px 0 4px; grid-column:1 / -1;
+  padding-bottom:6px; border-bottom:1px solid var(--line);
+}
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+.modal-actions .btn-delete { margin-right:auto;
+  background:#fee; color:var(--pink); border:0;
+  padding:10px 16px; border-radius:12px; font-weight:600; cursor:pointer; }
+
+/* Sub-Repeater (Eltern, Abholberechtigte) */
+.repeater-row {
+  display:grid; grid-template-columns:1fr 1fr 1fr 36px;
+  gap:6px; margin-bottom:6px; align-items:end;
+}
+.repeater-row input, .repeater-row select {
+  padding:8px 10px; border:1px solid var(--line); border-radius:8px;
+  font-size:13px; font-family:inherit; background:var(--bg);
+}
+.repeater-del {
+  background:#fee; color:var(--pink); border:0;
+  width:36px; height:36px; border-radius:8px; font-size:18px;
+  cursor:pointer; padding:0;
+}
+.repeater-add {
+  background:transparent; border:1px dashed var(--line);
+  color:var(--ink-mute); font-weight:600; font-size:13px;
+  padding:8px; border-radius:8px; cursor:pointer; width:100%;
+}
+
+@media (max-width: 540px) {
+  .field-grid { grid-template-columns:1fr; }
+  .repeater-row { grid-template-columns:1fr 1fr 36px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="logo">📋</div>
+  <div class="title">
+    <h1>Stammdaten</h1>
+    <p>Mitarbeiter:innen und Kinder verwalten</p>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="children">👶 Kinder</button>
+  <button class="tab" data-tab="staff">👨‍🏫 Mitarbeiter:innen</button>
+</div>
+
+<div class="action-bar">
+  <input class="search" id="search" placeholder="Suchen …">
+  <button class="btn primary" id="btnAdd">+ Neu</button>
+</div>
+
+<div id="grid" class="grid"></div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">Neu</h2>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn-delete" id="btnDelete" style="display:none">Archivieren</button>
+      <button class="btn ghost" id="btnCancel">Abbrechen</button>
+      <button class="btn primary" id="btnSave">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "/kita";
+const HDR = { "Content-Type":"application/json", "X-Org-Slug":"kita_pilot" };
+let STATE = { tab: "children", items: [], editing: null };
+
+const $ = id => document.getElementById(id);
+const esc = s => s == null ? "" : String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function initial(name) {
+  return (name || "?").trim().split(/\s+/)[0][0]?.toUpperCase() || "?";
+}
+function fmtDate(d) { return d ? d.split("T")[0] : ""; }
+
+function calcAge(birth) {
+  if (!birth) return null;
+  const b = new Date(birth);
+  const t = new Date();
+  let age = t.getFullYear() - b.getFullYear();
+  const m = t.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && t.getDate() < b.getDate())) age--;
+  return age;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    STATE.tab = t.dataset.tab;
+    load();
+  });
+});
+
+// ============================================================
+// LIST LOAD
+// ============================================================
+async function load() {
+  const ep = STATE.tab === "children" ? "/children" : "/staff";
+  try {
+    const r = await fetch(API + ep, { headers: HDR });
+    const j = await r.json();
+    STATE.items = STATE.tab === "children" ? j.children : j.staff;
+    render();
+  } catch (e) {
+    $("grid").innerHTML = `<div style="padding:20px; color:#a0391f;">Fehler: ${e.message}</div>`;
+  }
+}
+
+function render() {
+  const q = $("search").value.toLowerCase();
+  const items = STATE.items.filter(i => (i.name || "").toLowerCase().includes(q));
+  if (items.length === 0) {
+    $("grid").innerHTML = `<div style="padding:30px; text-align:center; color:var(--ink-mute);">Keine Einträge — klick auf <strong>+ Neu</strong> zum Anlegen.</div>`;
+    return;
+  }
+  $("grid").innerHTML = items.map(p => renderCard(p)).join("");
+  document.querySelectorAll(".card-person").forEach(c => {
+    c.addEventListener("click", () => openEdit(c.dataset.id));
+  });
+}
+
+function renderCard(p) {
+  const isStaff = STATE.tab === "staff";
+  const meta = isStaff
+    ? `${p.role || "—"} · ${p.weekly_hours || 0}h/Wo`
+    : `${p.birth_date ? calcAge(p.birth_date) + ' Jahre' : (p.birth_year ? 'geb. ' + p.birth_year : '—')}`;
+  const tags = [];
+  if (p.birth_date) tags.push(`<span class="tag badge-cake">🎂 ${new Date(p.birth_date).toLocaleDateString("de-DE", {day:"2-digit", month:"2-digit"})}</span>`);
+  if (!isStaff && p.allergies) tags.push(`<span class="tag alert">⚠ Allergie</span>`);
+  if (!isStaff && (!p.parents || JSON.parse(JSON.stringify(p.parents)).length === 0)) tags.push(`<span class="tag warn">Eltern fehlen</span>`);
+  if (isStaff && !p.birth_date) tags.push(`<span class="tag warn">Geb. fehlt</span>`);
+
+  return `<div class="card-person" data-id="${p.id}">
+    <div class="card-avatar ${isStaff ? 'staff' : ''}">${initial(p.name)}</div>
+    <div class="card-info">
+      <div class="card-name">${esc(p.name)}</div>
+      <div class="card-meta">${esc(meta)}</div>
+      <div class="card-tags">${tags.join("")}</div>
+    </div>
+  </div>`;
+}
+
+$("search").addEventListener("input", render);
+
+// ============================================================
+// MODAL OPEN/CLOSE
+// ============================================================
+$("btnAdd").addEventListener("click", () => openEdit(null));
+$("btnCancel").addEventListener("click", closeModal);
+$("modalBg").addEventListener("click", e => { if (e.target === $("modalBg")) closeModal(); });
+$("btnSave").addEventListener("click", saveItem);
+$("btnDelete").addEventListener("click", deleteItem);
+
+function closeModal() { $("modalBg").classList.remove("show"); STATE.editing = null; }
+
+async function openEdit(id) {
+  STATE.editing = id;
+  $("btnDelete").style.display = id ? "block" : "none";
+
+  let item = {};
+  if (id) {
+    const ep = STATE.tab === "children" ? `/children/${id}` : `/staff/${id}`;
+    const r = await fetch(API + ep, { headers: HDR });
+    item = await r.json();
+  }
+  $("modalTitle").textContent = (id ? "Bearbeiten · " : "Neu · ") + (STATE.tab === "children" ? "Kind" : "Mitarbeiter:in");
+  $("modalBody").innerHTML = STATE.tab === "children" ? formChild(item) : formStaff(item);
+  bindRepeaters();
+  $("modalBg").classList.add("show");
+}
+
+// ============================================================
+// FORMULARE
+// ============================================================
+function formStaff(p) {
+  return `<div class="field-grid">
+    <div class="field full"><label>Name</label><input id="f_name" value="${esc(p.name)}" required></div>
+
+    <div class="field"><label>Rolle</label>
+      <select id="f_role">
+        <option value="educator" ${p.role==='educator'?'selected':''}>Pädagog:in</option>
+        <option value="assistant" ${p.role==='assistant'?'selected':''}>Assistenz</option>
+        <option value="trainee" ${p.role==='trainee'?'selected':''}>Lehrling / Praktikum</option>
+        <option value="leadership" ${p.role==='leadership'?'selected':''}>Leitung</option>
+        <option value="kitchen" ${p.role==='kitchen'?'selected':''}>Küche</option>
+        <option value="cleaning" ${p.role==='cleaning'?'selected':''}>Reinigung</option>
+        <option value="other" ${p.role==='other'?'selected':''}>Sonstiges</option>
+      </select>
+    </div>
+    <div class="field"><label>Wochenstunden</label><input id="f_weekly_hours" type="number" step="0.5" value="${p.weekly_hours||''}"></div>
+
+    <div class="field"><label>Geburtsdatum 🎂</label><input id="f_birth_date" type="date" value="${fmtDate(p.birth_date)}"></div>
+    <div class="field"><label>Qualifikation</label><input id="f_qualification" value="${esc(p.qualification)}" placeholder="z.B. BAfEP-Diplom"></div>
+
+    <div class="field-section">Kontakt</div>
+    <div class="field"><label>E-Mail</label><input id="f_email" type="email" value="${esc(p.email)}"></div>
+    <div class="field"><label>Telefon</label><input id="f_phone" type="tel" value="${esc(p.phone)}"></div>
+    <div class="field full"><label>Adresse</label><input id="f_address" value="${esc(p.address)}"></div>
+    <div class="field full"><label>Notfallkontakt</label><input id="f_emergency_contact" value="${esc(p.emergency_contact)}" placeholder="Name · Beziehung · Tel"></div>
+
+    <div class="field-section">Anstellung</div>
+    <div class="field"><label>Vertragsart</label>
+      <select id="f_contract_type">
+        <option value="">—</option>
+        <option value="unbefristet" ${p.contract_type==='unbefristet'?'selected':''}>Unbefristet</option>
+        <option value="befristet" ${p.contract_type==='befristet'?'selected':''}>Befristet</option>
+        <option value="geringfügig" ${p.contract_type==='geringfügig'?'selected':''}>Geringfügig</option>
+        <option value="lehre" ${p.contract_type==='lehre'?'selected':''}>Lehre</option>
+        <option value="praktikum" ${p.contract_type==='praktikum'?'selected':''}>Praktikum</option>
+      </select>
+    </div>
+    <div class="field"><label></label><label style="font-size:13px; color:var(--ink); display:flex; align-items:center; gap:6px; padding-top:6px;"><input type="checkbox" id="f_active" ${p.active!==false?'checked':''}> Aktiv</label></div>
+    <div class="field"><label>Eintritt</label><input id="f_employment_start" type="date" value="${fmtDate(p.employment_start)}"></div>
+    <div class="field"><label>Austritt</label><input id="f_employment_end" type="date" value="${fmtDate(p.employment_end)}"></div>
+
+    <div class="field full"><label>Notizen</label><textarea id="f_notes">${esc(p.notes)}</textarea></div>
+  </div>`;
+}
+
+function formChild(p) {
+  const parents = Array.isArray(p.parents) ? p.parents : [];
+  const pickup = Array.isArray(p.pickup_authorized) ? p.pickup_authorized : [];
+  return `<div class="field-grid">
+    <div class="field full"><label>Name</label><input id="f_name" value="${esc(p.name)}" required></div>
+
+    <div class="field"><label>Geburtsdatum 🎂</label><input id="f_birth_date" type="date" value="${fmtDate(p.birth_date)}"></div>
+    <div class="field"><label>Geschlecht</label>
+      <select id="f_gender">
+        <option value="">—</option>
+        <option value="w" ${p.gender==='w'?'selected':''}>weiblich</option>
+        <option value="m" ${p.gender==='m'?'selected':''}>männlich</option>
+        <option value="d" ${p.gender==='d'?'selected':''}>divers</option>
+      </select>
+    </div>
+
+    <div class="field"><label>Eintritt</label><input id="f_entry_date" type="date" value="${fmtDate(p.entry_date)}"></div>
+    <div class="field"><label>Austritt</label><input id="f_exit_date" type="date" value="${fmtDate(p.exit_date)}"></div>
+
+    <div class="field full"><label>Adresse</label><input id="f_address" value="${esc(p.address)}"></div>
+
+    <div class="field"><label>Staatsangehörigkeit</label><input id="f_nationality" value="${esc(p.nationality)}"></div>
+    <div class="field"><label>Muttersprache</label><input id="f_native_language" value="${esc(p.native_language)}"></div>
+
+    <div class="field-section">Eltern / Erziehungsberechtigte</div>
+    <div class="field full"><div id="rep_parents" data-init='${JSON.stringify(parents).replace(/'/g, "&apos;")}'></div></div>
+
+    <div class="field-section">Abholberechtigte Personen</div>
+    <div class="field full"><div id="rep_pickup" data-init='${JSON.stringify(pickup).replace(/'/g, "&apos;")}'></div></div>
+
+    <div class="field-section">Gesundheit</div>
+    <div class="field full"><label>Allergien</label><textarea id="f_allergies">${esc(p.allergies)}</textarea></div>
+    <div class="field full"><label>Medikamente</label><textarea id="f_medications">${esc(p.medications)}</textarea></div>
+    <div class="field full"><label>Medizinische Hinweise</label><textarea id="f_medical_notes" placeholder="Impfstatus, Auffälligkeiten">${esc(p.medical_notes)}</textarea></div>
+    <div class="field full"><label>Ernährung</label><input id="f_dietary_notes" value="${esc(p.dietary_notes)}" placeholder="vegetarisch, halal, kein Schweinefleisch …"></div>
+
+    <div class="field-section">Notfall / Sonstiges</div>
+    <div class="field full"><label>Notfallkontakt</label><input id="f_emergency_contact" value="${esc(p.emergency_contact)}" placeholder="Name · Beziehung · Tel"></div>
+    <div class="field full"><label style="font-size:13px; color:var(--ink); display:flex; align-items:center; gap:6px;"><input type="checkbox" id="f_photo_consent" ${p.photo_consent?'checked':''}> Foto-Einwilligung erteilt</label></div>
+    <div class="field full"><label>Notizen</label><textarea id="f_notes">${esc(p.notes)}</textarea></div>
+    <div class="field full"><label style="font-size:13px; color:var(--ink); display:flex; align-items:center; gap:6px;"><input type="checkbox" id="f_active" ${p.active!==false?'checked':''}> Aktiv</label></div>
+  </div>`;
+}
+
+// ============================================================
+// REPEATER (Eltern, Pickup)
+// ============================================================
+function bindRepeaters() {
+  const repP = $("rep_parents");
+  if (repP) renderRepeater(repP, "parent");
+  const repU = $("rep_pickup");
+  if (repU) renderRepeater(repU, "pickup");
+}
+
+function renderRepeater(el, kind) {
+  let data = JSON.parse((el.dataset.init || "[]").replace(/&apos;/g,"'"));
+  el._data = data;
+  const renderRows = () => {
+    el.innerHTML = el._data.map((row, i) => {
+      if (kind === "parent") {
+        return `<div class="repeater-row">
+          <input placeholder="Name" data-k="name" data-i="${i}" value="${esc(row.name)}">
+          <input placeholder="Beziehung" data-k="relation" data-i="${i}" value="${esc(row.relation)}">
+          <input placeholder="Telefon" data-k="phone" data-i="${i}" value="${esc(row.phone)}">
+          <button class="repeater-del" data-i="${i}">×</button>
+          <input placeholder="E-Mail" data-k="email" data-i="${i}" value="${esc(row.email)}" style="grid-column:1 / 4;">
+        </div>`;
+      }
+      return `<div class="repeater-row">
+        <input placeholder="Name" data-k="name" data-i="${i}" value="${esc(row.name)}">
+        <input placeholder="Beziehung" data-k="relation" data-i="${i}" value="${esc(row.relation)}">
+        <input placeholder="Telefon" data-k="phone" data-i="${i}" value="${esc(row.phone)}">
+        <button class="repeater-del" data-i="${i}">×</button>
+      </div>`;
+    }).join("") + `<button class="repeater-add" data-add="1">+ ${kind === 'parent' ? 'Elternteil' : 'Person'} hinzufügen</button>`;
+    el.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", () => {
+        const i = parseInt(inp.dataset.i); const k = inp.dataset.k;
+        el._data[i][k] = inp.value;
+      });
+    });
+    el.querySelectorAll(".repeater-del").forEach(btn => {
+      btn.addEventListener("click", () => {
+        el._data.splice(parseInt(btn.dataset.i), 1);
+        renderRows();
+      });
+    });
+    el.querySelector("[data-add]").addEventListener("click", () => {
+      el._data.push(kind === "parent"
+        ? { name:"", relation:"", phone:"", email:"" }
+        : { name:"", relation:"", phone:"" });
+      renderRows();
+    });
+  };
+  renderRows();
+}
+
+// ============================================================
+// SAVE / DELETE
+// ============================================================
+async function saveItem() {
+  const isChild = STATE.tab === "children";
+  const name = $("f_name").value.trim();
+  if (!name) { alert("Name fehlt"); return; }
+
+  let payload;
+  if (isChild) {
+    payload = {
+      name,
+      birth_date: $("f_birth_date").value || null,
+      gender: $("f_gender").value || null,
+      entry_date: $("f_entry_date").value || null,
+      exit_date: $("f_exit_date").value || null,
+      address: $("f_address").value || null,
+      nationality: $("f_nationality").value || null,
+      native_language: $("f_native_language").value || null,
+      parents: $("rep_parents")._data || [],
+      pickup_authorized: $("rep_pickup")._data || [],
+      allergies: $("f_allergies").value || null,
+      medications: $("f_medications").value || null,
+      medical_notes: $("f_medical_notes").value || null,
+      dietary_notes: $("f_dietary_notes").value || null,
+      emergency_contact: $("f_emergency_contact").value || null,
+      photo_consent: $("f_photo_consent").checked,
+      notes: $("f_notes").value || null,
+      active: $("f_active").checked,
+    };
+  } else {
+    payload = {
+      name,
+      role: $("f_role").value,
+      weekly_hours: parseFloat($("f_weekly_hours").value) || null,
+      birth_date: $("f_birth_date").value || null,
+      qualification: $("f_qualification").value || null,
+      email: $("f_email").value || null,
+      phone: $("f_phone").value || null,
+      address: $("f_address").value || null,
+      emergency_contact: $("f_emergency_contact").value || null,
+      contract_type: $("f_contract_type").value || null,
+      employment_start: $("f_employment_start").value || null,
+      employment_end: $("f_employment_end").value || null,
+      notes: $("f_notes").value || null,
+      active: $("f_active").checked,
+    };
+  }
+
+  const ep = isChild ? "/children" : "/staff";
+  try {
+    const url = STATE.editing ? `${API}${ep}/${STATE.editing}` : `${API}${ep}`;
+    const method = STATE.editing ? "PATCH" : "POST";
+    const r = await fetch(url, { method, headers: HDR, body: JSON.stringify(payload) });
+    if (!r.ok) {
+      const txt = await r.text();
+      throw new Error(`HTTP ${r.status}: ${txt}`);
+    }
+    closeModal();
+    load();
+  } catch (e) { alert("Fehler beim Speichern: " + e.message); }
+}
+
+async function deleteItem() {
+  if (!STATE.editing) return;
+  if (!confirm("Wirklich archivieren? (Eintrag wird inaktiv, kann später reaktiviert werden)")) return;
+  const ep = STATE.tab === "children" ? `/children/${STATE.editing}` : `/staff/${STATE.editing}`;
+  try {
+    const r = await fetch(API + ep, { method: "DELETE", headers: HDR });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    closeModal();
+    load();
+  } catch (e) { alert("Fehler: " + e.message); }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+load();
+</script>
+
+</body>
+</html>

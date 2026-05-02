@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA · Safeguarding</title>
+<style>
+:root {
+  --bg: #f7f7f5; --card: #ffffff; --line: #e6e4de; --line-strong: #c6c2b8;
+  --ink: #1a1a1a; --ink-soft: #55524b; --ink-mute: #7a7a74;
+  --accent: #2d7a5f; --accent-soft: #e8f1ec;
+  --warn: #8a6a2a; --warn-soft: #f5ebd8;
+  --alert: #a0391f; --alert-soft: #f5e1da;
+  --info: #4a6a80; --info-soft: #e8eef1;
+  --learn: #6a4faf; --learn-soft: #efeaf5;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 28px 24px 64px; }
+
+header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.brand { display: flex; flex-direction: column; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); }
+h1 { font-size: 26px; font-weight: 600; margin: 4px 0 0; letter-spacing: -0.01em; }
+.lede { font-size: 13px; color: var(--ink-soft); margin: 4px 0 0; max-width: 600px; }
+.tag-pills { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.tag-pill { font-size: 11px; padding: 4px 10px; border-radius: 999px; background: var(--learn-soft); color: var(--learn); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tab { padding: 10px 14px; background: transparent; border: 0; border-bottom: 2px solid transparent; font-size: 14px; color: var(--ink-mute); cursor: pointer; font-weight: 500; }
+.tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.tab.learn-tab { color: var(--learn); border-bottom-color: transparent; }
+.tab.learn-tab.active { color: var(--learn); border-bottom-color: var(--learn); }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* CARDS */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+.card h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+.card .lede { font-size: 13px; color: var(--ink-mute); margin: 0 0 12px; }
+
+/* STATUS GRID */
+.status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.status-tile {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--card);
+}
+.status-tile h3 { margin: 0 0 4px; font-size: 13px; font-weight: 600; }
+.status-tile .meta { font-size: 11px; color: var(--ink-mute); }
+.status-tile .body { font-size: 13px; color: var(--ink-soft); margin-top: 8px; }
+.status-tile.ok { border-left: 4px solid var(--accent); }
+.status-tile.warn { border-left: 4px solid var(--warn); background: #fdfcf6; }
+.status-tile.alert { border-left: 4px solid var(--alert); background: var(--alert-soft); }
+
+/* PERSON ROW */
+.person-row { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.person-row:last-child { border-bottom: 0; }
+.person-name { flex: 1; font-weight: 500; }
+.person-status {
+  font-size: 10px; padding: 3px 8px; border-radius: 3px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.person-status.ok { background: var(--accent-soft); color: var(--accent); }
+.person-status.warn { background: var(--warn-soft); color: var(--warn); }
+.person-status.alert { background: var(--alert-soft); color: var(--alert); }
+
+/* SIGNALS */
+.signal { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.signal:last-child { border-bottom: 0; }
+.sev { font-size: 10px; text-transform: uppercase; font-weight: 700; padding: 3px 8px; border-radius: 3px; letter-spacing: 0.04em; white-space: nowrap; }
+.sev.high { background: var(--alert-soft); color: var(--alert); }
+.sev.mid { background: var(--warn-soft); color: var(--warn); }
+.sev.low { background: var(--info-soft); color: var(--info); }
+.signal-text { flex: 1; font-size: 14px; }
+.signal-meta { font-size: 11px; color: var(--ink-mute); margin-top: 3px; font-family: var(--mono); }
+.boost-hint { font-size: 10px; padding: 2px 6px; border-radius: 3px; background: var(--learn-soft); color: var(--learn); font-weight: 600; margin-left: 6px; }
+
+/* LEARN-CARD (Pattern-Kandidaten) */
+.learn-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--learn);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+.learn-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--learn); font-weight: 600; }
+.learn-card .title { font-size: 15px; font-weight: 600; margin: 4px 0 4px; }
+.learn-card .desc { font-size: 13px; color: var(--ink-soft); margin: 0 0 8px; }
+.learn-card .stats { display: flex; gap: 12px; font-size: 11px; color: var(--ink-mute); margin-bottom: 10px; font-family: var(--mono); }
+.learn-card .suggestion { font-size: 13px; background: #fafaf8; border-radius: 6px; padding: 8px 10px; margin: 8px 0; color: var(--ink); border-left: 2px solid var(--learn-soft); }
+.learn-card .actions { display: flex; gap: 8px; margin-top: 8px; }
+.learn-card button { padding: 7px 14px; font-size: 13px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; }
+.learn-card button.promote { background: var(--learn); color: #fff; }
+.learn-card button.dismiss { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
+.learn-card button.defer { background: #fafaf8; color: var(--ink); border: 1px solid var(--line); }
+
+.confidence-mini {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--ink-mute); font-family: var(--mono);
+}
+.confidence-bar-mini {
+  width: 60px; height: 4px; background: var(--line); border-radius: 999px; overflow: hidden;
+}
+.confidence-fill-mini { height: 100%; background: var(--learn); }
+
+/* SEVERITY PROPOSAL */
+.sev-proposal {
+  background: var(--learn-soft);
+  border: 1px solid var(--learn);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+.sev-proposal h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--learn); }
+.sev-proposal .body { font-size: 14px; }
+.sev-arrow { display: inline-block; padding: 2px 6px; background: #fff; border-radius: 4px; font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.sev-arrow.from { color: var(--ink-mute); }
+.sev-arrow.to { color: var(--alert); }
+.sev-proposal .actions { margin-top: 10px; display: flex; gap: 8px; }
+
+/* CROSS-EDITION HINTS */
+.cross-card {
+  background: linear-gradient(180deg, #fdfbff 0%, var(--learn-soft) 100%);
+  border: 1px dashed var(--learn);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+}
+.cross-card .head {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--learn); font-weight: 600;
+}
+.cross-card .body { font-size: 13px; margin-top: 4px; }
+.cross-card .target { font-family: var(--mono); padding: 1px 5px; background: rgba(255,255,255,0.7); border-radius: 3px; }
+
+/* FOOTER */
+footer.bot { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-mute); }
+footer.bot code { font-family: var(--mono); background: #fafaf8; padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="brand">
+    <span class="eyebrow">SHIKSHA · MODUL · cross-edition</span>
+    <h1>Safeguarding</h1>
+    <p class="lede">Schutzkonzept, Background-Checks, Einverständnisse, Vorfälle — und ein Modul, das mit jedem Operator-Feedback dazulernt.</p>
+    <div class="tag-pills" style="margin-top: 10px;">
+      <span class="tag-pill">lernfähig</span>
+      <span class="tag-pill">cross-edition</span>
+      <span class="tag-pill">v1</span>
+    </div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-panel="status">Pflicht-Status</button>
+  <button class="tab" data-panel="signals">Offene Signale</button>
+  <button class="tab learn-tab" data-panel="learn">Lern-Status</button>
+  <button class="tab" data-panel="incidents">Vorfälle</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- PFLICHT-STATUS -->
+<!-- ============================================================ -->
+<div class="panel active" id="panel-status">
+
+<div class="card">
+  <h2>Schutzkonzepte je Standort</h2>
+  <p class="lede">Was steht, wo wir sind, was demnächst gemacht werden muss.</p>
+  <div class="status-grid">
+    <div class="status-tile ok">
+      <h3>Lichtquelle Wien</h3>
+      <div class="meta">SCHULE · Yoga · Kinder-Yoga aktiv</div>
+      <div class="body">Schutzkonzept gültig bis 31.12.2026 · letzter Review 15. Februar</div>
+    </div>
+    <div class="status-tile warn">
+      <h3>Camping Allweglehen</h3>
+      <div class="meta">CAMPING · Pool + Spielplatz</div>
+      <div class="body">Pool-Auflagen A+B vom Gesundheitsamt — Frist 1. Juni · noch offen</div>
+    </div>
+    <div class="status-tile ok">
+      <h3>Camping Inntalblick</h3>
+      <div class="meta">CAMPING · Spielplatz + Hund</div>
+      <div class="body">Schutzkonzept gültig · letzter Review März · keine offenen Auflagen</div>
+    </div>
+    <div class="status-tile alert">
+      <h3>Inselwellen Sylt</h3>
+      <div class="meta">SCHULE · Surf · Outdoor</div>
+      <div class="body">ARAG-BHV-Versicherung Mahnung 1 — bis 9. Mai zahlen, sonst kein Saison-Schutz</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Personen-Status — Background-Checks + Erste Hilfe</h2>
+  <p class="lede">Wer hat was, wann läuft was ab.</p>
+  <div class="person-row">
+    <div class="person-name">Mira Hauser <small style="color: var(--ink-mute); font-weight: 400; margin-left: 6px;">Lichtquelle Wien · GF</small></div>
+    <span class="person-status ok">FZG ok 03/27</span>
+    <span class="person-status ok">EH ok 09/26</span>
+  </div>
+  <div class="person-row">
+    <div class="person-name">Felix Pranke <small style="color: var(--ink-mute); font-weight: 400; margin-left: 6px;">Lichtquelle Wien · Lehrer</small></div>
+    <span class="person-status warn">Lizenz 08/26</span>
+    <span class="person-status ok">EH ok 11/26</span>
+  </div>
+  <div class="person-row">
+    <div class="person-name">Lars Möbius <small style="color: var(--ink-mute); font-weight: 400; margin-left: 6px;">Inselwellen Sylt · Inhaber</small></div>
+    <span class="person-status ok">FZG ok 01/27</span>
+    <span class="person-status warn">Rettungsschwimmer 09/26</span>
+  </div>
+  <div class="person-row">
+    <div class="person-name">Tom Bechmann <small style="color: var(--ink-mute); font-weight: 400; margin-left: 6px;">Inselwellen Sylt · Anwärter</small></div>
+    <span class="person-status alert">Anwärter-Status 05/26</span>
+    <span class="person-status ok">EH ok 03/27</span>
+  </div>
+  <div class="person-row">
+    <div class="person-name">Maria Allweger <small style="color: var(--ink-mute); font-weight: 400; margin-left: 6px;">Camping Allweglehen · GF</small></div>
+    <span class="person-status ok">FZG ok 04/27</span>
+    <span class="person-status warn">Pool-Aufsicht-Lizenz fehlt</span>
+  </div>
+  <div class="person-row">
+    <div class="person-name">Andreas Pfeiler <small style="color: var(--ink-mute); font-weight: 400; margin-left: 6px;">Inntalblick Tirol · GF</small></div>
+    <span class="person-status ok">FZG ok 06/27</span>
+    <span class="person-status ok">EH ok 02/27</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Konsente — wo's brennt</h2>
+  <p class="lede">Wer hat was erteilt, wo fehlt was.</p>
+  <div class="signal">
+    <span class="sev mid">offen</span>
+    <div class="signal-text">
+      Yousef Kheir (8 J.) — Foto-Einverständnis fehlt seit Anmeldung im September 2025.
+      <div class="signal-meta">SCHULE · Lichtquelle Wien · guardian: Ahmad Kheir</div>
+    </div>
+  </div>
+  <div class="signal">
+    <span class="sev mid">offen</span>
+    <div class="signal-text">
+      Hiroki Tanaka (4 J.) — Foto-Einverständnis fehlt, Anmeldung 4. April.
+      <div class="signal-meta">SCHULE · Lichtquelle Wien · guardian: Mariko Tanaka</div>
+    </div>
+  </div>
+  <div class="signal">
+    <span class="sev mid">offen</span>
+    <div class="signal-text">
+      Theo Vogel (12 J.) — Foto-Einverständnis fehlt, Anmeldung 20. April.
+      <div class="signal-meta">SCHULE · Inselwellen Sylt · guardian: Hannah Vogel</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- OFFENE SIGNALE -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-signals">
+
+<div class="card">
+  <h2>Offene Safeguarding-Signale</h2>
+  <p class="lede">Cross-edition aggregiert. Schwere wird je nach Edition angepasst (z. B. Pool in CAMPING = high).</p>
+
+  <div class="signal">
+    <span class="sev high">jetzt</span>
+    <div class="signal-text">
+      Pool-Auflage Allweglehen: Antirutsch-Belag bis 1.6. erneuern.
+      <span class="boost-hint">CAMPING-Boost</span>
+      <div class="signal-meta">safeguarding.pool_inspection_due · default mid → CAMPING boost high</div>
+    </div>
+  </div>
+
+  <div class="signal">
+    <span class="sev high">jetzt</span>
+    <div class="signal-text">
+      Pool-Aufsichts-Plan-Doku Allweglehen: lückenhaft Vorsaison 2025.
+      <span class="boost-hint">CAMPING-Boost</span>
+      <div class="signal-meta">safeguarding.pool_supervision_lueckig · GBL Auflage B</div>
+    </div>
+  </div>
+
+  <div class="signal">
+    <span class="sev mid">heute</span>
+    <div class="signal-text">
+      Bruno (Hund Familie Maier, Inntalblick) — 3. Beschwerde in 3 Saisons.
+      <div class="signal-meta">safeguarding.dog_repeat_complaint · Pattern-Kandidat aktiv im Lern-Status</div>
+    </div>
+  </div>
+
+  <div class="signal">
+    <span class="sev mid">demnächst</span>
+    <div class="signal-text">
+      Tom Bechmann (Surf, Sylt) — Anwärter-Status endet 30. Mai.
+      <div class="signal-meta">safeguarding.background_check_expiring · Anwärter darf keinen Aufbaukurs allein</div>
+    </div>
+  </div>
+
+  <div class="signal">
+    <span class="sev mid">demnächst</span>
+    <div class="signal-text">
+      Lars Möbius (Sylt) — Rettungsschwimmer Silber endet 15. September.
+      <div class="signal-meta">safeguarding.staff_first_aid_expiring · Saison läuft</div>
+    </div>
+  </div>
+
+  <div class="signal">
+    <span class="sev low">Pflege</span>
+    <div class="signal-text">
+      Felix Pranke (Yoga, Wien) — Lizenz endet 30. August.
+      <div class="signal-meta">safeguarding.background_check_expiring · 127 Tage</div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- LERN-STATUS — Pattern-Kandidaten + Severity-Vorschläge -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-learn">
+
+<div class="card">
+  <h2 style="display: flex; align-items: center; gap: 10px;">
+    Was SHIKSHA gerade lernt
+    <span class="tag-pill">3 Kandidaten · 1 Severity-Vorschlag · 2 Cross-Edition-Hinweise</span>
+  </h2>
+  <p class="lede">Nichts wird ohne deine Zustimmung aktiv. Du promotest, verwirfst oder schiebst auf.</p>
+
+  <h3 style="font-size: 14px; margin: 22px 0 10px; color: var(--learn);">Pattern-Kandidaten</h3>
+
+  <div class="learn-card">
+    <div class="label">Recurring entity</div>
+    <div class="title">Hund Bruno (Familie Maier) — wiederkehrende Beschwerde-Quelle</div>
+    <div class="desc">3 dokumentierte Beschwerden in 3 Saisons (2024, 2025, 2026). Immer Lärm-/Bell-Beschwerde von Nachbarn.</div>
+    <div class="stats">
+      <span>3 Vorfälle</span>
+      <span>seit 22 Monaten</span>
+      <span class="confidence-mini">Confidence <div class="confidence-bar-mini"><div class="confidence-fill-mini" style="width: 86%;"></div></div> 86%</span>
+    </div>
+    <div class="suggestion">
+      Wenn promoted: Bei nächster Buchungs-Anfrage Familie Maier → safeguarding-Frühwarnung im CAMPING-Operator-Dashboard. Hinweis: Hund-Eignung + Anleinen-Pflicht ansprechen.
+    </div>
+    <div class="actions">
+      <button class="promote">Ja, promoten</button>
+      <button class="dismiss">Nein, ist Zufall</button>
+      <button class="defer">Erst nochmal beobachten</button>
+    </div>
+  </div>
+
+  <div class="learn-card">
+    <div class="label">Seasonal</div>
+    <div class="title">Pool-Inspektion Berchtesgaden — jährlich Mitte April</div>
+    <div class="desc">Gesundheitsamt BGL hat in 2024, 2025, 2026 jeweils zwischen 15.4. und 24.4. inspiziert. Auflagen-Muster ähnlich (Antirutsch + Aufsichtsplan).</div>
+    <div class="stats">
+      <span>3 Vorkommen</span>
+      <span>3 Jahre</span>
+      <span class="confidence-mini">Confidence <div class="confidence-bar-mini"><div class="confidence-fill-mini" style="width: 90%;"></div></div> 90%</span>
+    </div>
+    <div class="suggestion">
+      Wenn promoted: Ab 20. März jedes Jahres → Vorbereitungs-Aktion „Schreinerei + Reinigung anrufen, Aufsichts-Plan finalisieren" im CAMPING-Operator-Dashboard.
+    </div>
+    <div class="actions">
+      <button class="promote">Ja, promoten</button>
+      <button class="dismiss">Nein, ist Zufall</button>
+      <button class="defer">Erst nochmal beobachten</button>
+    </div>
+  </div>
+
+  <div class="learn-card">
+    <div class="label">Cross-Edition</div>
+    <div class="title">Foto-Einverständnis fehlt häufig in SCHULE — auch in CAMPING relevant?</div>
+    <div class="desc">In SCHULE.EDITION fehlt Foto-Einverständnis bei 38 % der Kinder-Anmeldungen in der ersten Woche. CAMPING.EDITION hat ähnliches Profil (Kinder-Camp + Familien-Pitch + Spielplatz).</div>
+    <div class="stats">
+      <span>14 Vorkommen SCHULE</span>
+      <span>0 Vorkommen CAMPING (noch)</span>
+      <span class="confidence-mini">Confidence <div class="confidence-bar-mini"><div class="confidence-fill-mini" style="width: 65%;"></div></div> 65%</span>
+    </div>
+    <div class="suggestion">
+      Wenn promoted: In CAMPING.EDITION beim Kinder-Check-in proaktiv abfragen. Hinweis als info-Signal in operator_dashboard.html.
+    </div>
+    <div class="actions">
+      <button class="promote">Ja, in CAMPING aktivieren</button>
+      <button class="dismiss">Nein, irrelevant</button>
+      <button class="defer">Mehr Daten abwarten</button>
+    </div>
+  </div>
+
+  <h3 style="font-size: 14px; margin: 28px 0 10px; color: var(--learn);">Severity-Vorschlag</h3>
+
+  <div class="sev-proposal">
+    <h3>Default-Severity anpassen?</h3>
+    <div class="body">
+      <code>safeguarding.consent_missing</code> wurde 64-mal gelöst. 41× sofort, 18× innerhalb 24h, 5× spät, 0× dismissed.
+      Mean-Score = +0.84 → SHIKSHA schlägt vor:
+      <span class="sev-arrow from">mid</span> → <span class="sev-arrow to">high</span>
+    </div>
+    <div class="actions">
+      <button class="promote" style="background: var(--learn); color: #fff; padding: 7px 14px; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600;">Ja, hochsetzen</button>
+      <button class="defer" style="background: #fafaf8; color: var(--ink); border: 1px solid var(--line); padding: 7px 14px; border-radius: 6px; cursor: pointer;">So lassen</button>
+    </div>
+  </div>
+
+  <h3 style="font-size: 14px; margin: 28px 0 10px; color: var(--learn);">Cross-Edition-Hinweise (passiv)</h3>
+
+  <div class="cross-card">
+    <div class="head">SCHULE → CAMPING</div>
+    <div class="body">
+      Pattern <span class="target">safeguarding.consent_missing.recurring</span> wurde in <strong>SCHULE</strong> promotet — als info-Signal jetzt auch sichtbar im <strong>CAMPING-Dashboard</strong> beim Kinder-Camp-Bereich.
+    </div>
+  </div>
+
+  <div class="cross-card">
+    <div class="head">CAMPING → CLUB (vorgemerkt)</div>
+    <div class="body">
+      Pattern <span class="target">safeguarding.dog_repeat_complaint.recurring_entity</span> könnte in <strong>CLUB</strong> ebenfalls relevant sein (Vereins-Hundesport-Sektionen). Operator wartet auf Bestätigung.
+    </div>
+  </div>
+
+</div>
+
+<div class="card">
+  <h2>Verworfene Kandidaten (Audit-Spur)</h2>
+  <p class="lede">Was wir gelernt haben, dass es kein Pattern war — bleibt sichtbar für Nachvollzug.</p>
+  <div class="person-row">
+    <div class="person-name"><code style="font-family: var(--mono); font-size: 12px;">safeguarding.first_aid_kit_expired.recurring</code></div>
+    <small style="color: var(--ink-mute); font-size: 11px;">verworfen am 12.04. von Maria — „nur Kalender-Routine, kein Pattern"</small>
+  </div>
+  <div class="person-row">
+    <div class="person-name"><code style="font-family: var(--mono); font-size: 12px;">safeguarding.consent_missing.recurring_entity_pre_natal</code></div>
+    <small style="color: var(--ink-mute); font-size: 11px;">verworfen am 8.04. von Mira — „Pre-Natal hat eigene Logik (Hebammen)"</small>
+  </div>
+</div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- VORFÄLLE -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-incidents">
+<div class="card">
+  <h2>Aktuelle Vorfälle</h2>
+  <p class="lede">Was passiert ist, was offen ist, was dokumentiert wurde.</p>
+
+  <div class="signal">
+    <span class="sev mid">offen</span>
+    <div class="signal-text">
+      Hund-Bell-Beschwerde Pitch B16 → E01 (Inntalblick).
+      <div class="signal-meta">23.04.2026 · Familie Eggenberg → Familie Maier · noch ungelöst</div>
+    </div>
+  </div>
+
+  <div class="signal">
+    <span class="sev low">resolved</span>
+    <div class="signal-text">
+      Spielplatz-Schaukel Holzgeländer locker (Allweglehen).
+      <div class="signal-meta">19.04.2026 · Schreinerei Brand am 24.04. behoben · Maria Allweger</div>
+    </div>
+  </div>
+
+  <div class="signal">
+    <span class="sev low">resolved</span>
+    <div class="signal-text">
+      Kind weint im Kinder-Camp Sylt — Tom Bechmann hat Notfall-Procedure korrekt angewandt.
+      <div class="signal-meta">26.04.2026 · Lars dokumentiert · Eltern informiert</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<footer class="bot">
+  Stand: 25.04.2026 · SAFEGUARDING MODUL V1 · cross-edition · lernfähig auf vier Achsen (Frequenz-Cluster, saisonal, cross-edition, severity-feedback) · Pattern erst nach Operator-Promotion aktiv · alle Aktionen <code>review_required = true</code>
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    const target = t.dataset.panel;
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + target).classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

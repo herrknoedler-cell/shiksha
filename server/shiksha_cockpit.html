@@ -1,0 +1,91 @@
+<!doctype html><html lang="de"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SHIKSHA · Cockpit</title>
+<style>
+:root{--ink:#1a1a1a;--soft:#55524b;--mute:#7a7a74;--line:#e6e4de;--card:#fff;--accent:#2d7a5f;--accent-soft:#e8f1ec;--warn:#8a6a2a;--warn-soft:#f5ebd8;--alert:#a0391f;--info:#4a6a80;--info-soft:#e8eef1;--bg:#f7f7f5;--mono:"SFMono-Regular",Menlo,monospace}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 22px 80px}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--mute)}
+h1{font-size:30px;font-weight:600;margin:4px 0 6px;letter-spacing:-0.01em}
+.lede{font-size:14px;color:var(--soft);margin:0 0 28px;max-width:680px}
+section{margin-top:32px}
+section h2{font-size:16px;font-weight:600;margin:0 0 4px}
+section .sub{font-size:12px;color:var(--mute);margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-decoration:none;color:inherit;display:block;transition:all 0.15s;border-left:4px solid var(--accent)}
+.card:hover{border-color:#c6c2b8;transform:translateY(-1px)}
+.card .name{font-family:var(--mono);font-size:13px;font-weight:600}
+.card .desc{font-size:12px;color:var(--soft);margin-top:4px}
+.card .url{font-size:10.5px;color:var(--mute);margin-top:6px;font-family:var(--mono);word-break:break-all}
+.card.module{border-left-color:var(--info)}
+.card.demo{border-left-color:var(--warn)}
+.tenant-bar{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.tenant{padding:8px 14px;border-radius:8px;background:var(--card);border:1px solid var(--line);font-size:13px;display:flex;align-items:center;gap:8px}
+.tenant::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.tag{display:inline-block;font-size:9.5px;padding:2px 6px;border-radius:3px;margin-right:4px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase}
+.tag.live{background:var(--accent-soft);color:var(--accent)}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:11px;color:var(--mute)}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<div class="wrap">
+<div class="eyebrow">SHIKSHA · Master-Cockpit</div>
+<h1>Wo läuft was.</h1>
+<p class="lede">Alle Live-UIs auf einer Seite. Klick öffnet direkt im Browser — Operator-Eingabemasken, Dashboards, Mobile-Apps.</p>
+
+<div class="tenant-bar">
+  <div class="tenant"><span><strong>shiksha.tun.zone</strong> · Haupt-Tenant · alle UIs unten</span></div>
+</div>
+
+<section>
+  <h2>Tools <span class="tag live">live</span></h2>
+  <p class="sub">Schnellzugriff für den täglichen Gebrauch.</p>
+  <div class="grid">
+    <a class="card" href="/foto"><div class="name">Foto-Flow</div><div class="desc">Schnelle Erfassung — iPhone-optimiert.</div><div class="url">/foto</div></a>
+    <a class="card" href="/accounting/upload"><div class="name">Dokument hochladen</div><div class="desc">PDF · JPG · HEIC · Drag&Drop.</div><div class="url">/accounting/upload</div></a>
+    <a class="card" href="/docs"><div class="name">API-Doku</div><div class="desc">Swagger UI mit allen Endpoints.</div><div class="url">/docs</div></a>
+    <a class="card" href="/health"><div class="name">Health-Check</div><div class="desc">Server-Status JSON.</div><div class="url">/health</div></a>
+  </div>
+</section>
+
+<section>
+  <h2>SCHULE.EDITION — UIs <span class="tag live">live</span></h2>
+  <p class="sub">Yoga, Surf, Ski, Reit, Tanz — alles was Kursbetrieb ist.</p>
+  <div class="grid">
+    <a class="card" href="/accounting/ui/schule/operator"><div class="name">Operator-Eingabemasken</div><div class="desc">Heute · Kurs anlegen · Anmeldung · Wetter-Entscheidung. Mit Konsent-Logik.</div><div class="url">/accounting/ui/schule/operator</div></a>
+    <a class="card" href="/accounting/ui/schule/dashboard"><div class="name">SchoolState-Dashboard</div><div class="desc">Sprachfähige Tageszusammenfassung. Switcher Yoga/Surf.</div><div class="url">/accounting/ui/schule/dashboard</div></a>
+    <a class="card" href="/accounting/ui/schule/teilnehmer"><div class="name">Teilnehmer-App</div><div class="desc">3 Phone-Sichten: Stammschüler · Surf-Gast · Eltern eines Kindes.</div><div class="url">/accounting/ui/schule/teilnehmer</div></a>
+  </div>
+</section>
+
+<section>
+  <h2>CAMPING.EDITION — UIs <span class="tag live">live</span></h2>
+  <p class="sub">Vercharterer, Familienbetriebe, Glamping. Pitch + Reservation + Lieferschein-Hölle.</p>
+  <div class="grid">
+    <a class="card" href="/accounting/ui/camping/operator"><div class="name">Operator-Eingabemasken</div><div class="desc">Heute · Pitch · Reservierung · Check-in · Strom · Lieferschein.</div><div class="url">/accounting/ui/camping/operator</div></a>
+    <a class="card" href="/accounting/ui/camping/dashboard"><div class="name">CampState-Dashboard</div><div class="desc">Tagesübersicht mit Switcher Bayern/Tirol. Patterns + Recommended Focus.</div><div class="url">/accounting/ui/camping/dashboard</div></a>
+    <a class="card" href="/accounting/ui/camping/gaeste"><div class="name">Gäste-App</div><div class="desc">3 Phone-Sichten: vor Anreise · während · nach Abreise (Bewertungs-Bitte).</div><div class="url">/accounting/ui/camping/gaeste</div></a>
+  </div>
+</section>
+
+<section>
+  <h2>Cross-Edition-Module — UIs</h2>
+  <p class="sub">Module, die in mehreren Editionen mitlaufen.</p>
+  <div class="grid">
+    <a class="card module" href="/accounting/ui/safeguarding"><div class="name">Safeguarding-Dashboard <span class="tag live">live</span></div><div class="desc">Pflicht-Status · Signale · Lern-Status (Pattern-Kandidaten + Severity-Vorschläge).</div><div class="url">/accounting/ui/safeguarding</div></a>
+    <a class="card module" href="/accounting/ui/accounting"><div class="name">Accounting-Dashboard <span class="tag live">live</span></div><div class="desc">6-Tab-Operator-UI: Heute · Match-Vorschläge · Rechnungen · PDF-Upload · Bank-Import · Aging.</div><div class="url">/accounting/ui/accounting</div></a>
+  </div>
+</section>
+
+<section>
+  <h2>Pilot-Demo</h2>
+  <p class="sub">Für deine Erstgespräche nächste Woche.</p>
+  <div class="grid">
+    <a class="card demo" href="/accounting/ui/pilot-demo"><div class="name">12-Slide-Walkthrough <span class="tag live">live</span></div><div class="desc">Pfeil-Tasten zum Navigieren · n für Operator-Notizen · Esc für Vollbild.</div><div class="url">/accounting/ui/pilot-demo</div></a>
+  </div>
+</section>
+
+<footer>
+  Stand: 26.04.2026 · 11 Live-UIs · 4 Live-Editionen + 2 deploy-bereite + 1 Design · 4 Cross-Edition-Module · Multi-Tenant-fähig
+</footer>
+</div></body></html>

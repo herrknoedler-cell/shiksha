@@ -1,0 +1,1479 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA · KITA · Compliance</title>
+<style>
+:root {
+  --bg: #f7f7f5; --card: #ffffff; --line: #e6e4de; --line-strong: #c6c2b8;
+  --ink: #1a1a1a; --ink-soft: #55524b; --ink-mute: #7a7a74;
+  --accent: #2d7a5f; --accent-soft: #e8f1ec;
+  --warn: #8a6a2a; --warn-soft: #f5ebd8;
+  --alert: #a0391f; --alert-soft: #f5e1da;
+  --info: #4a6a80; --info-soft: #e8eef1;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.app { max-width: 1280px; margin: 0 auto; padding: 24px 24px 80px; }
+
+header.top { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 16px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+.brand { display: flex; flex-direction: column; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); }
+h1 { font-size: 22px; font-weight: 600; margin: 2px 0 0; letter-spacing: -0.005em; }
+.org-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: #fafaf8; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; color: var(--ink-soft); }
+.org-pill::before { content: ""; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tab { padding: 10px 14px; background: transparent; border: 0; border-bottom: 2px solid transparent; font-size: 14px; color: var(--ink-mute); cursor: pointer; font-weight: 500; }
+.tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+.card h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+.card .lede { font-size: 13px; color: var(--ink-mute); margin: 0 0 16px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.kpi.warn { border-color: var(--warn); background: var(--warn-soft); }
+.kpi.alert { border-color: var(--alert); background: var(--alert-soft); }
+.kpi.ok { border-color: var(--accent); background: var(--accent-soft); }
+.kpi .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-mute); }
+.kpi .val { font-size: 24px; font-weight: 700; font-family: var(--mono); margin-top: 4px; }
+.kpi .sub { font-size: 11px; color: var(--ink-soft); margin-top: 4px; }
+
+table.list { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.list th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-mute); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--line); background: #fafaf8; position: sticky; top: 0; }
+table.list td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.list .amount { font-family: var(--mono); text-align: right; font-weight: 600; }
+table.list .amount.pos { color: var(--accent); }
+table.list .amount.neg { color: var(--alert); }
+
+.pill { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.pill.green { background: var(--accent-soft); color: var(--accent); }
+.pill.yellow { background: var(--warn-soft); color: var(--warn); }
+.pill.red { background: var(--alert-soft); color: var(--alert); }
+
+.dropzone { border: 2px dashed var(--line-strong); border-radius: 12px; padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.15s; background: #fafaf8; }
+.dropzone:hover, .dropzone.drag { border-color: var(--ink); background: var(--accent-soft); }
+.dropzone .icon { font-size: 36px; margin-bottom: 10px; }
+.dropzone .lbl { font-size: 15px; font-weight: 500; }
+.dropzone .sub { font-size: 12px; color: var(--ink-mute); margin-top: 6px; }
+.dropzone input[type="file"] { display: none; }
+
+.btn { padding: 8px 14px; border: 0; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn.primary { background: var(--ink); color: #fff; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--ink-soft); }
+
+.form-grid { display: grid; gap: 8px; margin-bottom: 12px; }
+.form-grid input, .form-grid select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; }
+
+.month-cell { padding: 6px 8px; border: 1px solid var(--line); text-align: center; font-size: 12px; font-family: var(--mono); }
+.month-cell.green { background: var(--accent-soft); }
+.month-cell.yellow { background: var(--warn-soft); color: var(--warn); }
+.month-cell.red { background: var(--alert-soft); color: var(--alert); font-weight: 700; }
+
+footer.bot { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-mute); }
+
+@media (max-width: 700px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<header class="top">
+  <div class="brand">
+    <span class="eyebrow">SHIKSHA · KITA · COMPLIANCE</span>
+    <h1>Personalschlüssel-Monitoring & Audit</h1>
+  </div>
+  <span class="org-pill">Pilot · Vorarlberg KBBG · Stadt Dornbirn</span>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-panel="overview">Übersicht</button>
+  <button class="tab" data-panel="groups">Gruppen</button>
+  <button class="tab" data-panel="staff">Mitarbeiter</button>
+  <button class="tab" data-panel="audit-monthly">Audit (Monat)</button>
+  <button class="tab" data-panel="audit-yearly">Audit (Jahr)</button>
+  <button class="tab" data-panel="documents">📸 Foto-Upload</button>
+  <button class="tab" data-panel="stcalc">🧮 ST%-Rechner</button>
+  <button class="tab" data-panel="notifications">✉️ Mitteilungen</button>
+  <button class="tab" data-panel="import">Excel-Import</button>
+  <button class="tab" data-panel="ruleset">Regelwerk</button>
+</div>
+
+<!-- ÜBERSICHT -->
+<div class="panel active" id="panel-overview">
+  <div class="card">
+    <h2>Aktueller Stand</h2>
+    <p class="lede">Live-Risiko-Auswertung pro Gruppe für den laufenden Monat. Werte aktualisieren sich mit jeder neuen Eingabe.</p>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="lbl">Gruppen aktiv</div><div class="val" id="kpi-groups">—</div></div>
+      <div class="kpi"><div class="lbl">Mitarbeiter</div><div class="val" id="kpi-staff">—</div></div>
+      <div class="kpi"><div class="lbl">Kinder eingeschrieben</div><div class="val" id="kpi-children">—</div></div>
+      <div class="kpi" id="kpi-risk-card"><div class="lbl">Risiko aktueller Monat</div><div class="val" id="kpi-risk">—</div><div class="sub" id="kpi-risk-sub">—</div></div>
+    </div>
+    <button class="btn ghost" id="btn-reload">Neu laden</button>
+  </div>
+
+  <div class="card">
+    <h2>Risiko pro Gruppe (laufender Monat)</h2>
+    <table class="list">
+      <thead><tr>
+        <th>Gruppe</th><th class="amount">Soll-FTE</th><th class="amount">Ist-FTE</th>
+        <th class="amount">Gap</th><th class="amount">Risiko €</th><th>Status</th>
+      </tr></thead>
+      <tbody id="overview-tbody"><tr><td colspan="6" style="padding:24px; text-align:center; color:var(--ink-mute)">lade …</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- GRUPPEN -->
+<div class="panel" id="panel-groups">
+  <div class="card">
+    <h2>Gruppen</h2>
+    <p class="lede">Krippe / Kindergarten / Hort · Kapazität laut Bewilligung.</p>
+    <div class="card" style="background:#fafaf8;">
+      <strong style="font-size:13px;">+ Neue Gruppe</strong>
+      <div class="form-grid" style="grid-template-columns: 1fr 140px 80px 140px 100px;">
+        <input type="text" id="g-name" placeholder="Name der Gruppe *" />
+        <select id="g-type">
+          <option value="kleinkindgruppe">Kleinkindgruppe (0-3)</option>
+          <option value="kiga" selected>Kindergarten (3-6)</option>
+          <option value="hort">Hort (6-14)</option>
+        </select>
+        <input type="number" id="g-cap" placeholder="Kapazität" value="25" />
+        <input type="text" id="g-loc" placeholder="Standort/Ort" />
+        <button class="btn primary" id="g-add">Hinzufügen</button>
+      </div>
+    </div>
+    <table class="list" id="groups-table">
+      <thead><tr><th>Name</th><th>Typ</th><th>Kapazität</th><th>Standort</th><th>Eröffnet</th><th></th></tr></thead>
+      <tbody id="groups-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MITARBEITER -->
+<div class="panel" id="panel-staff">
+  <div class="card">
+    <h2>Mitarbeiter</h2>
+    <p class="lede">Pädagoge:innen, Assistent:innen, Helfer:innen mit aktuellem Stellen%.</p>
+    <div class="card" style="background:#fafaf8;">
+      <strong style="font-size:13px;">+ Neuer Mitarbeiter</strong>
+      <div class="form-grid" style="grid-template-columns: 1fr 140px 130px 100px 80px 110px 100px;">
+        <input type="text" id="s-name" placeholder="Voller Name *" />
+        <select id="s-qual">
+          <option value="paedagoge">Pädagoge:in</option>
+          <option value="assistent">Assistent:in</option>
+          <option value="helfer">Helfer:in</option>
+          <option value="leitung">Leitung</option>
+          <option value="springer">Springer:in</option>
+        </select>
+        <input type="date" id="s-hired" />
+        <input type="number" id="s-pct" placeholder="Stellen %" value="100" min="0" max="100" />
+        <input type="number" id="s-hours" placeholder="h/Woche" value="38.5" step="0.5" />
+        <label style="font-size:12px; display:flex; align-items:center; gap:4px;"><input type="checkbox" id="s-bafep"> BAfEP</label>
+        <button class="btn primary" id="s-add">Hinzufügen</button>
+      </div>
+    </div>
+    <table class="list" id="staff-table">
+      <thead><tr><th>Name</th><th>Qualifikation</th><th>BAfEP</th><th class="amount">Stellen %</th><th>Eintritt</th><th></th></tr></thead>
+      <tbody id="staff-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- AUDIT MONAT -->
+<div class="panel" id="panel-audit-monthly">
+  <div class="card">
+    <h2>Monats-Audit</h2>
+    <p class="lede">Soll-Ist-Vergleich für einen Monat — pro Gruppe mit Lücken und Risiko.</p>
+    <div class="form-grid" style="grid-template-columns: 110px 110px 1fr 120px;">
+      <input type="number" id="am-year" placeholder="Jahr" />
+      <input type="number" id="am-month" placeholder="Monat" min="1" max="12" />
+      <span></span>
+      <button class="btn primary" id="am-load">Audit laden</button>
+    </div>
+    <div id="am-result"></div>
+  </div>
+</div>
+
+<!-- AUDIT JAHR -->
+<div class="panel" id="panel-audit-yearly">
+  <div class="card">
+    <h2>Jahres-Audit · 12 Monate</h2>
+    <p class="lede">Heatmap-Übersicht über alle Gruppen × alle Monate. Rückwärts-Audit bis 60 Monate möglich.</p>
+    <div class="form-grid" style="grid-template-columns: 110px 1fr 130px 130px;">
+      <input type="number" id="ay-year" placeholder="Jahr" />
+      <span></span>
+      <button class="btn ghost" id="ay-historical">60-Monate</button>
+      <button class="btn primary" id="ay-load">Jahres-Audit</button>
+    </div>
+    <div id="ay-result"></div>
+  </div>
+</div>
+
+<!-- DOKUMENT-FOTO-UPLOAD -->
+<div class="panel" id="panel-documents">
+  <div class="card">
+    <h2>📸 Dokument-Foto hochladen</h2>
+    <p class="lede">Anmeldeverträge, Krankenstandsmeldungen, Dienstpläne, Förderbescheide — Foto machen, hochladen, fertig. Mehrere Dateien gleichzeitig möglich.</p>
+
+    <label class="dropzone" id="kdoc-dropzone">
+      <div class="icon">📷</div>
+      <div class="lbl">Foto/PDF hierhin ziehen oder klicken</div>
+      <div class="sub">JPG · PNG · HEIC · PDF · mehrere möglich</div>
+      <input type="file" id="kdoc-file-input" accept="image/*,application/pdf" multiple capture="environment" />
+    </label>
+    <div id="kdoc-upload-result" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>Erfasste Dokumente</h2>
+    <p class="lede">Hochgeladene Fotos mit OCR-Text, erkannten Feldern, Möglichkeit zur Korrektur und Übernahme in die DB.</p>
+    <div style="margin-bottom:12px;">
+      <select id="kdoc-filter-type">
+        <option value="">Alle Typen</option>
+        <option value="anmeldevertrag">Anmeldeverträge</option>
+        <option value="krankenstand">Krankenstand</option>
+        <option value="dienstplan">Dienstplan</option>
+        <option value="foerderbescheid">Förderbescheid</option>
+        <option value="mitarbeitervertrag">Mitarbeiter-Vertrag</option>
+        <option value="unknown">Nicht erkannt</option>
+      </select>
+      <button class="btn ghost" id="kdoc-reload">Neu laden</button>
+    </div>
+    <table class="list" id="kdoc-table">
+      <thead><tr>
+        <th>Datum</th><th>Datei</th><th>Typ</th><th>Felder</th><th>OCR</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody id="kdoc-tbody"><tr><td colspan="7" style="padding:24px; text-align:center; color:var(--ink-mute)">Noch keine Dokumente.</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card" id="kdoc-detail-card" style="display:none;">
+    <h2>Detail-Ansicht</h2>
+    <div id="kdoc-detail-content"></div>
+  </div>
+</div>
+
+<!-- ST%-RECHNER -->
+<div class="panel" id="panel-stcalc">
+  <div class="card">
+    <h2>🧮 Stellenprozent-Rechner (Vorarlberg KKG)</h2>
+    <p class="lede">Berechnet förderbare Stellenprozente nach Verordnung Personaleinsatz und Gruppengröße. 1:1 nach offizieller Land-Vorlage. Live-Berechnung — die Werte aktualisieren sich beim Tippen.</p>
+
+    <div class="form-grid" style="grid-template-columns: 1fr 130px 130px 130px; gap:8px;">
+      <select id="stc-group">
+        <option value="">— Gruppe wählen —</option>
+      </select>
+      <input type="month" id="stc-month" />
+      <select id="stc-funding-basis">
+        <option value="KV">KV (39h)</option>
+        <option value="GAG">GAG (40h)</option>
+      </select>
+      <input type="number" id="stc-group-count" placeholder="Anzahl Gruppen" min="1" max="8" value="1" />
+    </div>
+
+    <div style="margin-top: 8px; display:flex; gap:8px; align-items:center;">
+      <button class="btn primary" id="stc-auto-fill" style="background:linear-gradient(135deg, #ff8c42, #ff4d8d);">
+        🪄 Auto-Daten aus DB
+      </button>
+      <span style="font-size:11px; color:var(--ink-mute);">
+        Lädt Kinderzahlen + verteilt sie auf alle 10 Halbtage (Vollbelegung-Annahme)
+      </span>
+    </div>
+
+    <div id="stc-funding-info" style="margin:8px 0 12px; padding:10px 14px; background:var(--info-soft); border-radius:8px; font-size:13px; color:var(--ink-soft); display:none;"></div>
+
+    <h3 style="font-size:13px; margin:14px 0 6px; color:var(--ink-mute); text-transform:uppercase; letter-spacing:0.05em;">Halbtags-Belegung</h3>
+    <div style="overflow-x:auto;">
+      <table class="list" id="stc-halfday-table">
+        <thead>
+          <tr>
+            <th>Halbtag</th>
+            <th>ÖZ (Std)</th>
+            <th>0–1 J</th>
+            <th>2 J</th>
+            <th>3 J</th>
+            <th>≥4 J</th>
+            <th>Σ Kinder</th>
+            <th>Variante</th>
+            <th class="amount">ST%</th>
+          </tr>
+        </thead>
+        <tbody id="stc-halfday-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top:14px;">
+      <div>
+        <label style="font-size:11px; color:var(--ink-mute); text-transform:uppercase;">I-Kind Wochenstunden</label>
+        <input type="number" id="stc-ikind-h" placeholder="0" step="0.5" value="0" />
+      </div>
+      <div></div>
+    </div>
+
+    <!-- ERGEBNIS -->
+    <div id="stc-result" style="margin-top:18px;">
+      <div class="kpi-grid" style="grid-template-columns: repeat(4,1fr);">
+        <div class="kpi"><div class="lbl">Kinderdienst</div><div class="val" id="stc-r-kd">—</div></div>
+        <div class="kpi"><div class="lbl">VB-Zeit</div><div class="val" id="stc-r-vbz">—</div></div>
+        <div class="kpi"><div class="lbl">I-Kind</div><div class="val" id="stc-r-ik">—</div></div>
+        <div class="kpi" id="stc-r-total-card"><div class="lbl">Gesamt ST%</div><div class="val" id="stc-r-total">—</div></div>
+      </div>
+      <div id="stc-funding-result" style="margin-top:12px;"></div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <button class="btn ghost" id="stc-reset">Zurücksetzen</button>
+      <button class="btn primary" id="stc-save">Snapshot speichern</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Historische Berechnungen</h2>
+    <div id="stc-history">
+      <div style="color:var(--ink-mute); font-style:italic; padding:10px;">Wähle eine Gruppe oben, um die Historie zu laden.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MITTEILUNGEN -->
+<div class="panel" id="panel-notifications">
+  <div class="card">
+    <h2>✉️ Neue Mitteilung</h2>
+    <p class="lede">Adressiere einzelne Eltern, eine Gruppe oder alle. Optional auch an Mitarbeiter.</p>
+
+    <div class="form-grid" style="grid-template-columns: 1fr;">
+      <input type="text" id="notif-title" placeholder="Betreff *" />
+      <textarea id="notif-body" rows="4" placeholder="Mitteilung *" style="padding:10px; border:1px solid var(--line); border-radius:6px; font-family:inherit; font-size:13px;"></textarea>
+    </div>
+
+    <div class="form-grid" style="grid-template-columns: 130px 1fr 130px;">
+      <select id="notif-target-type">
+        <option value="all">An alle Eltern</option>
+        <option value="group">Eine Gruppe</option>
+        <option value="children">Einzelne Kinder</option>
+        <option value="parent">Einzelne Eltern</option>
+      </select>
+      <select id="notif-target-id" style="display:none;">
+        <option value="">— wählen —</option>
+      </select>
+      <select id="notif-priority">
+        <option value="normal">Normal 📩</option>
+        <option value="high">Wichtig ⚠️</option>
+        <option value="urgent">Dringend 🚨</option>
+        <option value="low">Info 💬</option>
+      </select>
+    </div>
+
+    <div style="margin: 8px 0; display:flex; gap:14px; align-items:center; font-size:13px;">
+      <label style="display:flex; gap:6px; align-items:center; cursor:pointer;">
+        <input type="checkbox" id="notif-include-staff" /> Auch an Mitarbeiter senden
+      </label>
+      <label style="display:flex; gap:6px; align-items:center; cursor:pointer;">
+        <input type="checkbox" id="notif-via-email" checked /> Per E-Mail
+      </label>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn ghost" id="notif-save-draft">Als Entwurf speichern</button>
+      <button class="btn primary" id="notif-send">Senden →</button>
+    </div>
+
+    <div id="notif-result" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>Versendete Mitteilungen</h2>
+    <div style="margin-bottom:8px;">
+      <button class="btn ghost" id="notif-reload">Neu laden</button>
+    </div>
+    <table class="list">
+      <thead><tr>
+        <th>Datum</th><th>Betreff</th><th>Empfänger</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody id="notif-tbody"><tr><td colspan="5" style="padding:24px; text-align:center; color:var(--ink-mute)">Noch keine Mitteilungen.</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card" id="notif-detail-card" style="display:none;">
+    <h2>Empfänger-Status</h2>
+    <div id="notif-detail-content"></div>
+  </div>
+</div>
+
+<!-- IMPORT -->
+<div class="panel" id="panel-import">
+  <div class="card">
+    <h2>Excel-Import</h2>
+    <p class="lede">Lade eine Excel-Datei hoch — das System erkennt heuristisch, welcher Sheet was enthält (Mitarbeiter / Verträge / Belegung / Dienstplan).</p>
+    <label class="dropzone" id="dropzone">
+      <div class="icon">📥</div>
+      <div class="lbl">Excel-Datei hierhin ziehen oder klicken</div>
+      <div class="sub">.xlsx · .xls · accept multiple sheets</div>
+      <input type="file" id="file-input" accept=".xlsx,.xls" />
+    </label>
+    <div id="upload-result" style="margin-top:12px;"></div>
+
+    <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-mute);">
+      <strong>Sheet-Heuristik:</strong> Sheets mit <code>Mitarb*</code>/<code>Personal</code>/<code>Staff</code> → Mitarbeiter ·
+      <code>Vertrag*</code>/<code>Stelle*</code> → Verträge ·
+      <code>Kind*</code>/<code>Belegung</code> → Belegung ·
+      <code>Dienstplan</code>/<code>Schicht</code> → Dienstplan ·
+      <code>Krank*</code>/<code>Abwesen*</code> → Krankheit
+    </div>
+  </div>
+</div>
+
+<!-- REGELWERK -->
+<div class="panel" id="panel-ruleset">
+  <div class="card">
+    <h2>Aktives Regelwerk</h2>
+    <p class="lede">Vorarlberg KBBG (Land) + Stadt Dornbirn (kommunal) — Personalschlüssel und Förder-Tagsätze.</p>
+    <div id="rs-content"><div style="text-align:center; color:var(--ink-mute); padding:20px;">lade …</div></div>
+  </div>
+</div>
+
+<footer class="bot">
+  SHIKSHA · KITA · Compliance & Audit · Vorarlberg KBBG seit 11.09.2023 · live gegen <code>/kita</code>
+</footer>
+
+</div>
+
+<script>
+const API = "/kita";
+const ORG = "kita_pilot";
+let STATE = { groups: [], staff: [], rulesets: [] };
+
+// =============================================================
+// TABS
+// =============================================================
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("panel-" + tab.dataset.panel).classList.add("active");
+  });
+});
+
+// =============================================================
+// HELPERS
+// =============================================================
+async function api(path, opts={}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: {
+      "X-Org-Slug": ORG,
+      ...(opts.body ? { "Content-Type": "application/json" } : {}),
+      ...(opts.headers || {}),
+    },
+  });
+  if (!res.ok) throw new Error(`${opts.method || 'GET'} ${path} → ${res.status}`);
+  return res.json();
+}
+
+function fmtMoney(v) {
+  return (v || 0).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "€";
+}
+function fmtDate(s) {
+  if (!s) return "—";
+  const d = new Date(s);
+  if (isNaN(d)) return s;
+  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" });
+}
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+const QUAL_LABELS = {
+  paedagoge: "Pädagoge:in", assistent: "Assistent:in",
+  helfer: "Helfer:in", leitung: "Leitung",
+  springer: "Springer:in", praktikant: "Praktikant:in",
+};
+const TYPE_LABELS = {
+  kleinkindgruppe: "Kleinkindgruppe", kiga: "Kindergarten", hort: "Hort", altersgemischt: "Altersgemischt",
+};
+
+// =============================================================
+// ÜBERSICHT
+// =============================================================
+async function loadOverview() {
+  try {
+    const data = await api("/state");
+    document.getElementById("kpi-groups").textContent = data.summary.groups_active;
+    document.getElementById("kpi-staff").textContent = data.summary.staff_active;
+    document.getElementById("kpi-children").textContent = data.summary.children_enrolled;
+    const risk = data.summary.current_month_risk_eur || 0;
+    document.getElementById("kpi-risk").textContent = fmtMoney(risk);
+    document.getElementById("kpi-risk-sub").textContent =
+      `${data.summary.current_month_gap_days} Tage mit Unterdeckung`;
+    const card = document.getElementById("kpi-risk-card");
+    card.classList.toggle("alert", risk >= 2000);
+    card.classList.toggle("warn", risk >= 500 && risk < 2000);
+    card.classList.toggle("ok", risk < 500);
+
+    const tbody = document.getElementById("overview-tbody");
+    if (!data.risk_by_group?.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:24px; text-align:center; color:var(--ink-mute)">Keine Gruppen — bitte oben anlegen.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.risk_by_group.map(g => `<tr>
+      <td><strong>${escapeHtml(g.group_name)}</strong></td>
+      <td class="amount">${(g.fte_required || 0).toFixed(2)}</td>
+      <td class="amount">${(g.fte_actual || 0).toFixed(2)}</td>
+      <td class="amount ${g.fte_gap < 0 ? 'neg' : 'pos'}">${(g.fte_gap || 0).toFixed(2)}</td>
+      <td class="amount">${fmtMoney(g.risk_eur)}</td>
+      <td><span class="pill ${g.risk_level}">${g.risk_level}</span></td>
+    </tr>`).join("");
+  } catch (e) { console.warn(e); }
+}
+
+// =============================================================
+// GRUPPEN
+// =============================================================
+async function loadGroups() {
+  try {
+    const data = await api("/groups");
+    STATE.groups = data.groups || [];
+    populateStcalcGroupDropdown();
+    const tbody = document.getElementById("groups-tbody");
+    if (!STATE.groups.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:24px; text-align:center; color:var(--ink-mute)">Noch keine Gruppen.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = STATE.groups.map(g => `<tr data-id="${g.id}">
+      <td><strong>${escapeHtml(g.name)}</strong></td>
+      <td>${TYPE_LABELS[g.group_type] || g.group_type}</td>
+      <td>${g.capacity}</td>
+      <td>${escapeHtml(g.location || '—')}</td>
+      <td>${fmtDate(g.opened_at)}</td>
+      <td><button class="btn ghost g-del" style="padding:3px 10px; color:var(--alert);">×</button></td>
+    </tr>`).join("");
+    tbody.querySelectorAll(".g-del").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.closest("tr").dataset.id;
+        if (!confirm("Gruppe löschen?")) return;
+        await api(`/groups/${id}`, { method: "DELETE" });
+        await loadAll();
+      });
+    });
+  } catch (e) { console.warn(e); }
+}
+
+document.getElementById("g-add").addEventListener("click", async () => {
+  const name = document.getElementById("g-name").value.trim();
+  if (!name) { alert("Name fehlt"); return; }
+  await api("/groups", {
+    method: "POST",
+    body: JSON.stringify({
+      name,
+      group_type: document.getElementById("g-type").value,
+      capacity: parseInt(document.getElementById("g-cap").value) || 25,
+      location: document.getElementById("g-loc").value || null,
+    }),
+  });
+  document.getElementById("g-name").value = "";
+  document.getElementById("g-loc").value = "";
+  await loadAll();
+});
+
+// =============================================================
+// MITARBEITER
+// =============================================================
+async function loadStaff() {
+  try {
+    const data = await api("/staff");
+    STATE.staff = data.staff || [];
+    const tbody = document.getElementById("staff-tbody");
+    if (!STATE.staff.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:24px; text-align:center; color:var(--ink-mute)">Noch keine Mitarbeiter.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = STATE.staff.map(s => `<tr data-id="${s.id}">
+      <td><strong>${escapeHtml(s.full_name)}</strong></td>
+      <td>${QUAL_LABELS[s.qualification] || s.qualification}</td>
+      <td>${s.bafep_certified ? '✓' : '—'}</td>
+      <td class="amount">${s.current_contract_pct != null ? s.current_contract_pct.toFixed(0) + '%' : '—'}</td>
+      <td>${fmtDate(s.hired_at)}</td>
+      <td><button class="btn ghost s-del" style="padding:3px 10px; color:var(--alert);">×</button></td>
+    </tr>`).join("");
+    tbody.querySelectorAll(".s-del").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.closest("tr").dataset.id;
+        if (!confirm("Mitarbeiter löschen?")) return;
+        await api(`/staff/${id}`, { method: "DELETE" });
+        await loadAll();
+      });
+    });
+  } catch (e) { console.warn(e); }
+}
+
+document.getElementById("s-add").addEventListener("click", async () => {
+  const name = document.getElementById("s-name").value.trim();
+  if (!name) { alert("Name fehlt"); return; }
+  await api("/staff", {
+    method: "POST",
+    body: JSON.stringify({
+      full_name: name,
+      qualification: document.getElementById("s-qual").value,
+      hired_at: document.getElementById("s-hired").value || null,
+      contract_pct: parseFloat(document.getElementById("s-pct").value) || 100,
+      weekly_hours: parseFloat(document.getElementById("s-hours").value) || 38.5,
+      bafep_certified: document.getElementById("s-bafep").checked,
+    }),
+  });
+  document.getElementById("s-name").value = "";
+  await loadAll();
+});
+
+// =============================================================
+// AUDIT MONTHLY
+// =============================================================
+const today = new Date();
+document.getElementById("am-year").value = today.getFullYear();
+document.getElementById("am-month").value = today.getMonth() + 1;
+document.getElementById("ay-year").value = today.getFullYear();
+
+document.getElementById("am-load").addEventListener("click", async () => {
+  const y = parseInt(document.getElementById("am-year").value) || today.getFullYear();
+  const m = parseInt(document.getElementById("am-month").value) || (today.getMonth() + 1);
+  const data = await api(`/audit/monthly?year=${y}&month=${m}`);
+  let html = `<div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-top:16px;">
+    <div class="kpi"><div class="lbl">Geprüfte Gruppen</div><div class="val">${data.total_groups}</div></div>
+    <div class="kpi ${data.total_funding_at_risk_eur > 1000 ? 'alert' : data.total_funding_at_risk_eur > 200 ? 'warn' : 'ok'}"><div class="lbl">Risiko gesamt</div><div class="val">${fmtMoney(data.total_funding_at_risk_eur)}</div></div>
+    <div class="kpi"><div class="lbl">Monat</div><div class="val" style="font-size:18px;">${data.month}</div></div>
+  </div>`;
+  data.snapshots.forEach(s => {
+    html += `<div class="card" style="margin-top:12px;">
+      <h3 style="font-size:14px; margin:0 0 8px;">${escapeHtml(s.group_name)} <span class="pill ${s.risk_level}" style="margin-left:8px;">${s.risk_level}</span></h3>
+      <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; font-size:12px; color:var(--ink-soft);">
+        <div>Soll-FTE: <strong>${s.fte_required.toFixed(2)}</strong></div>
+        <div>Ist-FTE: <strong>${s.fte_actual.toFixed(2)}</strong></div>
+        <div>Gap: <strong style="color:${s.fte_gap < 0 ? 'var(--alert)' : 'var(--accent)'}">${s.fte_gap.toFixed(2)}</strong></div>
+        <div>Tage mit Lücke: <strong>${s.days_undercov}</strong></div>
+        <div>Risiko: <strong>${fmtMoney(s.funding_at_risk_eur)}</strong></div>
+      </div>`;
+    if (s.gaps.length) {
+      html += `<table class="list" style="margin-top:12px;"><thead><tr><th>Datum</th><th>Schwere</th><th class="amount">FTE fehlt</th><th class="amount">Kinder</th><th class="amount">Risiko €</th></tr></thead><tbody>`;
+      s.gaps.forEach(g => {
+        html += `<tr><td>${fmtDate(g.gap_date)}</td><td><span class="pill ${g.severity === 'critical' ? 'red' : g.severity === 'major' ? 'yellow' : 'green'}">${g.severity}</span></td><td class="amount">${g.fte_missing.toFixed(2)}</td><td class="amount">${g.children_affected}</td><td class="amount">${fmtMoney(g.eur_at_risk)}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById("am-result").innerHTML = html;
+});
+
+// =============================================================
+// AUDIT YEARLY
+// =============================================================
+document.getElementById("ay-load").addEventListener("click", async () => {
+  const y = parseInt(document.getElementById("ay-year").value) || today.getFullYear();
+  const data = await api(`/audit/yearly?year=${y}`);
+  let html = `<div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-top:16px;">
+    <div class="kpi ${data.total_funding_at_risk_eur > 5000 ? 'alert' : data.total_funding_at_risk_eur > 1000 ? 'warn' : 'ok'}"><div class="lbl">Jahres-Risiko</div><div class="val">${fmtMoney(data.total_funding_at_risk_eur)}</div></div>
+    <div class="kpi"><div class="lbl">Geprüfte Gruppen</div><div class="val">${data.total_groups}</div></div>
+    <div class="kpi"><div class="lbl">Jahr</div><div class="val" style="font-size:18px;">${data.year}</div></div>
+  </div>`;
+  data.per_group.forEach(g => {
+    html += `<div class="card" style="margin-top:12px;">
+      <h3 style="font-size:14px; margin:0 0 12px;">${escapeHtml(g.group.name)} — Risiko gesamt: <strong>${fmtMoney(g.total_funding_at_risk_eur)}</strong> · ${g.months_with_gap}/12 Monate mit Lücke</h3>
+      <div style="display:grid; grid-template-columns: repeat(12, 1fr); gap:4px;">`;
+    g.monthly.forEach(m => {
+      const mLabel = new Date(m.month).toLocaleDateString("de-DE", { month: "short" });
+      html += `<div class="month-cell ${m.risk_level}" title="${m.month}: ${fmtMoney(m.funding_at_risk_eur)} · ${m.days_undercov} Tage Lücke">
+        ${mLabel}<br>${m.funding_at_risk_eur > 0 ? Math.round(m.funding_at_risk_eur) + '€' : '✓'}
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById("ay-result").innerHTML = html;
+});
+
+document.getElementById("ay-historical").addEventListener("click", async () => {
+  if (!STATE.groups.length) { alert("Erst eine Gruppe anlegen"); return; }
+  const gid = STATE.groups[0].id;
+  const data = await api(`/audit/historical?group_id=${gid}&months_back=60`);
+  let html = `<div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-top:16px;">
+    <div class="kpi alert"><div class="lbl">60-Monate-Risiko gesamt</div><div class="val">${fmtMoney(data.total_funding_at_risk_eur)}</div></div>
+    <div class="kpi warn"><div class="lbl">davon korrigierbar</div><div class="val">${fmtMoney(data.potential_recoverable_eur)}</div></div>
+    <div class="kpi"><div class="lbl">Monate mit Lücke</div><div class="val">${data.months_with_gap}/${data.months_analysed}</div></div>
+    <div class="kpi"><div class="lbl">Gruppe</div><div class="val" style="font-size:14px;">${escapeHtml(data.group.name)}</div></div>
+  </div>`;
+  document.getElementById("ay-result").innerHTML = html;
+});
+
+// =============================================================
+// EXCEL-IMPORT
+// =============================================================
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("file-input");
+const uploadResult = document.getElementById("upload-result");
+
+dropzone.addEventListener("click", (e) => {
+  if (e.target.tagName !== "INPUT") fileInput.click();
+});
+dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("drag"); });
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
+dropzone.addEventListener("drop", e => {
+  e.preventDefault(); dropzone.classList.remove("drag");
+  if (e.dataTransfer.files.length) handleExcelUpload(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", () => {
+  if (fileInput.files[0]) handleExcelUpload(fileInput.files[0]);
+});
+
+async function handleExcelUpload(file) {
+  uploadResult.innerHTML = `<div class="card" style="background:var(--info-soft);">Upload läuft … ${escapeHtml(file.name)}</div>`;
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(API + "/import/excel", {
+    method: "POST", headers: { "X-Org-Slug": ORG }, body: fd,
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    uploadResult.innerHTML = `<div class="card" style="background:var(--alert-soft); color:var(--alert);">Fehler: ${escapeHtml(data.detail || JSON.stringify(data))}</div>`;
+    return;
+  }
+  let html = `<div class="card" style="background:var(--accent-soft);">
+    <strong>Erfolgreich importiert:</strong>
+    <ul style="margin-top:8px;">`;
+  html += `<li>Sheets gefunden: ${data.sheets_found.join(", ")}</li>`;
+  Object.entries(data.imported || {}).forEach(([k, v]) => {
+    html += `<li>${k}: ${v} Zeilen</li>`;
+  });
+  html += `</ul></div>`;
+  uploadResult.innerHTML = html;
+  await loadAll();
+}
+
+// =============================================================
+// DOKUMENT-FOTO-UPLOAD
+// =============================================================
+const kdocDropzone = document.getElementById("kdoc-dropzone");
+const kdocFileInput = document.getElementById("kdoc-file-input");
+const kdocUploadResult = document.getElementById("kdoc-upload-result");
+
+kdocDropzone.addEventListener("click", (e) => {
+  if (e.target.tagName !== "INPUT") kdocFileInput.click();
+});
+kdocDropzone.addEventListener("dragover", e => { e.preventDefault(); kdocDropzone.classList.add("drag"); });
+kdocDropzone.addEventListener("dragleave", () => kdocDropzone.classList.remove("drag"));
+kdocDropzone.addEventListener("drop", e => {
+  e.preventDefault(); kdocDropzone.classList.remove("drag");
+  if (e.dataTransfer.files.length) kdocUpload(e.dataTransfer.files);
+});
+kdocFileInput.addEventListener("change", () => {
+  if (kdocFileInput.files.length) kdocUpload(kdocFileInput.files);
+});
+
+async function kdocUpload(fileList) {
+  const list = Array.from(fileList);
+  if (!list.length) return;
+  kdocUploadResult.innerHTML = `<div class="card" style="background:var(--info-soft);">⏳ Upload + OCR läuft … ${list.length} Datei(en).<br><small>OCR-Verarbeitung braucht ca. 5-15 Sekunden pro Datei.</small></div>`;
+  const fd = new FormData();
+  for (const f of list) fd.append("files", f);
+  try {
+    const res = await fetch(API + "/documents/upload", {
+      method: "POST", headers: {"X-Org-Slug": ORG}, body: fd,
+    });
+    const data = await res.json();
+    let html = `<div class="card" style="background:var(--accent-soft);">
+      <strong>${data.results.filter(r => r.ok).length} importiert</strong>`;
+    const dups = data.results.filter(r => r.duplicate).length;
+    if (dups) html += `, ${dups} Duplikate übersprungen`;
+    html += `</div>`;
+    if (data.results.length) {
+      html += `<ul class="upload-list" style="margin-top:8px; padding:0; list-style:none;">`;
+      data.results.forEach(r => {
+        const icon = r.ok ? "✓" : (r.duplicate ? "⊘" : "✗");
+        const meta = r.ok
+          ? `<span style="color:var(--ink-mute); font-size:11px;"> · Typ: <strong>${r.document_type}</strong> · ${r.fields_extracted} Felder · ${r.ocr_chars} OCR-Zeichen</span>`
+          : (r.error ? ` — ${r.error}` : "");
+        html += `<li style="padding:4px 0; border-bottom:1px solid var(--line);">${icon} ${escapeHtml(r.filename || '?')}${meta}</li>`;
+      });
+      html += `</ul>`;
+    }
+    kdocUploadResult.innerHTML = html;
+    await loadKitaDocs();
+  } catch (e) {
+    kdocUploadResult.innerHTML = `<div class="card" style="background:var(--alert-soft); color:var(--alert);">Fehler: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+const KDOC_TYPE_LABELS = {
+  anmeldevertrag: "📄 Anmeldevertrag",
+  krankenstand: "🤒 Krankenstand",
+  dienstplan: "📅 Dienstplan",
+  foerderbescheid: "💶 Förderbescheid",
+  mitarbeitervertrag: "👥 Mitarbeiter-Vertrag",
+  unknown: "❓ Nicht erkannt",
+};
+const KDOC_STATUS_LABELS = {
+  pending: "ausstehend", reviewed: "geprüft",
+  applied: "angewendet", archived: "archiviert",
+};
+
+async function loadKitaDocs() {
+  const filterType = document.getElementById("kdoc-filter-type").value;
+  let path = "/documents?limit=100";
+  if (filterType) path += `&document_type=${filterType}`;
+  const data = await api(path);
+  const tbody = document.getElementById("kdoc-tbody");
+  if (!data.documents?.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="padding:24px; text-align:center; color:var(--ink-mute)">Noch keine Dokumente.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.documents.map(d => `<tr data-id="${d.id}">
+    <td>${fmtDate(d.created_at)}</td>
+    <td><a href="${API}/documents/${d.id}/file" target="_blank" style="color:var(--accent); text-decoration:none;" title="${escapeHtml(d.file_name||'')}">📎 ${escapeHtml((d.file_name || '?').slice(0, 35))}</a></td>
+    <td>${KDOC_TYPE_LABELS[d.document_type] || d.document_type}</td>
+    <td>${d.field_count} Felder</td>
+    <td>${d.ocr_chars} Zeichen</td>
+    <td><span class="pill ${d.status === 'applied' ? 'green' : d.status === 'pending' ? 'yellow' : 'red'}">${KDOC_STATUS_LABELS[d.status] || d.status}</span></td>
+    <td>
+      <button class="btn ghost kdoc-detail" style="padding:3px 8px;">Details</button>
+      <button class="btn ghost kdoc-del" style="padding:3px 8px; color:var(--alert);">×</button>
+    </td>
+  </tr>`).join("");
+
+  tbody.querySelectorAll(".kdoc-del").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const id = e.target.closest("tr").dataset.id;
+      if (!confirm("Dokument löschen?")) return;
+      await api(`/documents/${id}`, { method: "DELETE" });
+      await loadKitaDocs();
+    });
+  });
+  tbody.querySelectorAll(".kdoc-detail").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      const id = e.target.closest("tr").dataset.id;
+      await showKdocDetail(id);
+    });
+  });
+}
+
+async function showKdocDetail(id) {
+  const detail = await api(`/documents/${id}`);
+  const card = document.getElementById("kdoc-detail-card");
+  const content = document.getElementById("kdoc-detail-content");
+  card.style.display = "block";
+
+  let html = `<div style="margin-bottom:12px;">
+    <strong>Datei:</strong> <a href="${API}/documents/${id}/file" target="_blank">${escapeHtml(detail.document.file_name)}</a> ·
+    <strong>Typ:</strong> ${KDOC_TYPE_LABELS[detail.document.document_type] || detail.document.document_type} ·
+    <strong>Status:</strong> ${KDOC_STATUS_LABELS[detail.document.status]}
+  </div>`;
+
+  // Felder mit Inline-Edit
+  if (detail.fields.length) {
+    html += `<table class="list" style="margin-bottom:16px;"><thead><tr><th>Feld</th><th>Wert</th><th>Confidence</th><th></th></tr></thead><tbody>`;
+    detail.fields.forEach(f => {
+      const conf = f.confidence != null ? (f.confidence * 100).toFixed(0) + '%' : '—';
+      html += `<tr>
+        <td><strong>${escapeHtml(f.field_key)}</strong></td>
+        <td><input type="text" data-doc="${id}" data-key="${escapeHtml(f.field_key)}" value="${escapeHtml(f.field_value || '')}" class="kfield-edit" style="width:100%; padding:4px;" /></td>
+        <td>${conf}${f.is_user_edited ? ' ✎' : ''}</td>
+        <td></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  } else {
+    html += `<div style="color:var(--ink-mute); font-style:italic; margin-bottom:16px;">Keine Felder extrahiert. Roher OCR-Text unten.</div>`;
+  }
+
+  // Apply-Button für Anmeldeverträge
+  if (detail.document.document_type === "anmeldevertrag" && detail.document.status === "pending") {
+    const groupOpts = STATE.groups.map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join("");
+    html += `<div class="card" style="background:var(--accent-soft);">
+      <strong>📌 In KITA-Belegung übernehmen</strong>
+      <div style="display:grid; grid-template-columns: 1fr 110px 130px; gap:8px; margin-top:8px; align-items:center;">
+        <select id="kdoc-target-group" style="padding:6px;">${groupOpts || '<option>(erst Gruppe anlegen)</option>'}</select>
+        <input type="number" id="kdoc-target-hours" placeholder="h/Woche" value="25" step="0.5" style="padding:6px;" />
+        <button class="btn primary" id="kdoc-apply-btn" data-doc="${id}">Übernehmen</button>
+      </div>
+    </div>`;
+  }
+
+  // OCR-Roh-Text
+  html += `<details style="margin-top:16px;">
+    <summary style="cursor:pointer; font-weight:600; padding:8px;">OCR-Text anzeigen (${(detail.document.raw_text || '').length} Zeichen)</summary>
+    <pre style="background:#fafaf8; padding:12px; border:1px solid var(--line); border-radius:6px; font-size:11px; max-height:400px; overflow:auto; white-space:pre-wrap;">${escapeHtml(detail.document.raw_text || '— kein Text extrahiert —')}</pre>
+  </details>`;
+
+  content.innerHTML = html;
+
+  // Inline-Edit Handler
+  content.querySelectorAll(".kfield-edit").forEach(inp => {
+    inp.addEventListener("change", async (e) => {
+      const docId = e.target.dataset.doc;
+      const key = e.target.dataset.key;
+      const val = e.target.value;
+      try {
+        await api(`/documents/${docId}/fields`, {
+          method: "PATCH",
+          body: JSON.stringify({ field_key: key, field_value: val }),
+        });
+        e.target.style.background = "var(--accent-soft)";
+        setTimeout(() => e.target.style.background = "", 800);
+      } catch (err) { alert("Fehler: " + err.message); }
+    });
+  });
+
+  // Apply-Handler
+  const applyBtn = document.getElementById("kdoc-apply-btn");
+  if (applyBtn) {
+    applyBtn.addEventListener("click", async (e) => {
+      const docId = e.target.dataset.doc;
+      const groupId = document.getElementById("kdoc-target-group").value;
+      const hours = parseFloat(document.getElementById("kdoc-target-hours").value) || 25;
+      if (!groupId) { alert("Gruppe wählen"); return; }
+      try {
+        const res = await api(`/documents/${docId}/apply`, {
+          method: "POST",
+          body: JSON.stringify({ group_id: groupId, booked_hours_per_week: hours }),
+        });
+        alert(`Kind angelegt — Enrollment-ID: ${res.enrollment_id}`);
+        await loadKitaDocs();
+        await loadOverview();
+        card.style.display = "none";
+      } catch (err) { alert("Fehler: " + err.message); }
+    });
+  }
+}
+
+document.getElementById("kdoc-reload").addEventListener("click", loadKitaDocs);
+document.getElementById("kdoc-filter-type").addEventListener("change", loadKitaDocs);
+
+// =============================================================
+// REGELWERK
+// =============================================================
+async function loadRulesets() {
+  try {
+    const data = await api("/rulesets");
+    STATE.rulesets = data.rulesets || [];
+    let html = "";
+    for (const rs of STATE.rulesets) {
+      const det = await api(`/rulesets/${rs.id}/details`);
+      html += `<div style="margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line);">
+        <h3 style="font-size:14px; margin:0 0 4px;">${escapeHtml(rs.name)}
+          <span class="pill ${rs.level === 'land' ? 'green' : 'yellow'}" style="margin-left:8px;">${rs.level}</span>
+        </h3>
+        <div style="font-size:11px; color:var(--ink-mute); margin-bottom:8px;">
+          Gültig ab ${fmtDate(rs.valid_from)} · ${escapeHtml(rs.jurisdiction)} ·
+          ${rs.source_url ? `<a href="${rs.source_url}" target="_blank">Quelle</a>` : ''}
+        </div>`;
+      if (det.personnel_ratios?.length) {
+        html += `<table class="list"><thead><tr>
+          <th>Gruppentyp</th><th>Kinder max</th><th>FTE Soll</th><th>Päd. min %</th><th>Vorbereitung h/Wo</th>
+        </tr></thead><tbody>`;
+        for (const r of det.personnel_ratios) {
+          html += `<tr>
+            <td><strong>${TYPE_LABELS[r.group_type] || r.group_type}</strong>${r.subtype ? ` <small>(${r.subtype})</small>` : ''}</td>
+            <td>${r.children_max}</td>
+            <td><strong>${r.fte_required.toFixed(2)}</strong></td>
+            <td>${r.qualification.paedagoge_min_pct}%</td>
+            <td>${r.preparation_hours_per_week_min}h</td>
+          </tr>`;
+        }
+        html += `</tbody></table>`;
+      }
+      if (det.funding_rates?.length) {
+        html += `<div style="margin-top:8px; font-size:12px;"><strong>Förder-Tagsätze:</strong> `;
+        html += det.funding_rates.map(f => `${TYPE_LABELS[f.group_type] || f.group_type}: ${fmtMoney(f.rate_per_day)}/Tag`).join(" · ");
+        html += `</div>`;
+      }
+      html += `</div>`;
+    }
+    document.getElementById("rs-content").innerHTML = html;
+  } catch (e) { console.warn(e); }
+}
+
+// =============================================================
+// BOOT
+// =============================================================
+// =============================================================
+// ST%-RECHNER (Vorarlberg KKG)
+// =============================================================
+const WEEKDAYS_LABEL = {
+  montag:"Mo", dienstag:"Di", mittwoch:"Mi", donnerstag:"Do", freitag:"Fr"
+};
+const STC_HALFDAYS = [
+  ["montag","vm","Montag VM"], ["montag","nm","Montag NM"],
+  ["dienstag","vm","Dienstag VM"], ["dienstag","nm","Dienstag NM"],
+  ["mittwoch","vm","Mittwoch VM"], ["mittwoch","nm","Mittwoch NM"],
+  ["donnerstag","vm","Donnerstag VM"], ["donnerstag","nm","Donnerstag NM"],
+  ["freitag","vm","Freitag VM"], ["freitag","nm","Freitag NM"],
+];
+
+function buildStcalcTable() {
+  const tbody = document.getElementById("stc-halfday-tbody");
+  tbody.innerHTML = STC_HALFDAYS.map(([wd, hd, label]) => {
+    const key = `${wd}_${hd}`;
+    return `<tr data-key="${key}">
+      <td><strong>${label}</strong></td>
+      <td><input type="number" class="stc-in" data-field="oz" data-key="${key}" placeholder="0" step="0.25" min="0" max="8" style="width:70px; padding:4px;" /></td>
+      <td><input type="number" class="stc-in" data-field="n_0_1" data-key="${key}" placeholder="0" min="0" max="20" style="width:60px; padding:4px;" /></td>
+      <td><input type="number" class="stc-in" data-field="n_2" data-key="${key}" placeholder="0" min="0" max="20" style="width:60px; padding:4px;" /></td>
+      <td><input type="number" class="stc-in" data-field="n_3" data-key="${key}" placeholder="0" min="0" max="20" style="width:60px; padding:4px;" /></td>
+      <td><input type="number" class="stc-in" data-field="n_4_plus" data-key="${key}" placeholder="0" min="0" max="20" style="width:60px; padding:4px;" /></td>
+      <td class="amount stc-sum"><strong>0</strong></td>
+      <td class="stc-variant" style="font-size:11px;">—</td>
+      <td class="amount stc-st" style="font-weight:700;"><strong>0,00</strong></td>
+    </tr>`;
+  }).join("");
+
+  tbody.querySelectorAll(".stc-in").forEach(inp => {
+    inp.addEventListener("input", debounce(stcalcRecalc, 300));
+  });
+}
+
+function debounce(fn, ms) {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+function getHalfdayData() {
+  const data = {};
+  document.querySelectorAll("#stc-halfday-tbody .stc-in").forEach(inp => {
+    const key = inp.dataset.key;
+    const field = inp.dataset.field;
+    if (!data[key]) data[key] = {};
+    data[key][field] = parseFloat(inp.value) || 0;
+  });
+  return data;
+}
+
+async function stcalcRecalc() {
+  const groupId = document.getElementById("stc-group").value;
+  const monthInput = document.getElementById("stc-month").value;  // "2026-04"
+  const snapshotMonth = monthInput ? monthInput + "-01" : null;
+  const fb = document.getElementById("stc-funding-basis").value;
+  const gc = parseInt(document.getElementById("stc-group-count").value) || 1;
+  const ikind = parseFloat(document.getElementById("stc-ikind-h").value) || 0;
+
+  const payload = {
+    group_id: groupId || null,
+    snapshot_month: snapshotMonth,
+    halfday_data: getHalfdayData(),
+    funding_basis: fb,
+    group_count: gc,
+    i_kind_hours_per_week: ikind,
+  };
+
+  try {
+    const res = await api("/st-calc/preview", { method: "POST", body: JSON.stringify(payload) });
+
+    // Pro Halbtag-Zeile aktualisieren
+    res.halfday_details.forEach(d => {
+      const tr = document.querySelector(`#stc-halfday-tbody tr[data-key="${d.halfday}"]`);
+      if (!tr) return;
+      tr.querySelector(".stc-sum strong").textContent = d.n_kinder;
+      const variantCell = tr.querySelector(".stc-variant");
+      if (d.variante === "kiga_warning") {
+        variantCell.innerHTML = '<span style="color:var(--alert);">⚠ KIGA</span>';
+      } else if (d.variante === "variante_1") {
+        variantCell.textContent = "V1 (1:3)";
+      } else if (d.variante === "variante_2") {
+        variantCell.textContent = "V2 (1:5)";
+      } else {
+        variantCell.textContent = "—";
+      }
+      tr.querySelector(".stc-st strong").textContent = d.st_pct.toFixed(2);
+      if (d.exceeds_max) {
+        tr.style.background = "var(--warn-soft)";
+      } else if (d.warning) {
+        tr.style.background = "var(--alert-soft)";
+      } else {
+        tr.style.background = "";
+      }
+    });
+
+    // KPIs
+    document.getElementById("stc-r-kd").textContent = res.st_kinderdienst.toFixed(2) + "%";
+    document.getElementById("stc-r-vbz").textContent = res.st_vbz_total.toFixed(2) + "%";
+    document.getElementById("stc-r-ik").textContent = res.st_ikind.toFixed(2) + "%";
+    document.getElementById("stc-r-total").textContent = res.st_total.toFixed(2) + "%";
+
+    // Förder-Aufteilung
+    const fbDiv = document.getElementById("stc-funding-result");
+    if (res.funding_breakdown) {
+      const f = res.funding_breakdown;
+      fbDiv.innerHTML = `<div class="card" style="background:linear-gradient(135deg, var(--accent-soft), var(--info-soft)); margin:0;">
+        <strong>Förder-Aufteilung (Jahr ${f.funding_year} seit Gründung)</strong>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:8px;">
+          <div>
+            <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase;">Land</div>
+            <div style="font-size:22px; font-weight:700; color:var(--accent);">${f.land_pct}% = ${f.land_st.toFixed(2)} ST%</div>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase;">Stadt</div>
+            <div style="font-size:22px; font-weight:700; color:var(--info);">${f.stadt_pct}% = ${f.stadt_st.toFixed(2)} ST%</div>
+          </div>
+        </div>
+      </div>`;
+    } else {
+      fbDiv.innerHTML = `<div style="color:var(--ink-mute); font-style:italic; font-size:13px;">Wähle Gruppe + Monat um die Förder-Aufteilung Land/Stadt zu sehen.</div>`;
+    }
+
+    if (res.has_kiga_warning) {
+      document.getElementById("stc-r-total-card").classList.add("warn");
+    } else {
+      document.getElementById("stc-r-total-card").classList.remove("warn");
+    }
+  } catch (e) {
+    console.warn("stcalc preview", e);
+  }
+}
+
+document.getElementById("stc-funding-basis").addEventListener("change", stcalcRecalc);
+document.getElementById("stc-group-count").addEventListener("input", debounce(stcalcRecalc, 300));
+document.getElementById("stc-ikind-h").addEventListener("input", debounce(stcalcRecalc, 300));
+document.getElementById("stc-group").addEventListener("change", async () => {
+  await stcalcLoadFundingInfo();
+  await stcalcLoadHistory();
+  stcalcRecalc();
+});
+document.getElementById("stc-month").addEventListener("change", () => {
+  stcalcLoadFundingInfo();
+  stcalcRecalc();
+});
+
+async function stcalcLoadFundingInfo() {
+  const gid = document.getElementById("stc-group").value;
+  const m = document.getElementById("stc-month").value;
+  const info = document.getElementById("stc-funding-info");
+  if (!gid || !m) {
+    info.style.display = "none";
+    return;
+  }
+  try {
+    const data = await api(`/st-calc/funding/${gid}?month=${m}-01`);
+    if (data.warning) {
+      info.innerHTML = `⚠ ${data.warning}`;
+      info.style.background = "var(--warn-soft)";
+    } else {
+      info.innerHTML = `<strong>${escapeHtml(data.group_name)}</strong> · gegründet ${fmtDate(data.founded_at)} · <strong>Jahr ${data.funding_year}</strong> der Förderung → Land <strong>${data.land_pct}%</strong> · Stadt <strong>${data.stadt_pct}%</strong>`;
+      info.style.background = "var(--info-soft)";
+    }
+    info.style.display = "block";
+  } catch (e) {
+    info.style.display = "none";
+  }
+}
+
+async function stcalcLoadHistory() {
+  const gid = document.getElementById("stc-group").value;
+  const histDiv = document.getElementById("stc-history");
+  if (!gid) {
+    histDiv.innerHTML = `<div style="color:var(--ink-mute); font-style:italic; padding:10px;">Wähle eine Gruppe oben, um die Historie zu laden.</div>`;
+    return;
+  }
+  try {
+    const data = await api(`/st-calc/${gid}`);
+    if (!data.calculations.length) {
+      histDiv.innerHTML = `<div style="color:var(--ink-mute); font-style:italic; padding:10px;">Noch keine gespeicherten Berechnungen für diese Gruppe.</div>`;
+      return;
+    }
+    histDiv.innerHTML = `<table class="list">
+      <thead><tr><th>Monat</th><th class="amount">Kinderdienst</th><th class="amount">VBZ</th><th class="amount">I-Kind</th><th class="amount">Gesamt</th><th>Förder-Jahr</th><th>Land/Stadt</th></tr></thead>
+      <tbody>${data.calculations.map(c => `<tr>
+        <td>${c.snapshot_month.slice(0,7)}</td>
+        <td class="amount">${c.st_kinderdienst.toFixed(2)}</td>
+        <td class="amount">${c.st_vbz_gruppe.toFixed(2)}</td>
+        <td class="amount">${c.st_ikind.toFixed(2)}</td>
+        <td class="amount"><strong>${c.st_total.toFixed(2)}</strong></td>
+        <td>Jahr ${c.funding_year || '—'}</td>
+        <td>${c.land_pct ? c.land_pct + '/' + c.stadt_pct : '—'}</td>
+      </tr>`).join("")}</tbody></table>`;
+  } catch (e) { console.warn(e); }
+}
+
+async function populateStcalcGroupDropdown() {
+  const sel = document.getElementById("stc-group");
+  // Unified: Legacy + neue Gruppen mit Kinderzahlen
+  try {
+    const data = await api("/groups/unified");
+    const groups = data.groups || [];
+    let html = `<option value="">— Gruppe wählen —</option>`;
+    const newGr = groups.filter(g => g.source === "new");
+    const legacy = groups.filter(g => g.source === "legacy");
+    if (newGr.length) {
+      html += `<optgroup label="Neue Gruppen">`;
+      newGr.forEach(g => {
+        html += `<option value="${g.id}">${escapeHtml(g.name)} (${g.n_children} Kinder)</option>`;
+      });
+      html += `</optgroup>`;
+    }
+    if (legacy.length) {
+      html += `<optgroup label="Legacy-Gruppen (echte Pilot-Daten)">`;
+      legacy.forEach(g => {
+        html += `<option value="${g.id}">${escapeHtml(g.name)} (${g.n_children} Kinder)</option>`;
+      });
+      html += `</optgroup>`;
+    }
+    sel.innerHTML = html;
+    STATE.unified_groups = groups;
+  } catch (e) {
+    console.warn("unified groups", e);
+    sel.innerHTML = `<option value="">— Gruppe wählen —</option>` +
+      (STATE.groups || []).map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join("");
+  }
+}
+
+document.getElementById("stc-auto-fill").addEventListener("click", async () => {
+  const groupId = document.getElementById("stc-group").value;
+  if (!groupId) { alert("Erst eine Gruppe wählen!"); return; }
+  const monthInput = document.getElementById("stc-month").value;
+
+  const btn = document.getElementById("stc-auto-fill");
+  btn.disabled = true;
+  btn.textContent = "🔄 Lädt …";
+
+  try {
+    const fb = document.getElementById("stc-funding-basis").value;
+    const gc = parseInt(document.getElementById("stc-group-count").value) || 1;
+    const res = await fetch(API + `/st-calc/auto/${encodeURIComponent(groupId)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Org-Slug": ORG },
+      body: JSON.stringify({
+        snapshot_month: monthInput ? monthInput + "-01" : null,
+        funding_basis: fb,
+        group_count: gc,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Fehler");
+
+    // Halfday-Tabelle füllen
+    Object.entries(data.halfday_data).forEach(([key, vals]) => {
+      ["oz", "n_0_1", "n_2", "n_3", "n_4_plus"].forEach(field => {
+        const inp = document.querySelector(`#stc-halfday-tbody .stc-in[data-key="${key}"][data-field="${field}"]`);
+        if (inp) inp.value = vals[field] || "";
+      });
+    });
+
+    // Recalc + zeige Ergebnis + Soll/Ist
+    await stcalcRecalc();
+    await renderSollIstComparison(data);
+
+    // Hinweise + Auto-Banner
+    const banner = document.getElementById("stc-funding-info");
+    let html = `<strong>🪄 Auto-Berechnung:</strong> ${data.children_count} Kinder geladen · `;
+    html += `Verteilung: ${data.age_distribution.n_0_1}× 0-1J, ${data.age_distribution.n_2}× 2J, ${data.age_distribution.n_3}× 3J, ${data.age_distribution.n_4_plus}× ≥4J · `;
+    html += `Stichtag ${fmtDate(data.stichtag)} · Vollbelegung 4,5h VM + 4h NM angenommen`;
+    if (data.warnings && data.warnings.length) {
+      html += `<div style="margin-top:8px; padding:8px; background:var(--alert-soft); border-radius:6px;">`;
+      data.warnings.forEach(w => { html += `⚠ ${escapeHtml(w)}<br>`; });
+      html += `</div>`;
+    }
+    banner.innerHTML = html;
+    banner.style.display = "block";
+    banner.style.background = data.warnings?.length ? "var(--warn-soft)" : "var(--accent-soft)";
+  } catch (e) {
+    alert("Fehler: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "🪄 Auto-Daten aus DB";
+  }
+});
+
+async function renderSollIstComparison(autoData) {
+  // Hole Ist-ST% des Personals
+  let ist;
+  try {
+    ist = await api("/staff/total-st?funding_basis=" + document.getElementById("stc-funding-basis").value);
+  } catch (e) { return; }
+
+  const soll = autoData.st_total;
+  const ist_total = ist.total_st_pct;
+  const gap = ist_total - soll;
+  const status = gap >= 0 ? "ok" : "alert";
+
+  // Anhängen an Result-Bereich
+  const fbDiv = document.getElementById("stc-funding-result");
+  let extraHtml = `<div class="card" style="background:linear-gradient(135deg, ${gap >= 0 ? '#e8f1ec' : '#f5e1da'}, #fff); margin-top:10px;">
+    <strong>Soll/Ist-Vergleich Personal</strong>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:8px;">
+      <div>
+        <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase;">Soll (KKG-Berechnung)</div>
+        <div style="font-size:20px; font-weight:700;">${soll.toFixed(2)}%</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase;">Ist (${ist.count} aktive)</div>
+        <div style="font-size:20px; font-weight:700;">${ist_total.toFixed(2)}%</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--ink-mute); text-transform:uppercase;">Gap</div>
+        <div style="font-size:20px; font-weight:700; color:${gap >= 0 ? 'var(--accent)' : 'var(--alert)'};">
+          ${gap >= 0 ? '+' : ''}${gap.toFixed(2)}%
+        </div>
+      </div>
+    </div>
+    <details style="margin-top:8px; font-size:12px;">
+      <summary style="cursor:pointer; color:var(--ink-soft);">Mitarbeiter-Detail (${ist.count} Personen, ${ist.total_weekly_hours}h/Wo)</summary>
+      <table class="list" style="margin-top:6px; font-size:11px;">
+        <thead><tr><th>Name</th><th>Rolle</th><th class="amount">h/Wo</th><th class="amount">ST%</th></tr></thead>
+        <tbody>${ist.staff.map(s => `<tr>
+          <td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.role)}</td>
+          <td class="amount">${s.weekly_hours}</td><td class="amount">${s.st_pct.toFixed(2)}</td>
+        </tr>`).join("")}</tbody>
+      </table>
+    </details>
+  </div>`;
+
+  fbDiv.innerHTML += extraHtml;
+}
+
+document.getElementById("stc-save").addEventListener("click", async () => {
+  const groupId = document.getElementById("stc-group").value;
+  const monthInput = document.getElementById("stc-month").value;
+  if (!groupId || !monthInput) { alert("Gruppe und Monat wählen"); return; }
+  const payload = {
+    group_id: groupId,
+    snapshot_month: monthInput + "-01",
+    halfday_data: getHalfdayData(),
+    funding_basis: document.getElementById("stc-funding-basis").value,
+    group_count: parseInt(document.getElementById("stc-group-count").value) || 1,
+    i_kind_hours_per_week: parseFloat(document.getElementById("stc-ikind-h").value) || 0,
+  };
+  try {
+    const res = await api("/st-calc/save", { method: "POST", body: JSON.stringify(payload) });
+    alert(`✓ Snapshot gespeichert: ${res.st_total.toFixed(2)}% gesamt für ${res.snapshot_month.slice(0,7)}`);
+    await stcalcLoadHistory();
+  } catch (e) { alert("Fehler: " + e.message); }
+});
+
+document.getElementById("stc-reset").addEventListener("click", () => {
+  document.querySelectorAll("#stc-halfday-tbody .stc-in").forEach(i => i.value = "");
+  stcalcRecalc();
+});
+
+// Default: aktueller Monat
+const stcDefaultMonth = new Date().toISOString().slice(0,7);
+document.getElementById("stc-month").value = stcDefaultMonth;
+
+// Build table on boot
+buildStcalcTable();
+
+// =============================================================
+// MITTEILUNGEN (Trägerin)
+// =============================================================
+const NOTIF_PRIO_LABELS = { urgent: "🚨 Dringend", high: "⚠️ Wichtig", normal: "📩 Normal", low: "💬 Info" };
+const NOTIF_TARGET_LABELS = { all: "Alle Eltern", group: "Gruppe", children: "Einzelkinder", parent: "Einzelne Eltern" };
+
+document.getElementById("notif-target-type").addEventListener("change", (e) => {
+  const sel = document.getElementById("notif-target-id");
+  const type = e.target.value;
+  if (type === "all") { sel.style.display = "none"; return; }
+  sel.style.display = "";
+  if (type === "group") {
+    sel.innerHTML = `<option value="">— Gruppe wählen —</option>` +
+      (STATE.groups || []).map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join("");
+  } else {
+    sel.innerHTML = `<option value="">— ggf. später wählen —</option>`;
+  }
+});
+
+document.getElementById("notif-send").addEventListener("click", async () => {
+  const title = document.getElementById("notif-title").value.trim();
+  const body = document.getElementById("notif-body").value.trim();
+  if (!title || !body) { alert("Betreff und Text sind Pflicht"); return; }
+  const targetType = document.getElementById("notif-target-type").value;
+  const targetId = document.getElementById("notif-target-id").value;
+  const payload = {
+    title, body,
+    target_type: targetType,
+    target_group_id: targetType === "group" ? targetId : null,
+    include_staff: document.getElementById("notif-include-staff").checked,
+    send_via_email: document.getElementById("notif-via-email").checked,
+    priority: document.getElementById("notif-priority").value,
+  };
+  try {
+    const created = await api("/notifications", { method: "POST", body: JSON.stringify(payload) });
+    const sent = await api(`/notifications/${created.id}/send`, { method: "POST" });
+    document.getElementById("notif-result").innerHTML = `
+      <div class="card" style="background:var(--accent-soft);">
+        <strong>✓ Versendet</strong> · ${sent.recipients_total} Empfänger · ${sent.emails_sent} E-Mails gesendet${sent.emails_failed ? ` · ${sent.emails_failed} fehlgeschlagen` : ''}
+      </div>`;
+    document.getElementById("notif-title").value = "";
+    document.getElementById("notif-body").value = "";
+    await loadNotifications();
+  } catch (e) {
+    document.getElementById("notif-result").innerHTML = `<div class="card" style="background:var(--alert-soft);">Fehler: ${escapeHtml(e.message)}</div>`;
+  }
+});
+
+async function loadNotifications() {
+  try {
+    const data = await api("/notifications");
+    const tbody = document.getElementById("notif-tbody");
+    if (!data.notifications?.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:24px; text-align:center; color:var(--ink-mute)">Noch keine Mitteilungen.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.notifications.map(n => `<tr data-id="${n.id}">
+      <td>${fmtDate(n.created_at)}</td>
+      <td><strong>${escapeHtml(n.title)}</strong>${n.priority !== 'normal' ? `<div class="iban">${NOTIF_PRIO_LABELS[n.priority]}</div>` : ''}</td>
+      <td>${NOTIF_TARGET_LABELS[n.target_type] || n.target_type}<br><small style="color:var(--ink-mute)">${n.recipients_sent}/${n.recipients_total} gesendet</small></td>
+      <td><span class="pill ${n.status === 'sent' ? 'green' : 'yellow'}">${n.status}</span></td>
+      <td>
+        <button class="btn ghost notif-detail" style="padding:3px 8px;">Empfänger</button>
+        <button class="btn ghost notif-del" style="padding:3px 8px; color:var(--alert);">×</button>
+      </td>
+    </tr>`).join("");
+    tbody.querySelectorAll(".notif-detail").forEach(btn => {
+      btn.addEventListener("click", async (ev) => {
+        const id = ev.target.closest("tr").dataset.id;
+        const recip = await api(`/notifications/${id}/recipients`);
+        document.getElementById("notif-detail-card").style.display = "block";
+        document.getElementById("notif-detail-content").innerHTML = `
+          <table class="list">
+            <thead><tr><th>Name</th><th>Typ</th><th>E-Mail</th><th>Status</th><th>Versendet</th></tr></thead>
+            <tbody>${recip.recipients.map(r => `<tr>
+              <td>${escapeHtml(r.name || '—')}</td>
+              <td>${r.type}</td>
+              <td><small>${escapeHtml(r.email || '—')}</small></td>
+              <td><span class="pill ${r.status === 'sent' ? 'green' : r.status === 'failed' ? 'red' : 'yellow'}">${r.status}</span></td>
+              <td>${r.sent_at ? fmtDate(r.sent_at) : '—'}</td>
+            </tr>`).join("")}</tbody></table>`;
+      });
+    });
+    tbody.querySelectorAll(".notif-del").forEach(btn => {
+      btn.addEventListener("click", async (ev) => {
+        const id = ev.target.closest("tr").dataset.id;
+        if (!confirm("Mitteilung löschen?")) return;
+        await api(`/notifications/${id}`, { method: "DELETE" });
+        await loadNotifications();
+      });
+    });
+  } catch (e) { console.warn(e); }
+}
+
+document.getElementById("notif-reload").addEventListener("click", loadNotifications);
+
+// =============================================================
+// BOOT
+// =============================================================
+async function loadAll() {
+  await Promise.all([loadOverview(), loadGroups(), loadStaff(), loadRulesets(), loadKitaDocs(), loadNotifications()]);
+}
+document.getElementById("btn-reload").addEventListener("click", loadAll);
+loadAll();
+</script>
+
+</body>
+</html>

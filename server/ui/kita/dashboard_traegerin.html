@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHIKSHA · Trägerin-Dashboard</title>
+
+<!-- Gridstack 10.x -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css">
+<script src="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js"></script>
+
+<!-- SHIKSHA Card-Library -->
+<link rel="stylesheet" href="/accounting/ui/kita/shiksha-cards.css">
+<script src="/accounting/ui/kita/shiksha-cards.js" defer></script>
+</head>
+<body>
+
+<header class="app-top">
+  <div class="app-logo">S</div>
+  <div>
+    <div class="app-title">Trägerin-Dashboard</div>
+    <span class="app-sub" id="kita-name">KITA Krummelus</span>
+  </div>
+  <div class="app-spacer"></div>
+  <button class="app-btn" id="btn-edit">✎ Bearbeiten</button>
+  <button class="app-btn" id="btn-add" style="display:none">+ Karte</button>
+  <button class="app-btn" id="btn-reset" style="display:none" title="Auf Standard-Layout zurücksetzen">↻ Reset</button>
+</header>
+
+<main class="dashboard-wrap">
+  <div class="grid-stack" id="grid"></div>
+</main>
+
+<!-- Card-Picker Modal -->
+<div class="modal-bg" id="picker-bg">
+  <div class="modal">
+    <h2>Neue Karte hinzufügen</h2>
+    <div class="picker-grid" id="picker-grid"></div>
+    <div style="text-align:right; margin-top:18px;">
+      <button class="app-btn" id="picker-cancel">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "/kita/dashboard";
+const $ = id => document.getElementById(id);
+
+// User-ID aus localStorage (oder Default)
+function getUserId() {
+  let uid = localStorage.getItem("shiksha.user_id");
+  if (!uid) {
+    uid = "traegerin-" + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem("shiksha.user_id", uid);
+  }
+  return uid;
+}
+const HDR = { "Content-Type": "application/json", "X-Org-Slug": "kita_pilot", "X-User-Id": getUserId() };
+
+let grid = null;
+let editMode = false;
+let cardCounter = 0;
+
+// =============================================
+// LADEN / SPEICHERN
+// =============================================
+async function loadLayout() {
+  const r = await fetch(`${API}/layout?key=traegerin`, { headers: HDR });
+  const d = await r.json();
+  return d.layout || [];
+}
+
+let saveTimer = null;
+function debouncedSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveLayout, 800);
+}
+
+async function saveLayout() {
+  // Aus Gridstack die aktuellen Positionen einsammeln
+  const items = grid.engine.nodes.map(n => {
+    const el = n.el;
+    return {
+      id: el.dataset.cardId,
+      x: n.x, y: n.y, w: n.w, h: n.h,
+      type: el.dataset.cardType,
+      config: el.dataset.cardConfig ? JSON.parse(el.dataset.cardConfig) : {},
+    };
+  });
+  await fetch(`${API}/layout`, {
+    method: "PUT",
+    headers: HDR,
+    body: JSON.stringify({ key: "traegerin", layout: items, edit_mode: editMode }),
+  });
+  showToast("Gespeichert");
+}
+
+function showToast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+// =============================================
+// CARDS RENDERN (in Gridstack)
+// =============================================
+function addCardToGrid(item) {
+  const def = ShikshaCards.definitions[item.type] || {};
+  const widget = grid.addWidget({
+    x: item.x, y: item.y, w: item.w, h: item.h,
+    id: item.id || ("c" + (++cardCounter)),
+    noResize: !!def.noResize,    // Round-Cards können nicht resized werden
+  });
+  // Card aufbauen
+  const card = ShikshaCards.buildCard(item);
+  if (!card) return;
+  const content = widget.querySelector(".grid-stack-item-content");
+  content.innerHTML = "";
+  content.appendChild(card);
+  widget.dataset.cardId = item.id || ("c" + cardCounter);
+  widget.dataset.cardType = item.type;
+  widget.dataset.cardConfig = JSON.stringify(item.config || {});
+  if (def.noResize) widget.dataset.noResize = "true";
+
+  // Menü-Klick (im Edit-Mode) → Karte entfernen
+  const menu = card.querySelector(".card-menu");
+  if (menu) {
+    menu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (confirm("Karte entfernen?")) {
+        grid.removeWidget(widget);
+        debouncedSave();
+      }
+    });
+  }
+}
+
+// =============================================
+// EDIT-MODE
+// =============================================
+function setEditMode(on) {
+  editMode = on;
+  document.body.classList.toggle("edit-mode", on);
+  grid.enableMove(on);
+  grid.enableResize(on);
+  $("btn-edit").classList.toggle("edit-active", on);
+  $("btn-edit").innerHTML = on ? "✓ Fertig" : "✎ Bearbeiten";
+  $("btn-add").style.display = on ? "" : "none";
+  $("btn-reset").style.display = on ? "" : "none";
+}
+
+$("btn-edit").addEventListener("click", () => setEditMode(!editMode));
+
+$("btn-reset").addEventListener("click", async () => {
+  if (!confirm("Layout auf Standard zurücksetzen?")) return;
+  await fetch(`${API}/layout/reset`, {
+    method: "POST", headers: HDR,
+    body: JSON.stringify({ key: "traegerin" }),
+  });
+  location.reload();
+});
+
+// =============================================
+// CARD-PICKER
+// =============================================
+$("btn-add").addEventListener("click", () => {
+  const grid = $("picker-grid");
+  grid.innerHTML = ShikshaCards.listCards().map(c => `
+    <div class="picker-item" data-card-key="${c.key}">
+      <div class="ico">${c.icon}</div>
+      <div class="name">${c.name}</div>
+      <div class="desc">${c.description || ''}</div>
+      <div class="size">${c.defaultSize.w}×${c.defaultSize.h}</div>
+    </div>
+  `).join("");
+  grid.querySelectorAll(".picker-item").forEach(el => {
+    el.addEventListener("click", () => addCardOfType(el.dataset.cardKey));
+  });
+  $("picker-bg").classList.add("show");
+});
+
+$("picker-cancel").addEventListener("click", () => {
+  $("picker-bg").classList.remove("show");
+});
+
+$("picker-bg").addEventListener("click", e => {
+  if (e.target === $("picker-bg")) $("picker-bg").classList.remove("show");
+});
+
+function addCardOfType(typeKey) {
+  const def = ShikshaCards.definitions[typeKey];
+  if (!def) return;
+  // Default-Config je nach Typ
+  let config = {};
+  if (typeKey === "action-round") {
+    const label = prompt("Beschriftung?", "Neue Aktion");
+    const url = prompt("Ziel-URL?", "/accounting/ui/kita/dashboard");
+    const icon = prompt("Emoji als Icon?", "⚡");
+    if (!label) return;
+    config = { label, url, icon, color: def.accent || "pink" };
+  }
+  cardCounter++;
+  addCardToGrid({
+    id: "c" + cardCounter + "-" + Date.now(),
+    x: 0, y: 999, w: def.defaultSize.w, h: def.defaultSize.h,
+    type: typeKey, config,
+  });
+  $("picker-bg").classList.remove("show");
+  debouncedSave();
+}
+
+// =============================================
+// INIT
+// =============================================
+(async () => {
+  // Auf Card-Library warten
+  await new Promise(res => {
+    if (window.ShikshaCards) return res();
+    const i = setInterval(() => { if (window.ShikshaCards) { clearInterval(i); res(); } }, 30);
+  });
+
+  grid = GridStack.init({
+    column: 12,
+    cellHeight: 80,
+    margin: 8,
+    float: false,                // KEINE Lücken — Cards rücken nach
+    disableOneColumnMode: false,
+    animate: true,
+    handle: ".card",
+    resizable: { handles: "se" },
+  });
+
+  // Layout-Änderungen → debounced speichern + auto-compact
+  grid.on("change added removed", (event, items) => {
+    debouncedSave();
+  });
+
+  // Bei Resize → Card mit neuer Größe neu rendern (Detail-Stufen)
+  grid.on("resizestop", (event, el) => {
+    const node = el.gridstackNode;
+    const card = el.querySelector(".card");
+    if (card && window.ShikshaCards) {
+      ShikshaCards.refreshCard(card, { w: node.w, h: node.h });
+    }
+  });
+
+  const layout = await loadLayout();
+  layout.forEach(item => addCardToGrid(item));
+
+  // Initial: Edit-Mode aus
+  setEditMode(false);
+})();
+</script>
+</body>
+</html>

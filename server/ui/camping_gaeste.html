@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA · Mein Camping</title>
+<style>
+:root {
+  --bg: #f0eee9; --phone-bg: #ffffff;
+  --ink: #1a1a1a; --ink-soft: #55524b; --ink-mute: #8a8780;
+  --line: #ece9e2;
+  --accent: #2d7a5f; --accent-soft: #e8f1ec;
+  --warn-soft: #f5ebd8; --warn: #8a6a2a;
+  --alert-soft: #f5e1da; --alert: #a0391f;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 30px 16px; -webkit-font-smoothing: antialiased; }
+.phone-stage { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.phone { width: 380px; height: 760px; background: #1a1a1a; border-radius: 38px; padding: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.18), 0 6px 12px rgba(0,0,0,0.08); position: relative; }
+.phone-screen { background: var(--phone-bg); border-radius: 30px; height: 100%; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 92px; height: 24px; background: #1a1a1a; border-radius: 0 0 14px 14px; z-index: 100; }
+.status-bar { height: 38px; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.app-header { padding: 12px 22px 16px; }
+.app-greeting { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-mute); }
+.app-title { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin: 4px 0 0; }
+.app-content { flex: 1; overflow-y: auto; padding: 0 18px 100px; }
+
+.hero { background: var(--ink); color: #fff; border-radius: 18px; padding: 22px; margin-bottom: 16px; }
+.hero .when { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.6); }
+.hero .what { font-size: 22px; font-weight: 600; margin: 4px 0 8px; line-height: 1.2; }
+.hero .where { font-size: 13px; color: rgba(255,255,255,0.75); }
+.hero .who { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+.soft-card { background: var(--phone-bg); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; }
+.soft-card .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-mute); }
+.soft-card .val { font-size: 18px; font-weight: 600; margin-top: 4px; }
+.soft-card .sub { font-size: 13px; color: var(--ink-soft); margin-top: 4px; }
+.soft-card.tinted { background: var(--accent-soft); border-color: transparent; }
+.soft-card.tinted .val { color: var(--accent); }
+.soft-card.warn { background: var(--warn-soft); border-color: transparent; }
+.soft-card.warn .val { color: var(--warn); }
+.soft-card.alert { background: var(--alert-soft); border-color: transparent; }
+.soft-card.alert .val { color: var(--alert); }
+
+.row-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
+.row-item:last-child { border-bottom: 0; }
+.row-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fafaf8; font-size: 18px; flex-shrink: 0; }
+.row-text { flex: 1; }
+.row-text .name { font-size: 14px; font-weight: 500; }
+.row-text .meta { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
+
+.tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 76px; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-top: 1px solid var(--line); display: flex; padding-bottom: 14px; z-index: 50; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: transparent; border: 0; cursor: pointer; color: var(--ink-mute); font-size: 11px; font-weight: 500; }
+.tab-item.active { color: var(--ink); }
+.tab-item .dot { width: 22px; height: 22px; border-radius: 50%; background: currentColor; opacity: 0.15; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+.tab-item.active .dot { opacity: 1; color: #fff; background: var(--ink); }
+
+.foto-fab { position: absolute; bottom: 96px; right: 18px; width: 56px; height: 56px; background: var(--ink); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 0; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+.sprache { font-size: 16px; line-height: 1.5; background: #fff8d6; padding: 10px 14px; border-radius: 12px; margin-bottom: 14px; }
+.section-h { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-mute); margin: 18px 0 8px; font-weight: 600; }
+
+.review-card { background: var(--ink); color: #fff; border-radius: 18px; padding: 22px; margin-bottom: 14px; }
+.review-card h3 { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+.review-card p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.75); }
+.review-card .stars { display: flex; gap: 4px; margin-top: 14px; }
+.review-card .star { width: 28px; height: 28px; background: rgba(255,255,255,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+.review-card .star.active { background: #ffd566; color: #1a1a1a; }
+.review-card .actions { display: flex; gap: 8px; margin-top: 16px; }
+.review-card button { font-size: 13px; padding: 8px 16px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; }
+.review-card button.primary { background: #fff; color: var(--ink); }
+.review-card button.skip { background: rgba(255,255,255,0.1); color: #fff; }
+
+.weather-tile { display: flex; gap: 12px; align-items: center; background: var(--accent-soft); padding: 14px; border-radius: 12px; margin-bottom: 12px; }
+.weather-tile .icon { font-size: 32px; }
+.weather-tile .info { flex: 1; }
+.weather-tile .info .when { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+.weather-tile .info .desc { font-size: 14px; color: var(--ink); }
+
+.phone-label { text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-mute); margin-top: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="phone-stage">
+
+<!-- ============================================================ -->
+<!-- PHONE 1 — VOR ANREISE: FAMILIE SCHMIDT (BAYERN, 3. SAISON) -->
+<!-- ============================================================ -->
+<div>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="phone-screen">
+    <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+    <div class="app-header">
+      <div class="app-greeting">Allweglehen Berchtesgaden</div>
+      <h1 class="app-title">Hi Stefan ⛺</h1>
+    </div>
+    <div class="app-content">
+
+      <div class="sprache">
+        Noch 78 Tage bis Anreise. Wir freuen uns — drittes Mal in Folge ist schon ein bisschen Heimat.
+      </div>
+
+      <div class="hero">
+        <div class="when">Anreise · Sonntag 12. Juli</div>
+        <div class="what">Pitch A01 · Komfort</div>
+        <div class="where">110 m² · Bergblick · Strom 16A · Wasser+Abwasser</div>
+        <div class="who">14 Nächte · 4 Personen</div>
+      </div>
+
+      <div class="section-h">Eure Buchung</div>
+      <div class="soft-card tinted">
+        <div class="lbl">Anzahlung erhalten</div>
+        <div class="val">386 €</div>
+        <div class="sub">Restzahlung 899,20 € bis 5. Juli</div>
+      </div>
+
+      <div class="section-h">Service vorbestellen</div>
+      <div class="soft-card">
+        <div class="row-item">
+          <div class="row-icon">🥐</div>
+          <div class="row-text">
+            <div class="name">Frühstücks-Brötchen</div>
+            <div class="meta">am Vortag bis 19 Uhr bestellen</div>
+          </div>
+        </div>
+        <div class="row-item">
+          <div class="row-icon">🚲</div>
+          <div class="row-text">
+            <div class="name">Fahrräder Familie</div>
+            <div class="meta">2× Erw + 2× Kind, 14 Nächte</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-h">Wir wissen noch</div>
+      <div class="soft-card tinted">
+        <div class="lbl">Lukas</div>
+        <div class="val">12 Jahre · Pool ja, Spielplatz immer</div>
+        <div class="sub">Aufsichtsplan im Welcome-Heft</div>
+      </div>
+      <div class="soft-card tinted">
+        <div class="lbl">Mia</div>
+        <div class="val">9 Jahre · Pool nur 10–12 + 15–18</div>
+        <div class="sub">Aufsicht durch Personal in den Stunden</div>
+      </div>
+
+    </div>
+    <button class="foto-fab" title="Frage stellen">💬</button>
+    <nav class="tab-bar">
+      <button class="tab-item active"><div class="dot">M</div>Mein</button>
+      <button class="tab-item"><div class="dot">S</div>Service</button>
+      <button class="tab-item"><div class="dot">P</div>Platz</button>
+    </nav>
+  </div>
+</div>
+<div class="phone-label">Vor Anreise · Stammgast</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHONE 2 — WÄHREND AUFENTHALT: NL-GAST TIROL -->
+<!-- ============================================================ -->
+<div>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="phone-screen">
+    <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+    <div class="app-header">
+      <div class="app-greeting">Camping Inntalblick · Inntal</div>
+      <h1 class="app-title">Hoi Lotte 🐕</h1>
+    </div>
+    <div class="app-content">
+
+      <div class="weather-tile">
+        <div class="icon">🌧</div>
+        <div class="info">
+          <div class="when">Mittwoch</div>
+          <div class="desc">Dauerregen — Inntal-Tipps für Indoor: Hofer-Glashütte, Tirol-Panorama, Schwimmbad Inn-See.</div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="when">heute · 14:00</div>
+        <div class="what">Hundewiese geöffnet</div>
+        <div class="where">E-Bereich · Anleinen außerhalb!</div>
+        <div class="who">aktuell 3 Hunde da</div>
+      </div>
+
+      <div class="section-h">Eure Pitch-Eigenschaften</div>
+      <div class="soft-card">
+        <div class="row-item">
+          <div class="row-icon">⚡</div>
+          <div class="row-text"><div class="name">Strom 16A</div><div class="meta">heutiger Verbrauch 14,2 kWh</div></div>
+        </div>
+        <div class="row-item">
+          <div class="row-icon">💧</div>
+          <div class="row-text"><div class="name">Wasser & Abwasser</div><div class="meta">funktioniert</div></div>
+        </div>
+        <div class="row-item">
+          <div class="row-icon">🏔</div>
+          <div class="row-text"><div class="name">Karwendel-Blick</div><div class="meta">heute klar nach 16 Uhr</div></div>
+        </div>
+      </div>
+
+      <div class="section-h">Brauchst du was?</div>
+      <div class="soft-card warn">
+        <div class="lbl">Andreas fragt</div>
+        <div class="val">Bruno ist heute morgen rausgelaufen?</div>
+        <div class="sub">Frau Eggenberg von B16 hat sich gemeldet — alles okay bei euch?</div>
+      </div>
+
+      <div class="section-h">Heute</div>
+      <div class="soft-card">
+        <div class="row-item">
+          <div class="row-icon">🥐</div>
+          <div class="row-text"><div class="name">Brötchen vorbestellen</div><div class="meta">bis 19 Uhr für morgen</div></div>
+        </div>
+        <div class="row-item">
+          <div class="row-icon">🚴</div>
+          <div class="row-text"><div class="name">Rad-Werkstatt offen</div><div class="meta">kleine Reparaturen kostenlos</div></div>
+        </div>
+        <div class="row-item">
+          <div class="row-icon">🍝</div>
+          <div class="row-text"><div class="name">Restaurant Tagesteller</div><div class="meta">Spätzle mit Pilzen — 12 €</div></div>
+        </div>
+      </div>
+
+    </div>
+    <button class="foto-fab" title="Frage stellen">💬</button>
+    <nav class="tab-bar">
+      <button class="tab-item active"><div class="dot">H</div>Heute</button>
+      <button class="tab-item"><div class="dot">S</div>Service</button>
+      <button class="tab-item"><div class="dot">P</div>Platz</button>
+    </nav>
+  </div>
+</div>
+<div class="phone-label">Während · Hund + Wetter</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHONE 3 — NACH ABREISE: BEWERTUNGS-BITTE (review_required) -->
+<!-- ============================================================ -->
+<div>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="phone-screen">
+    <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+    <div class="app-header">
+      <div class="app-greeting">Allweglehen Berchtesgaden</div>
+      <h1 class="app-title">Hi Klaus 👋</h1>
+    </div>
+    <div class="app-content">
+
+      <div class="sprache">
+        Schön war's. Vielleicht magst du uns sagen wie's war — das hilft, ohne dass wir nerven.
+      </div>
+
+      <div class="review-card">
+        <h3>Wie war's bei uns, Klaus?</h3>
+        <p>Aufenthalt 20.–30. Mai · Pitch A03</p>
+        <div class="stars">
+          <span class="star active">★</span>
+          <span class="star active">★</span>
+          <span class="star active">★</span>
+          <span class="star active">★</span>
+          <span class="star active">★</span>
+        </div>
+        <div class="actions">
+          <button class="primary">Sag uns kurz was</button>
+          <button class="skip">nicht jetzt</button>
+        </div>
+      </div>
+
+      <div class="section-h">Wir wissen</div>
+      <div class="soft-card tinted">
+        <div class="lbl">Du kommst seit 2018</div>
+        <div class="val">Achtes Mal</div>
+        <div class="sub">Immer im Mai · Inge & Klaus · Pitch A03 fast immer</div>
+      </div>
+
+      <div class="section-h">Schon eine Idee fürs nächste Jahr?</div>
+      <div class="soft-card">
+        <div class="row-item">
+          <div class="row-icon">📅</div>
+          <div class="row-text"><div class="name">Mai 2027 — Pitch A03 reservieren?</div><div class="meta">5 % Stamm­gast-Rabatt enthalten</div></div>
+        </div>
+      </div>
+
+      <div class="section-h">Das wollten wir noch sagen</div>
+      <div class="soft-card warn">
+        <div class="lbl">Endrechnung</div>
+        <div class="val">580 € bezahlt</div>
+        <div class="sub">Sauber abgereist · Pool-Schlüssel zurück · Strom 12 kWh</div>
+      </div>
+
+    </div>
+    <nav class="tab-bar">
+      <button class="tab-item active"><div class="dot">B</div>Bewertung</button>
+      <button class="tab-item"><div class="dot">N</div>Nächstes Jahr</button>
+      <button class="tab-item"><div class="dot">A</div>Archiv</button>
+    </nav>
+  </div>
+</div>
+<div class="phone-label">Nach Abreise · Bewertung</div>
+</div>
+
+</div>
+
+<div style="text-align: center; margin-top: 30px; font-size: 11px; color: #999; max-width: 600px; margin-left: auto; margin-right: auto;">
+  CAMPING.EDITION · Gäste-App · Drei Sichten der Guest-Journey: vor Anreise (Stammgast Familie), während Aufenthalt (Hund + Wetter, Tirol), nach Abreise (Bewertung, review_required = nie automatisch versendet)<br>
+  25.04.2026 · alle Aktionen sind Vorschläge
+</div>
+
+</body>
+</html>

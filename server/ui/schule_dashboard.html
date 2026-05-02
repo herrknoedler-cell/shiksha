@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SHIKSHA · SCHULE — SchoolState</title>
+<style>
+:root {
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --line: #e6e4de;
+  --line-strong: #c6c2b8;
+  --ink: #1a1a1a;
+  --ink-soft: #55524b;
+  --ink-mute: #7a7a74;
+  --accent: #2d7a5f;
+  --accent-soft: #e8f1ec;
+  --warn: #8a6a2a;
+  --warn-soft: #f5ebd8;
+  --alert: #a0391f;
+  --alert-soft: #f5e1da;
+  --info: #4a6a80;
+  --info-soft: #e8eef1;
+  --mono: "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+/* HEADER */
+header.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.brand {
+  display: flex;
+  flex-direction: column;
+}
+.eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+}
+h1 {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 4px 0 0;
+  letter-spacing: -0.01em;
+}
+.lede {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 4px 0 0;
+  max-width: 560px;
+}
+.school-switcher {
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px;
+  background: #fafaf8;
+}
+.school-switcher button {
+  padding: 7px 12px;
+  font-size: 13px;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.school-switcher button.active {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* SCHOOL-STATE: SUMMARY (Sprache) */
+.state-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 12px;
+  padding: 22px 26px;
+  margin-bottom: 20px;
+}
+.state-card.alert { border-left-color: var(--alert); }
+.state-card .when {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+}
+.state-card .summary {
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 6px 0 0;
+}
+.state-card .meta {
+  font-size: 11px;
+  color: var(--ink-mute);
+  margin-top: 10px;
+}
+
+/* SECTION HEADERS */
+section { margin-top: 28px; }
+section h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+section .h-sub {
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin: 0 0 12px;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.col { display: flex; flex-direction: column; gap: 16px; }
+
+/* SIGNALS */
+.signal-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.signal-card-header {
+  padding: 14px 18px 8px;
+  border-bottom: 1px dashed var(--line);
+}
+.signal {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.signal:last-child { border-bottom: 0; }
+.sev {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.sev.high { background: var(--alert-soft); color: var(--alert); }
+.sev.mid { background: var(--warn-soft); color: var(--warn); }
+.sev.low { background: var(--info-soft); color: var(--info); }
+.sev.info { background: #f0f0ee; color: var(--ink-mute); }
+.signal-text { flex: 1; font-size: 14px; }
+.signal-meta {
+  font-size: 11px;
+  color: var(--ink-mute);
+  margin-top: 3px;
+  font-family: var(--mono);
+}
+.signal-action {
+  font-size: 12px;
+  color: var(--ink);
+  background: #fafaf8;
+  border: 1px solid var(--line);
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* PATTERNS */
+.pattern-list {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.pattern-row {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pattern-row:last-child { border-bottom: 0; }
+.pattern-text { font-size: 14px; }
+.pattern-meta {
+  font-size: 11px;
+  color: var(--ink-mute);
+  font-family: var(--mono);
+}
+.confidence-bar {
+  height: 4px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.confidence-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+/* FOCUS */
+.focus-list {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.focus-row {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.focus-row:last-child { border-bottom: 0; }
+.focus-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  width: 18px;
+}
+.focus-text { flex: 1; font-size: 14px; }
+.focus-text small {
+  display: block;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+}
+.focus-list h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.6);
+  padding: 14px 18px 6px;
+  margin: 0;
+}
+
+/* DRILLDOWNS */
+.drilldown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.drilldown {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.drilldown:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+.drilldown .lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-mute);
+}
+.drilldown .val {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--mono);
+  margin-top: 4px;
+}
+.drilldown .sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.drilldown .trend {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.trend.up { background: var(--accent-soft); color: var(--accent); }
+.trend.down { background: var(--alert-soft); color: var(--alert); }
+.trend.flat { background: #f0f0ee; color: var(--ink-mute); }
+
+/* PANEL SWITCHING */
+.school-panel { display: none; }
+.school-panel.active { display: block; }
+
+footer.bot {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+footer.bot code {
+  font-family: var(--mono);
+  background: #fafaf8;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+  .drilldown-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="brand">
+    <span class="eyebrow">SHIKSHA · SCHULE.EDITION</span>
+    <h1>SchoolState</h1>
+    <p class="lede">Was los ist. Was als nächstes wichtig wäre. Sprache statt Zahlen.</p>
+  </div>
+  <div class="school-switcher" id="switcher">
+    <button class="active" data-school="yoga">Lichtquelle Wien</button>
+    <button data-school="surf">Inselwellen Sylt</button>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<!-- YOGA SCHOOL — Lichtquelle Wien -->
+<!-- ============================================================ -->
+<div class="school-panel active" id="panel-yoga">
+
+<div class="state-card">
+  <div class="when">25. April 2026 · 14:30</div>
+  <p class="summary">Drei Sachen heute: <strong>Werner Hofbauer</strong> zahlt nicht (Mahnung 1 raus), <strong>Klara Voboril</strong> wartet seit drei Tagen auf Anschluss, und <strong>Sarah Lehner</strong> war zwei Wochen nicht da. Sonst ruhig — Mittwoch-Vinyasa läuft seit vier Wochen voll.</p>
+  <div class="meta">2 hohe + 4 mittlere + 3 niedrige Signale · 2 Patterns erkannt · review_required = true</div>
+</div>
+
+<section>
+  <h2>Empfohlener Fokus</h2>
+  <p class="h-sub">Drei Aktionen mit dem höchsten Hebel — alle als Vorschlag, alle bestätigungspflichtig.</p>
+  <div class="focus-list">
+    <h3>Heute</h3>
+    <div class="focus-row">
+      <div class="focus-num">1.</div>
+      <div class="focus-text">
+        Werner Hofbauer freundlich erinnern — €115 offen, Mahnung 1 ist raus.
+        <small>Vorlage liegt schon · 2-Klick-Versand</small>
+      </div>
+    </div>
+    <div class="focus-row">
+      <div class="focus-num">2.</div>
+      <div class="focus-text">
+        Klara Voboril nach Probestunde fragen — bevor sie weg ist.
+        <small>Trial 22.04. · Hatha Morgen · 3 Tage Funkstille</small>
+      </div>
+    </div>
+    <div class="focus-row">
+      <div class="focus-num">3.</div>
+      <div class="focus-text">
+        Sarah Lehner kurz anschreiben — 5 Sessions ungenutzt auf der Karte.
+        <small>Streak gebrochen seit 14 Tagen · sonst Stammkundin</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="grid">
+    <div class="col">
+
+      <h2 style="margin-bottom: 8px;">Offene Signale</h2>
+      <p class="h-sub">Was gerade auffällt. Rot drückt, Gelb informiert, Blau pflegt.</p>
+
+      <div class="signal-card">
+        <div class="signal">
+          <span class="sev high">jetzt</span>
+          <div class="signal-text">
+            Werner Hofbauer Karte ist überfällig.
+            <div class="signal-meta">schule.package.expired_unrenewed · 13 Tage · €115,00</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev high">jetzt</span>
+          <div class="signal-text">
+            ARAG Sport-Versicherung: Mahnung 1 offen, Saisonbeginn ohne Schutz droht.
+            <div class="signal-meta">schule.partnership.payment_overdue · €1.488,93</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">heute</span>
+          <div class="signal-text">
+            Klara hat probiert, wartet seit 3 Tagen.
+            <div class="signal-meta">schule.enrollment.trial_followup_due · Hatha Morgen 22.04.</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">heute</span>
+          <div class="signal-text">
+            Sarah Lehner seit 14 Tagen nicht da.
+            <div class="signal-meta">schule.participation.streak_broken · 5/10 Karte ungenutzt</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">demnächst</span>
+          <div class="signal-text">
+            Yousef Kheir und Hiroki Tanaka — Foto-Einverständnis fehlt noch.
+            <div class="signal-meta">schule.consent_partial · 2 Kinder · für nächsten Sa-Kurs relevant</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">retention</span>
+          <div class="signal-text">
+            Stefan Auer — Karte aus, kein Folgekauf, 56 Tage inaktiv.
+            <div class="signal-meta">schule.retention.at_risk · sonst 2 Jahre dabei</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev low">demnächst</span>
+          <div class="signal-text">
+            Bernd Sailer Monatskarte läuft in 5 Tagen aus.
+            <div class="signal-meta">schule.package.expiring_soon · zuverlässiger Erneuerer</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev low">irgendwann</span>
+          <div class="signal-text">
+            Felix Pranke — Lizenz läuft am 30.08. ab.
+            <div class="signal-meta">schule.instructor.license_expiring · noch 127 Tage</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev info">positiv</span>
+          <div class="signal-text">
+            Workshop Atem &amp; Meditation — 5 von 6 nötigen Anmeldungen.
+            <div class="signal-meta">schule.course.threshold_close · gezielt Stammkundinnen ansprechen?</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col">
+
+      <h2 style="margin-bottom: 8px;">Patterns</h2>
+      <p class="h-sub">Was sich wiederholt — gut zu wissen.</p>
+
+      <div class="pattern-list">
+        <div class="pattern-row">
+          <div class="pattern-text">Mittwoch 18:30 ist seit 4 Wochen voll.</div>
+          <div class="pattern-meta">vinyasa-power · 16/16 plätze · pattern.recurring</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 92%;"></div></div>
+        </div>
+        <div class="pattern-row">
+          <div class="pattern-text">Mittwochs trägt Tom 60% der Stunden.</div>
+          <div class="pattern-meta">instructor.overload_detected · seit 3 Wochen</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 75%;"></div></div>
+        </div>
+        <div class="pattern-row">
+          <div class="pattern-text">Pre-Natal-Kurs: 2 Anmeldungen, 6 Plätze offen.</div>
+          <div class="pattern-meta">course.understaffed_demand · tendenz: erste 4 Wochen unterauslastet</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 60%;"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Drilldowns</h2>
+  <p class="h-sub">Klick öffnet Detailsicht — hier nur Headlines.</p>
+  <div class="drilldown-grid">
+    <div class="drilldown">
+      <div class="lbl">Engagement</div>
+      <div class="val">82%</div>
+      <div class="sub">aktive Schüler diese Woche</div>
+      <div class="trend up">+ 4 ggü. letzte Wo</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Trainer-Last</div>
+      <div class="val">Tom</div>
+      <div class="sub">trägt diese Woche 60%</div>
+      <div class="trend down">Schieflage</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Retention 30d</div>
+      <div class="val">94%</div>
+      <div class="sub">2 weg, 28 dabei geblieben</div>
+      <div class="trend flat">stabil</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Offen Posten</div>
+      <div class="val">€1.604</div>
+      <div class="sub">2 überfällige Rechnungen</div>
+      <div class="trend down">+€115 ggü. Vorwo</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SURF SCHOOL — Inselwellen Sylt -->
+<!-- ============================================================ -->
+<div class="school-panel" id="panel-surf">
+
+<div class="state-card alert">
+  <div class="when">25. April 2026 · 14:30</div>
+  <p class="summary">Sturm morgen — der Mittagskurs muss verschoben werden, drei Schüler warten auf Bescheid. Außerdem läuft die Sport-BHV-Mahnung gegen uns: Saison ohne Schutz darf nicht passieren. Sonst startet das Camp gut.</p>
+  <div class="meta">3 hohe + 3 mittlere + 3 niedrige Signale · review_required = true</div>
+</div>
+
+<section>
+  <h2>Empfohlener Fokus</h2>
+  <p class="h-sub">Drei Aktionen — Wetter zuerst, dann Versicherung, dann Equipment.</p>
+  <div class="focus-list">
+    <h3>Jetzt</h3>
+    <div class="focus-row">
+      <div class="focus-num">1.</div>
+      <div class="focus-text">
+        Verschiebung Mittagskurs an drei Schüler kommunizieren.
+        <small>Vorlage steht · Plan B (Theorie-Block) bereit · Mi 14:00 als Ersatz</small>
+      </div>
+    </div>
+    <div class="focus-row">
+      <div class="focus-num">2.</div>
+      <div class="focus-text">
+        ARAG Sport-Versicherung: Erstrechnung €1.488,93 jetzt überweisen — Saisonstart 1.5.
+        <small>Mahngebühr €5 schon enthalten · Status: kritisch</small>
+      </div>
+    </div>
+    <div class="focus-row">
+      <div class="focus-num">3.</div>
+      <div class="focus-text">
+        Channel Islands Rookie 6'4 zur Reparatur bringen — 12 Tage liegt das Board jetzt.
+        <small>vor erstem fortgeschrittenen Kurs nötig</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="grid">
+    <div class="col">
+
+      <h2 style="margin-bottom: 8px;">Offene Signale</h2>
+      <p class="h-sub">Wetter, Versicherung, Lizenzen, Konsente.</p>
+
+      <div class="signal-card">
+        <div class="signal">
+          <span class="sev high">jetzt</span>
+          <div class="signal-text">
+            Wind 38 kn / Welle 1.6m morgen — über Anfänger-Grenze.
+            <div class="signal-meta">schule.weather.threshold_breach · session_sylt_002 · Buhne 16</div>
+          </div>
+          <button class="signal-action">entscheiden</button>
+        </div>
+        <div class="signal">
+          <span class="sev high">jetzt</span>
+          <div class="signal-text">
+            Drei Schüler (Charlotte, Marc, Laura) warten auf Wetter-Info.
+            <div class="signal-meta">schule.weather.communication_pending</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev high">jetzt</span>
+          <div class="signal-text">
+            ARAG Sport-Versicherung Mahnung 1: €1.488,93 fällig 9. Mai.
+            <div class="signal-meta">schule.partnership.payment_overdue · ohne Schutz keine Saison</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">heute</span>
+          <div class="signal-text">
+            Tom Bechmann: Anwärter-Status läuft am 30.05. ab.
+            <div class="signal-meta">schule.instructor.license_expiring · darf KEINEN Aufbaukurs allein leiten</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">demnächst</span>
+          <div class="signal-text">
+            NL-Kurs morgen — Marieke (NL) zugewiesen für Emma (NL).
+            <div class="signal-meta">schule.weather.go_no_go_decision_due · 8h bis Entscheidung</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev mid">retention</span>
+          <div class="signal-text">
+            Theo Vogel — Foto-Einverständnis fehlt.
+            <div class="signal-meta">schule.consent_partial · für Kinder-Camp morgen wichtig</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev low">demnächst</span>
+          <div class="signal-text">
+            Lena Köpper — gestern Probestunde, Anmeldung offen.
+            <div class="signal-meta">schule.enrollment.trial_followup_due · 1 Tag</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev low">irgendwann</span>
+          <div class="signal-text">
+            Pia Reinhart Lizenz endet am 12.08. (109 Tage).
+            <div class="signal-meta">schule.instructor.license_expiring · ISA Level 1</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+        <div class="signal">
+          <span class="sev info">equipment</span>
+          <div class="signal-text">
+            Channel Islands Rookie 6'4 — Ding hinten links, seit 12 Tagen.
+            <div class="signal-meta">schule.equipment.damaged_unrepaired</div>
+          </div>
+          <button class="signal-action">öffnen</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col">
+
+      <h2 style="margin-bottom: 8px;">Patterns</h2>
+      <p class="h-sub">Was wir aus dieser Saison lernen.</p>
+
+      <div class="pattern-list">
+        <div class="pattern-row">
+          <div class="pattern-text">5-Tage-Camps füllen sich später als gehofft.</div>
+          <div class="pattern-meta">enrollment_curve_late · 2026 ähnlich wie 2025</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 66%;"></div></div>
+        </div>
+        <div class="pattern-row">
+          <div class="pattern-text">NL-Gäste reservieren über Marieke konstant.</div>
+          <div class="pattern-meta">language_match · ~30% der NL-Anmeldungen</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 80%;"></div></div>
+        </div>
+        <div class="pattern-row">
+          <div class="pattern-text">Wetter-Verschiebungen Plan B (Theorie) führt zu mehr Stamm-Bezug.</div>
+          <div class="pattern-meta">retention_pattern · Indikator, kein Beweis</div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width: 55%;"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Drilldowns</h2>
+  <p class="h-sub">Saisonkennzahlen — Bezugswoche und Tendenz.</p>
+  <div class="drilldown-grid">
+    <div class="drilldown">
+      <div class="lbl">Belegung Saison</div>
+      <div class="val">62%</div>
+      <div class="sub">25 von 40 Slots vergeben</div>
+      <div class="trend up">+ 8 ggü. Vorwo</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Wetter-Stop Tage</div>
+      <div class="val">3</div>
+      <div class="sub">verschoben in der Vorsaison</div>
+      <div class="trend flat">erwartbar</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Equipment</div>
+      <div class="val">17/19</div>
+      <div class="sub">Wetsuits einsatzbereit</div>
+      <div class="trend down">2 in Reparatur</div>
+    </div>
+    <div class="drilldown">
+      <div class="lbl">Offen Posten</div>
+      <div class="val">€1.489</div>
+      <div class="sub">ARAG · kritisch</div>
+      <div class="trend down">Saison-blockierend</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer class="bot">
+  Stand: 25.04.2026 · SCHULE.EDITION V1 · SchoolState ist sprachfähig (Summary, Patterns, Recommended Focus) · alle Aktionen <code>review_required=true</code> · Sprache entsteht im Orchestrator (V4-Prinzip 3) · Confidence in Sprache, nie Prozent (V4-Prinzip 14)
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('#switcher button').forEach(b => {
+  b.addEventListener('click', () => {
+    const target = b.dataset.school;
+    document.querySelectorAll('#switcher button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.school-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + target).classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

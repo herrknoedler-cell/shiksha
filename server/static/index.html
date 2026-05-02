@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SHIKSHA</title>
+<meta name="description" content="SHIKSHA — Dein Büro versteht dich.">
+<style>
+  /* ============================================================
+     SHIKSHA Onepage — Apple-style
+     ============================================================ */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:        #ffffff;
+    --bg-soft:   #fafaf9;
+    --bg-dark:   #1d1d1f;
+    --bg-stitch: #0b0b0b;
+
+    --text:       #1d1d1f;
+    --text-soft:  #6e6e73;
+    --text-faint: #a1a1a6;
+    --text-inv:   #f5f5f7;
+
+    --line:       rgba(0,0,0,0.08);
+    --line-soft:  rgba(0,0,0,0.04);
+
+    --a-account:    #6e6e73;
+    --a-calendar:   #3ed6c5;
+    --a-accounting: #ffb347;
+    --a-courses:    #ff3ea5;
+    --a-schedule:   #a78bfa;
+    --a-documents:  #4a8fd4;
+    --a-stitch:     #c8a86e;
+    --a-admin:      #1d1d1f;
+
+    --radius-lg: 28px;
+    --radius-md: 20px;
+    --radius-sm: 12px;
+
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+    --shadow-lift: 0 2px 4px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.10);
+    --shadow-modal: 0 40px 80px rgba(0,0,0,0.28), 0 8px 24px rgba(0,0,0,0.10);
+
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family:
+      -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+      "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    letter-spacing: -0.003em;
+  }
+  body.modal-open { overflow: hidden; }
+
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ============================================================
+     NAV
+     ============================================================ */
+  nav.topnav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px 0;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--line-soft);
+    transition: background .3s var(--ease);
+  }
+  nav.topnav.on-dark {
+    background: rgba(0,0,0,0.55);
+    border-bottom-color: rgba(255,255,255,0.08);
+  }
+  nav.topnav.on-dark .nav-inner,
+  nav.topnav.on-dark .nav-links a { color: var(--text-inv); }
+
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 1200px; margin: 0 auto; padding: 0 32px;
+    color: var(--text);
+    transition: color .3s var(--ease);
+  }
+  .brand {
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .brand-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--a-courses);
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 32px;
+    font-size: 13px; font-weight: 400;
+  }
+  .nav-links a { opacity: .75; transition: opacity .2s var(--ease); }
+  .nav-links a:hover { opacity: 1; }
+  @media (max-width: 680px) { .nav-links { display: none; } }
+
+  /* ============================================================
+     HERO
+     ============================================================ */
+  section.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    color: var(--text-inv);
+    background: #111;
+  }
+  .hero-media { position: absolute; inset: 0; z-index: 0; }
+  .hero-media img { width: 100%; height: 100%; object-fit: cover; opacity: .85; }
+  .hero-media::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 50% at 30% 30%, rgba(255,62,165,0.22), transparent 70%),
+      radial-gradient(50% 40% at 80% 70%, rgba(62,214,197,0.18), transparent 70%),
+      linear-gradient(180deg, #0f0f10 0%, #1a1a1c 100%);
+  }
+  .hero-media::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.55) 100%);
+  }
+
+  .hero-inner {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 1200px;
+    margin: 0 auto;
+    padding: 140px 32px 120px;
+  }
+  .hero-eyebrow {
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--a-calendar);
+    box-shadow: 0 0 0 4px rgba(62,214,197,0.18);
+  }
+  .hero-greeting {
+    font-size: clamp(44px, 7vw, 88px);
+    font-weight: 600; line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px; color: #fff;
+  }
+  .hero-greeting .soft { color: rgba(255,255,255,0.62); font-weight: 400; }
+  .hero-sub {
+    font-size: clamp(18px, 2vw, 22px);
+    font-weight: 400; line-height: 1.45;
+    max-width: 640px;
+    color: rgba(255,255,255,0.82);
+    margin-bottom: 56px;
+  }
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 26px;
+    background: #fff; color: #1d1d1f;
+    border-radius: 999px;
+    font-size: 14px; font-weight: 500;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .hero-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+  .hero-scroll {
+    position: absolute; bottom: 32px; left: 50%;
+    transform: translateX(-50%); z-index: 2;
+    font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .hero-scroll .line {
+    width: 1px; height: 28px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0));
+  }
+
+  /* ============================================================
+     BLOCKS
+     ============================================================ */
+  section.block { padding: 140px 0; }
+  section.block.soft { background: var(--bg-soft); }
+  .block-head { max-width: 760px; margin: 0 auto 80px; text-align: center; }
+  .block-eyebrow {
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--text-faint); margin-bottom: 20px;
+  }
+  .block-title {
+    font-size: clamp(32px, 4.5vw, 52px);
+    font-weight: 600; line-height: 1.1;
+    letter-spacing: -0.025em; margin-bottom: 20px;
+  }
+  .block-lede {
+    font-size: clamp(17px, 1.6vw, 20px);
+    line-height: 1.55; color: var(--text-soft);
+  }
+
+  /* ============================================================
+     MODULE CARDS
+     ============================================================ */
+  .modules {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (max-width: 980px) { .modules { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .modules { grid-template-columns: 1fr; } }
+
+  .card {
+    position: relative;
+    background: #fff;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+    display: flex; flex-direction: column;
+    cursor: pointer;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
+
+  .card-media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #f0f0f0;
+  }
+  .card-media img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .7s var(--ease);
+  }
+  .card:hover .card-media img { transform: scale(1.03); }
+  .card-media[data-accent="account"]    { background: linear-gradient(135deg, #e5e5e7 0%, #f5f5f7 100%); }
+  .card-media[data-accent="calendar"]   { background: linear-gradient(135deg, #b8efe8 0%, #e7faf7 100%); }
+  .card-media[data-accent="accounting"] { background: linear-gradient(135deg, #ffd9a8 0%, #fff2e1 100%); }
+  .card-media[data-accent="courses"]    { background: linear-gradient(135deg, #ffc2dd 0%, #ffe6f0 100%); }
+  .card-media[data-accent="schedule"]   { background: linear-gradient(135deg, #d5c8ff 0%, #ece7ff 100%); }
+  .card-media[data-accent="documents"]  { background: linear-gradient(135deg, #c2d8f2 0%, #e4eefa 100%); }
+
+  .card-body {
+    padding: 28px 28px 32px;
+    flex: 1;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .card-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .card-tag .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .card[data-accent="account"]    .card-tag .dot { background: var(--a-account); }
+  .card[data-accent="calendar"]   .card-tag .dot { background: var(--a-calendar); }
+  .card[data-accent="accounting"] .card-tag .dot { background: var(--a-accounting); }
+  .card[data-accent="courses"]    .card-tag .dot { background: var(--a-courses); }
+  .card[data-accent="schedule"]   .card-tag .dot { background: var(--a-schedule); }
+  .card[data-accent="documents"]  .card-tag .dot { background: var(--a-documents); }
+
+  .card-title {
+    font-size: 24px; font-weight: 600;
+    line-height: 1.2; letter-spacing: -0.015em;
+    color: var(--text);
+  }
+  .card-desc {
+    font-size: 15px; line-height: 1.55;
+    color: var(--text-soft);
+  }
+  .card-link {
+    margin-top: auto; padding-top: 16px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text);
+    display: inline-flex; align-items: center; gap: 6px;
+    opacity: .8; transition: opacity .2s var(--ease);
+  }
+  .card:hover .card-link { opacity: 1; }
+
+  /* ============================================================
+     MODAL — Detail-Panel pro Modul
+     ============================================================ */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(20,20,22,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s var(--ease);
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -48%) scale(.98);
+    width: min(94vw, 1000px);
+    max-height: 88vh;
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    z-index: 201;
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s var(--ease), transform .35s var(--ease);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .modal.open {
+    opacity: 1; pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .modal-header {
+    padding: 44px 48px 28px;
+    border-bottom: 1px solid var(--line-soft);
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--text-soft);
+    transition: background .2s var(--ease), color .2s var(--ease);
+  }
+  .modal-close:hover { background: #ececec; color: var(--text); }
+
+  .modal-eyebrow {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--text-faint);
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .modal-eyebrow .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text-faint);
+  }
+  .modal-title {
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 600; line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+  .modal-lede {
+    font-size: 17px; line-height: 1.5;
+    color: var(--text-soft);
+    margin-top: 12px;
+    max-width: 640px;
+  }
+
+  .modal-body {
+    padding: 32px 48px 44px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 48px;
+  }
+  @media (max-width: 780px) {
+    .modal-header { padding: 32px 24px 20px; }
+    .modal-body { grid-template-columns: 1fr; gap: 32px; padding: 24px 24px 32px; }
+    .modal { width: 96vw; max-height: 92vh; border-radius: 20px; }
+  }
+
+  .modal-body h4 {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 18px;
+  }
+
+  .col-main p {
+    font-size: 16px; line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .col-main p + p { color: var(--text-soft); }
+
+  /* Field rows — Apple Settings Look */
+  .fields { margin-bottom: 32px; }
+  .field-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 14px;
+    gap: 16px;
+  }
+  .field-row:last-child { border-bottom: 0; }
+  .field-row .label { color: var(--text); flex-shrink: 0; }
+  .field-row .value {
+    color: var(--text-faint);
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .field-row .value.chip {
+    font-family: inherit; font-size: 12px;
+    background: var(--bg-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+    color: var(--text-soft);
+  }
+
+  /* Views grid */
+  .views { margin-bottom: 32px; }
+  .views-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .view-tile {
+    background: var(--bg-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
+    padding: 14px;
+    aspect-ratio: 5/4;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .view-sketch {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint);
+  }
+  .view-sketch svg { width: 100%; height: 100%; }
+  .view-label {
+    font-size: 12px; font-weight: 500;
+    color: var(--text);
+  }
+
+  /* Admin list */
+  .admin-list { list-style: none; }
+  .admin-list li {
+    padding: 12px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: center; gap: 10px;
+    color: var(--text);
+  }
+  .admin-list li:last-child { border-bottom: 0; }
+  .admin-list li::before {
+    content: "";
+    width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor; opacity: .4;
+    flex-shrink: 0;
+  }
+
+  /* Modal accent dot colors */
+  .modal[data-accent="account"]    .modal-eyebrow .dot { background: var(--a-account); }
+  .modal[data-accent="calendar"]   .modal-eyebrow .dot { background: var(--a-calendar); }
+  .modal[data-accent="accounting"] .modal-eyebrow .dot { background: var(--a-accounting); }
+  .modal[data-accent="courses"]    .modal-eyebrow .dot { background: var(--a-courses); }
+  .modal[data-accent="schedule"]   .modal-eyebrow .dot { background: var(--a-schedule); }
+  .modal[data-accent="documents"]  .modal-eyebrow .dot { background: var(--a-documents); }
+
+  /* ============================================================
+     STITCH SECTION
+     ============================================================ */
+  section.stitch {
+    background: var(--bg-stitch);
+    color: var(--text-inv);
+    padding: 140px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .stitch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  @media (max-width: 900px) { .stitch-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .stitch-eyebrow {
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--a-stitch);
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .stitch-eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--a-stitch);
+    box-shadow: 0 0 0 4px rgba(200,168,110,0.15);
+  }
+  .stitch-title {
+    font-size: clamp(36px, 4.5vw, 56px);
+    font-weight: 600; line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 28px;
+  }
+  .stitch-copy {
+    font-size: 17px; line-height: 1.6;
+    color: rgba(245,245,247,0.75);
+    margin-bottom: 32px;
+    max-width: 520px;
+  }
+  .stitch-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px; }
+  .stitch-chip {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid rgba(200,168,110,0.25);
+    border-radius: 999px;
+    color: rgba(200,168,110,0.9);
+  }
+  .stitch-chip.live {
+    background: rgba(62,214,197,0.08);
+    border-color: rgba(62,214,197,0.25);
+    color: var(--a-calendar);
+  }
+  .stitch-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 26px;
+    border: 1px solid rgba(200,168,110,0.35);
+    border-radius: 999px;
+    color: var(--a-stitch);
+    font-size: 14px; font-weight: 500;
+    transition: background .25s var(--ease);
+  }
+  .stitch-cta:hover { background: rgba(200,168,110,0.08); }
+  .stitch-media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .stitch-media::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 60% at 50% 50%, rgba(200,168,110,0.12), transparent 70%),
+      linear-gradient(135deg, #151515 0%, #0b0b0b 100%);
+    z-index: 0;
+  }
+  .stitch-media img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
+
+  /* ============================================================
+     ADMIN DASHBOARD
+     ============================================================ */
+  section.admin {
+    padding: 140px 0;
+    background: var(--bg-soft);
+  }
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+  @media (max-width: 900px) { .admin-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .admin-grid { grid-template-columns: 1fr; } }
+
+  .admin-panel {
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 28px 28px 24px;
+    border: 1px solid var(--line-soft);
+    min-height: 180px;
+    display: flex; flex-direction: column;
+  }
+  .admin-panel h3 {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 18px;
+  }
+  .admin-panel .big {
+    font-size: 34px; font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .admin-panel .sub { font-size: 13px; color: var(--text-soft); margin-bottom: 14px; }
+  .admin-panel .rows { margin-top: auto; font-size: 13px; }
+  .admin-panel .row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0;
+    border-top: 1px solid var(--line-soft);
+  }
+  .admin-panel .row .k { color: var(--text-soft); }
+  .admin-panel .row .v { color: var(--text); font-weight: 500; }
+  .admin-panel .dot {
+    display: inline-block;
+    width: 7px; height: 7px; border-radius: 50%;
+    margin-right: 6px; vertical-align: middle;
+  }
+  .dot.green { background: #2ecc71; }
+  .dot.amber { background: #f4b942; }
+  .dot.red   { background: #e05240; }
+
+  /* ============================================================
+     EDITIONS TEASER
+     ============================================================ */
+  section.editions { padding: 140px 0; background: var(--bg); text-align: center; }
+  .editions-title {
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 600; line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+  }
+  .editions-lede {
+    font-size: 18px; line-height: 1.55;
+    color: var(--text-soft);
+    max-width: 620px; margin: 0 auto 48px;
+  }
+  .editions-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .edition-pill {
+    padding: 10px 20px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text); background: #fff;
+  }
+  .edition-pill.coming {
+    color: var(--text-faint);
+    background: var(--bg-soft);
+    border-style: dashed;
+  }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  footer {
+    padding: 56px 0 48px;
+    border-top: 1px solid var(--line-soft);
+    color: var(--text-soft);
+    font-size: 13px;
+  }
+  .foot-inner {
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 1200px; margin: 0 auto; padding: 0 32px;
+    flex-wrap: wrap; gap: 16px;
+  }
+
+  /* ============================================================
+     SCROLL-REVEAL
+     ============================================================ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity .8s var(--ease), transform .8s var(--ease);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav" id="topnav">
+  <div class="nav-inner">
+    <a href="#top" class="brand">
+      <span class="brand-dot"></span>
+      <span>SHIKSHA</span>
+    </a>
+    <div class="nav-links">
+      <a href="#modules">Module</a>
+      <a href="#stitch">Stitch</a>
+      <a href="#admin">Admin</a>
+      <a href="#editions">Editions</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-media">
+    <img src="/images/hero.jpg" alt="" onerror="this.style.display='none'">
+  </div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      <span id="today-label">Heute</span>
+    </div>
+    <h1 class="hero-greeting">
+      <span id="greeting">Guten Tag</span>,<br>
+      <span class="soft">dein Büro ist bereit.</span>
+    </h1>
+    <p class="hero-sub">
+      SHIKSHA liest deine Dokumente, erkennt Entitäten, setzt Termine,
+      verbucht Rechnungen und erklärt jede Entscheidung, die es trifft.
+    </p>
+    <a href="#modules" class="hero-cta">
+      <span>Module ansehen</span>
+      <span>→</span>
+    </a>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <span class="line"></span>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section class="block" id="modules">
+  <div class="container">
+    <div class="block-head reveal">
+      <div class="block-eyebrow">Module</div>
+      <h2 class="block-title">Sechs Räume, ein Gedanke.</h2>
+      <p class="block-lede">
+        Jedes Modul ist eigenständig benutzbar und teilt sich mit den anderen
+        dieselben Entitäten, Dokumente und Entscheidungen.
+      </p>
+    </div>
+    <div class="modules" id="module-grid"><!-- wird per JS aus MODULES gerendert --></div>
+  </div>
+</section>
+
+<!-- STITCH -->
+<section class="stitch" id="stitch">
+  <div class="container">
+    <div class="stitch-grid">
+      <div class="stitch-text reveal">
+        <div class="stitch-eyebrow">
+          <span class="dot"></span>
+          <span>Schwesterprojekt</span>
+        </div>
+        <h2 class="stitch-title">STITCH.ENGINE</h2>
+        <p class="stitch-copy">
+          SVG wird Stickerei. Eine eigenständige Pipeline, die Pfade klassifiziert,
+          Stiche routet, Parameter vergibt und ein validierbares Maschinenmodell baut.
+        </p>
+        <div class="stitch-meta">
+          <span class="stitch-chip live">● Pipeline V4 stable</span>
+          <span class="stitch-chip">V5 pending</span>
+          <span class="stitch-chip">16 Objekte · 31.600 Stiche</span>
+        </div>
+        <a href="https://stitch.tun.zone" class="stitch-cta">
+          <span>Cockpit öffnen</span><span>↗</span>
+        </a>
+      </div>
+      <div class="stitch-media reveal">
+        <img src="/images/stitch-preview.jpg" alt="" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADMIN DASHBOARD -->
+<section class="admin" id="admin">
+  <div class="container">
+    <div class="block-head reveal">
+      <div class="block-eyebrow">Administration</div>
+      <h2 class="block-title">Eine Übersicht, keine Verwaltung.</h2>
+      <p class="block-lede">
+        Das Admin-Dashboard zeigt den Zustand des Systems, die Nutzung,
+        die aktuelle Edition und die letzten Aktionen — auf einer Seite.
+      </p>
+    </div>
+
+    <div class="admin-grid" id="admin-grid"><!-- wird per JS aus ADMIN gerendert --></div>
+  </div>
+</section>
+
+<!-- EDITIONS -->
+<section class="editions" id="editions">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="editions-title">Editions statt Versionen.</h2>
+      <p class="editions-lede">
+        Eine Edition ist ein in sich geschlossener Zustand — getestet, dokumentiert,
+        rückverfolgbar. Keine Alpha-Beta-Spielwiese.
+      </p>
+      <div class="editions-row">
+        <span class="edition-pill">V5 · Shipped</span>
+        <span class="edition-pill">V6 · Operations-API</span>
+        <span class="edition-pill coming">V7 · First Real Edition</span>
+        <span class="edition-pill coming">V8 · Coming</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-inner">
+    <span>SHIKSHA · 2026</span>
+    <span>shiksha.tun.zone</span>
+  </div>
+</footer>
+
+<!-- MODAL (eine Instanz, wird dynamisch befüllt) -->
+<div class="modal-backdrop" id="modal-backdrop"></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-header">
+    <button class="modal-close" id="modal-close" aria-label="Schließen">✕</button>
+    <div class="modal-eyebrow"><span class="dot"></span><span id="modal-eyebrow"></span></div>
+    <h2 class="modal-title" id="modal-title"></h2>
+    <p class="modal-lede" id="modal-lede"></p>
+  </div>
+  <div class="modal-body">
+    <div class="col-main" id="modal-main"></div>
+    <div class="col-side" id="modal-side"></div>
+  </div>
+</div>
+
+<script>
+/* =================================================================
+ * 📝  MODUL-INHALTE — HIER STEHT DER TEXT, DEN CLAUDE ANPASST
+ * -----------------------------------------------------------------
+ * Änderungswünsche einfach melden, z.B.:
+ *   "Ändere den Intro-Text bei Calendar in …"
+ *   "Füge bei Accounting das Feld Kostenstelle hinzu"
+ *   "Nimm die Ansicht 'Agenda' bei Kalender wieder raus"
+ * Jedes Modul hat: name, accent, lede, paragraphs[], fields[],
+ *                  views[] (optional), admin[]
+ * =================================================================*/
+const MODULES = {
+
+  account: {
+    name: "Account",
+    accent: "account",
+    lede: "Dein Profil, deine Regeln.",
+    paragraphs: [
+      "Wer du bist, was du darfst, welche Edition von SHIKSHA dir zur Verfügung steht — all das liegt im Account.",
+      "Account ist kein Login-Kasten, sondern der Ort, an dem Profil-Daten, Sprachpräferenz, Zeitzone und Kontaktwege zusammenlaufen.",
+      "Rollen steuern Sichtbarkeit: ein Lehrender sieht andere Module als ein Buchhalter."
+    ],
+    fields: [
+      { label: "Name",             value: "Thomas Knödler" },
+      { label: "E-Mail",           value: "thomas@example.com" },
+      { label: "Sprache",          value: "Deutsch", chip: true },
+      { label: "Zeitzone",         value: "Europe/Berlin" },
+      { label: "Rolle",            value: "Owner", chip: true },
+      { label: "Edition",          value: "V5 · Shipped", chip: true },
+      { label: "Zwei-Faktor",      value: "aktiv" }
+    ],
+    views: null,
+    admin: [
+      "Benutzer anlegen und deaktivieren",
+      "Rollen zuweisen und beschränken",
+      "Editions aktivieren oder einfrieren",
+      "API-Tokens erzeugen und widerrufen"
+    ]
+  },
+
+  calendar: {
+    name: "Calendar",
+    accent: "calendar",
+    lede: "Termine, Fristen, Follow-ups — alles an einem Ort.",
+    paragraphs: [
+      "Jeder Zeitpunkt in SHIKSHA wohnt hier: Rechnungs-Fälligkeit, Kundengespräch, Kursstunde, Follow-up-Erinnerung.",
+      "Ereignisse sind immer mit Entitäten verknüpft — Kunde, Lieferant, Kurs, Dokument. Das erlaubt Fragen wie „Was ist bei Lunchbox Gastro im nächsten Monat offen?”",
+      "CRM-Felder (Kontakt, Ergebnis, Follow-up) sind im selben Datensatz, damit aus einem Termin ohne Bruch das nächste To-do entsteht."
+    ],
+    fields: [
+      { label: "Titel",           value: "Erstgespräch Lunchbox Gastro" },
+      { label: "Typ",             value: "Termin", chip: true },
+      { label: "Start",           value: "25.04.2026, 10:30" },
+      { label: "Ende",            value: "25.04.2026, 11:30" },
+      { label: "Ganztägig",       value: "nein" },
+      { label: "Entität",         value: "cust_lunchbox_001" },
+      { label: "Dokument",        value: "RE-2026-041.pdf" },
+      { label: "Erinnerung",      value: "24 h vorher" },
+      { label: "Kontakt",         value: "Anna Weber" },
+      { label: "Outcome",         value: "—", chip: true },
+      { label: "Follow-up am",    value: "02.05.2026" },
+      { label: "Edition",         value: "V5", chip: true }
+    ],
+    views: [
+      { label: "Monat",   sketch: "month" },
+      { label: "Woche",   sketch: "week" },
+      { label: "Tag",     sketch: "day" },
+      { label: "Agenda",  sketch: "agenda" }
+    ],
+    admin: [
+      "Edition-Filter (z.B. nur V5-Termine)",
+      "iCal-Export pro Entität",
+      "Fremdkalender-Sync (Google, Apple, Outlook)",
+      "Serientermine und Ausnahmen"
+    ]
+  },
+
+  accounting: {
+    name: "Accounting",
+    accent: "accounting",
+    lede: "Rechnungen, die sich selbst erklären.",
+    paragraphs: [
+      "Jede Rechnung bekommt hier ein Gesicht — Betrag, Fälligkeit, Entität, Konto, Status.",
+      "Entscheidungen sind nachvollziehbar: SHIKSHA speichert, warum eine Buchung auf „Bewirtung” statt „Büromaterial” ging, und welches Signal den Ausschlag gab.",
+      "Belege liegen immer als Dokument dabei, Ledger-Einträge sind unveränderlich, Korrekturen laufen über Storno-Buchungen."
+    ],
+    fields: [
+      { label: "Belegnummer",  value: "RE-2026-041" },
+      { label: "Datum",        value: "01.04.2026" },
+      { label: "Entität",      value: "Lunchbox Gastro GmbH" },
+      { label: "Netto",        value: "210,08 €" },
+      { label: "MwSt.",        value: "19 % · 39,92 €" },
+      { label: "Brutto",       value: "250,00 €" },
+      { label: "Konto",        value: "6640 Bewirtung", chip: true },
+      { label: "Projekt",      value: "—" },
+      { label: "Fällig",       value: "15.04.2026" },
+      { label: "Status",       value: "offen", chip: true },
+      { label: "IBAN geprüft", value: "nein · warten", chip: true },
+      { label: "Beleg",        value: "RE-2026-041.pdf" }
+    ],
+    views: null,
+    admin: [
+      "Kontenplan pflegen (SKR03, SKR04, eigen)",
+      "Perioden schließen und sperren",
+      "Export nach DATEV / CSV",
+      "Mehrwertsteuer-Voranmeldung vorbereiten"
+    ]
+  },
+
+  courses: {
+    name: "Courses",
+    accent: "courses",
+    lede: "Ausbildung als Strom, nicht als Liste.",
+    paragraphs: [
+      "Kurse sind Ströme: sie haben einen Anfang, einen Takt und ein Ziel. Jede Einheit verknüpft Ort, Zeit, Lehrende, Teilnehmer und Material.",
+      "Am Ende des Stroms steht ein Zertifikat — erzeugt aus echten Anwesenheiten und Leistungen, nicht aus einem Häkchen.",
+      "Courses und Calendar teilen sich Daten: eine Kursstunde ist gleichzeitig ein Calendar-Event vom Typ `course_session`."
+    ],
+    fields: [
+      { label: "Kursname",        value: "Segel-Grundkurs Frühjahr" },
+      { label: "Beschreibung",    value: "Grundlagen Jollensegeln" },
+      { label: "Start",           value: "05.05.2026" },
+      { label: "Ende",            value: "22.06.2026" },
+      { label: "Takt",            value: "Di & Do, 18:00", chip: true },
+      { label: "Lehrende",        value: "T. Knödler" },
+      { label: "Max. Teilnehmer", value: "8" },
+      { label: "Ort",             value: "Vereinsgelände" },
+      { label: "Preis",           value: "360,00 €" },
+      { label: "Voraussetzungen", value: "Schwimmer" },
+      { label: "Material",        value: "Schwimmweste, Ölzeug" },
+      { label: "Zertifikat",      value: "JüB-Vorstufe", chip: true }
+    ],
+    views: [
+      { label: "Stream",        sketch: "stream" },
+      { label: "Kalender",      sketch: "month" },
+      { label: "Teilnehmer",    sketch: "people" },
+      { label: "Fortschritt",   sketch: "progress" }
+    ],
+    admin: [
+      "Teilnehmer einschreiben / umbuchen",
+      "Anwesenheiten nachtragen",
+      "Zertifikate ausstellen und zurückziehen",
+      "Stornierungen mit Regel (z.B. 7-Tage-Frist)"
+    ]
+  },
+
+  schedule: {
+    name: "Schedule",
+    accent: "schedule",
+    lede: "Pläne, die mitdenken.",
+    paragraphs: [
+      "Schedule ist der Taktgeber — wer macht was, wann, mit wem, mit welchem Gerät.",
+      "Aus Kursen, Kunden-Terminen und internen Deadlines entsteht ein Plan, der Kollisionen erkennt, bevor sie passieren.",
+      "Ressourcen können Personen sein, Räume oder Werkzeuge — alle drei werden gleich behandelt und gleich sichtbar."
+    ],
+    fields: [
+      { label: "Aufgabe",         value: "Segelboot vorbereiten" },
+      { label: "Ressource",       value: "T. Knödler" },
+      { label: "Ressourcen-Typ",  value: "Person", chip: true },
+      { label: "Start",           value: "05.05.2026, 16:00" },
+      { label: "Dauer",           value: "90 min" },
+      { label: "Folgt auf",       value: "Material prüfen" },
+      { label: "Priorität",       value: "hoch", chip: true },
+      { label: "Puffer",          value: "15 min" }
+    ],
+    views: null,
+    admin: [
+      "Ressourcenkalender (Personen, Räume, Geräte)",
+      "Kapazitätsplan pro Woche",
+      "Konflikt-Auflösung mit Vorschlag",
+      "Blocker (Urlaub, Wartung) vormerken"
+    ]
+  },
+
+  documents: {
+    name: "Documents",
+    accent: "documents",
+    lede: "Papier wird Daten.",
+    paragraphs: [
+      "Per Foto, Scan oder Mail-Anhang wandert Papier in SHIKSHA — OCR, Klassifikation und Entity-Erkennung laufen automatisch.",
+      "Erkannt werden Typ (Rechnung, Vertrag, Beleg, Schreiben), Entität und Schlüsseldaten wie Betrag, Datum, IBAN.",
+      "Jede Erkennung ist erklärbar: woher der Betrag, woher das Datum, woher die IBAN — jede Quelle ist zurückverfolgbar im Dokument selbst."
+    ],
+    fields: [
+      { label: "Datei",         value: "RE-2026-041.pdf" },
+      { label: "Typ",           value: "Rechnung", chip: true },
+      { label: "Entität",       value: "Lunchbox Gastro GmbH" },
+      { label: "Betrag",        value: "250,00 €" },
+      { label: "Datum",         value: "01.04.2026" },
+      { label: "Sprache",       value: "DE", chip: true },
+      { label: "Seiten",        value: "2" },
+      { label: "Tags",          value: "bewirtung, april" },
+      { label: "Notiz",         value: "IBAN prüfen" }
+    ],
+    views: [
+      { label: "Gitter",      sketch: "grid" },
+      { label: "Liste",       sketch: "list" },
+      { label: "Pro Entität", sketch: "entity" },
+      { label: "Zeitstrahl",  sketch: "timeline" }
+    ],
+    admin: [
+      "Typ-Regeln (Stichworte, Absender, Layout)",
+      "Klassifikations-Training mit Feedback",
+      "Archivierung nach Aufbewahrungsfrist",
+      "Mail-Ingest-Adresse (ingest@shiksha.tun.zone)"
+    ]
+  }
+
+};
+
+/* =================================================================
+ * 🛠  ADMIN-DASHBOARD-PANELS — auch hier einfach anpassbar
+ * =================================================================*/
+const ADMIN = [
+  {
+    title: "Systemstatus",
+    big: "Alles grün",
+    sub: "API, DB, Storage, TLS",
+    rows: [
+      { k: "API",      v: '<span class="dot green"></span>OK' },
+      { k: "DB",       v: '<span class="dot green"></span>OK' },
+      { k: "Storage",  v: '<span class="dot green"></span>OK' },
+      { k: "TLS",      v: '<span class="dot amber"></span>120 Tage' }
+    ]
+  },
+  {
+    title: "Nutzung · April",
+    big: "2.318",
+    sub: "Dokumente verarbeitet",
+    rows: [
+      { k: "Aktive Nutzer", v: "12" },
+      { k: "Rechnungen",    v: "187" },
+      { k: "Termine",       v: "41" },
+      { k: "Offene Posten", v: "6" }
+    ]
+  },
+  {
+    title: "Edition",
+    big: "V5",
+    sub: "Shipped · 18.04.2026",
+    rows: [
+      { k: "Migrations",  v: "0 pending" },
+      { k: "Features",    v: "28" },
+      { k: "Feature-Flags", v: "3 aktiv" },
+      { k: "Next",        v: "V6 · Ops-API" }
+    ]
+  },
+  {
+    title: "Audit · letzte Aktionen",
+    big: "",
+    sub: "",
+    rows: [
+      { k: "11:42", v: "Claude: SELECT calendar_events" },
+      { k: "09:46", v: "Thomas: deploy index.html" },
+      { k: "09:37", v: "Thomas: upload 8 Bilder" },
+      { k: "08:55", v: "System: nginx reload" }
+    ]
+  },
+  {
+    title: "Backup",
+    big: "2 h",
+    sub: "seit letztem Backup",
+    rows: [
+      { k: "Letztes Backup",   v: "09:20" },
+      { k: "Retention",        v: "30 Tage" },
+      { k: "Ziel",             v: "Hetzner Storage Box" },
+      { k: "Status",           v: '<span class="dot green"></span>OK' }
+    ]
+  },
+  {
+    title: "Integrationen",
+    big: "4",
+    sub: "aktive Verbindungen",
+    rows: [
+      { k: "Mail-Ingest",   v: '<span class="dot amber"></span>geplant' },
+      { k: "DATEV-Export",  v: '<span class="dot amber"></span>geplant' },
+      { k: "Kalender-Sync", v: '<span class="dot green"></span>Google' },
+      { k: "LLM",           v: '<span class="dot green"></span>Claude' }
+    ]
+  }
+];
+
+/* =================================================================
+ *  Render
+ * =================================================================*/
+(function renderModules() {
+  const grid = document.getElementById('module-grid');
+  const order = ['account','calendar','accounting','courses','schedule','documents'];
+  const titles = {
+    account:    "Dein Profil, deine Regeln.",
+    calendar:   "Termine, Fristen, Follow-ups.",
+    accounting: "Rechnungen, die sich selbst erklären.",
+    courses:    "Ausbildung als Strom.",
+    schedule:   "Pläne, die mitdenken.",
+    documents:  "Papier wird Daten."
+  };
+  const descs = {
+    account:    "Nutzer, Rollen, Editionen, Spracheinstellungen. Die Basis für alles, was darüber liegt.",
+    calendar:   "Alle Zeitpunkte eines Vorgangs an einem Ort — verknüpft mit Entitäten, Dokumenten und Buchungen.",
+    accounting: "Einnahmen, Ausgaben, offene Posten — mit nachvollziehbarer Entscheidung hinter jeder Zuordnung.",
+    courses:    "Lehrpläne, Einheiten, Teilnehmer, Zertifikate — verstanden als laufender Prozess.",
+    schedule:   "Ressourcen, Zeiten, Abhängigkeiten — automatisiert, wo es geht, manuell, wo es sein muss.",
+    documents:  "OCR, Klassifikation, Entity-Erkennung — mit einem Ergebnisbild, das du sofort verstehst."
+  };
+
+  grid.innerHTML = order.map(key => {
+    const m = MODULES[key];
+    return `
+      <article class="card reveal" data-accent="${m.accent}" data-module="${key}">
+        <div class="card-media" data-accent="${m.accent}">
+          <img src="/images/module-${key}.jpg" alt="" onerror="this.style.display='none'">
+        </div>
+        <div class="card-body">
+          <span class="card-tag"><span class="dot"></span>${m.name}</span>
+          <h3 class="card-title">${titles[key]}</h3>
+          <p class="card-desc">${descs[key]}</p>
+          <span class="card-link">Weiter lesen <span>→</span></span>
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => openModal(card.dataset.module));
+  });
+})();
+
+(function renderAdmin() {
+  const grid = document.getElementById('admin-grid');
+  grid.innerHTML = ADMIN.map(panel => `
+    <div class="admin-panel reveal">
+      <h3>${panel.title}</h3>
+      ${panel.big ? `<div class="big">${panel.big}</div>` : ''}
+      ${panel.sub ? `<div class="sub">${panel.sub}</div>` : ''}
+      <div class="rows">
+        ${panel.rows.map(r => `
+          <div class="row"><span class="k">${r.k}</span><span class="v">${r.v}</span></div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+})();
+
+/* =================================================================
+ *  View-Skizzen (kleine SVGs für Ansichten)
+ * =================================================================*/
+function viewSketch(kind) {
+  const color = 'currentColor';
+  switch (kind) {
+    case 'month':
+      return `<svg viewBox="0 0 100 70">${
+        Array.from({length: 35}, (_, i) => {
+          const x = 8 + (i % 7) * 13;
+          const y = 8 + Math.floor(i / 7) * 12;
+          const filled = [3, 10, 11, 17, 22].includes(i);
+          return `<rect x="${x}" y="${y}" width="10" height="8" rx="2"
+            fill="${filled ? color : 'none'}" stroke="${color}" stroke-width="0.5" opacity="${filled ? 0.8 : 0.3}"/>`;
+        }).join('')
+      }</svg>`;
+    case 'week':
+      return `<svg viewBox="0 0 100 70">${
+        Array.from({length: 7}, (_, i) => {
+          const x = 6 + i * 13;
+          return `<rect x="${x}" y="8" width="10" height="54" rx="2" fill="none" stroke="${color}" stroke-width="0.5" opacity="0.35"/>` +
+                 `<rect x="${x+1}" y="${14 + (i*3)%20}" width="8" height="${8 + (i%3)*4}" rx="1" fill="${color}" opacity="0.6"/>`;
+        }).join('')
+      }</svg>`;
+    case 'day':
+      return `<svg viewBox="0 0 100 70">
+        <rect x="30" y="6" width="40" height="58" rx="3" fill="none" stroke="${color}" stroke-width="0.5" opacity="0.3"/>
+        <rect x="32" y="12" width="36" height="10" rx="2" fill="${color}" opacity="0.7"/>
+        <rect x="32" y="28" width="36" height="14" rx="2" fill="${color}" opacity="0.5"/>
+        <rect x="32" y="48" width="36" height="8" rx="2" fill="${color}" opacity="0.35"/>
+      </svg>`;
+    case 'agenda':
+      return `<svg viewBox="0 0 100 70">${
+        [0,1,2,3].map(i => {
+          const y = 10 + i * 14;
+          return `<circle cx="14" cy="${y+4}" r="2" fill="${color}" opacity="0.7"/>
+                  <rect x="22" y="${y}" width="66" height="2.5" rx="1" fill="${color}" opacity="0.7"/>
+                  <rect x="22" y="${y+5}" width="40" height="2" rx="1" fill="${color}" opacity="0.35"/>`;
+        }).join('')
+      }</svg>`;
+    case 'stream':
+      return `<svg viewBox="0 0 100 70">
+        <line x1="8" y1="35" x2="92" y2="35" stroke="${color}" stroke-width="0.5" opacity="0.35"/>
+        ${[14, 32, 50, 68, 86].map((x, i) => `
+          <circle cx="${x}" cy="35" r="${i===2?5:3}" fill="${color}" opacity="${i===2?0.9:0.6}"/>
+        `).join('')}
+      </svg>`;
+    case 'people':
+      return `<svg viewBox="0 0 100 70">${
+        [[25,30],[50,30],[75,30],[37,55],[62,55]].map(([x,y]) => `
+          <circle cx="${x}" cy="${y}" r="8" fill="none" stroke="${color}" stroke-width="0.6" opacity="0.6"/>
+          <circle cx="${x}" cy="${y-2}" r="3" fill="${color}" opacity="0.6"/>
+        `).join('')
+      }</svg>`;
+    case 'progress':
+      return `<svg viewBox="0 0 100 70">${
+        [20, 45, 70, 30].map((w, i) => `
+          <rect x="10" y="${10 + i*14}" width="80" height="4" rx="2" fill="${color}" opacity="0.15"/>
+          <rect x="10" y="${10 + i*14}" width="${w}" height="4" rx="2" fill="${color}" opacity="0.7"/>
+        `).join('')
+      }</svg>`;
+    case 'grid':
+      return `<svg viewBox="0 0 100 70">${
+        Array.from({length: 9}, (_, i) => {
+          const x = 10 + (i % 3) * 28;
+          const y = 8 + Math.floor(i / 3) * 20;
+          return `<rect x="${x}" y="${y}" width="22" height="16" rx="2" fill="${color}" opacity="${0.3 + (i%3)*0.15}"/>`;
+        }).join('')
+      }</svg>`;
+    case 'list':
+      return `<svg viewBox="0 0 100 70">${
+        [0,1,2,3,4].map(i => `
+          <rect x="10" y="${8 + i*12}" width="8" height="8" rx="1.5" fill="${color}" opacity="0.5"/>
+          <rect x="22" y="${10 + i*12}" width="66" height="2" rx="1" fill="${color}" opacity="0.6"/>
+          <rect x="22" y="${14 + i*12}" width="40" height="1.5" rx="1" fill="${color}" opacity="0.3"/>
+        `).join('')
+      }</svg>`;
+    case 'entity':
+      return `<svg viewBox="0 0 100 70">
+        <circle cx="50" cy="35" r="10" fill="${color}" opacity="0.7"/>
+        ${[[20,18],[80,18],[20,52],[80,52]].map(([x,y]) => `
+          <rect x="${x-8}" y="${y-5}" width="16" height="10" rx="2" fill="${color}" opacity="0.35"/>
+          <line x1="${x}" y1="${y}" x2="50" y2="35" stroke="${color}" stroke-width="0.5" opacity="0.3"/>
+        `).join('')}
+      </svg>`;
+    case 'timeline':
+      return `<svg viewBox="0 0 100 70">
+        <line x1="10" y1="50" x2="90" y2="50" stroke="${color}" stroke-width="0.5" opacity="0.35"/>
+        ${[18, 30, 48, 62, 80].map((x, i) => `
+          <line x1="${x}" y1="46" x2="${x}" y2="54" stroke="${color}" stroke-width="0.5" opacity="0.5"/>
+          <rect x="${x-4}" y="${40-(i%3)*6}" width="8" height="${6+(i%3)*4}" rx="1" fill="${color}" opacity="0.6"/>
+        `).join('')}
+      </svg>`;
+    default:
+      return '';
+  }
+}
+
+/* =================================================================
+ *  Modal
+ * =================================================================*/
+const modal = document.getElementById('modal');
+const backdrop = document.getElementById('modal-backdrop');
+
+function openModal(key) {
+  const m = MODULES[key];
+  if (!m) return;
+
+  modal.dataset.accent = m.accent;
+  document.getElementById('modal-eyebrow').textContent = m.name;
+  document.getElementById('modal-title').textContent = m.lede;
+  document.getElementById('modal-lede').textContent = '';
+
+  // Left column: paragraphs
+  document.getElementById('modal-main').innerHTML =
+    `<h4>Überblick</h4>` +
+    m.paragraphs.map(p => `<p>${p}</p>`).join('');
+
+  // Right column: fields + views + admin
+  let side = '';
+
+  if (m.fields && m.fields.length) {
+    side += `<div class="fields"><h4>Eingabefelder</h4>`;
+    side += m.fields.map(f => `
+      <div class="field-row">
+        <span class="label">${f.label}</span>
+        <span class="value${f.chip ? ' chip' : ''}">${f.value}</span>
+      </div>
+    `).join('');
+    side += `</div>`;
+  }
+
+  if (m.views && m.views.length) {
+    side += `<div class="views"><h4>Ansichten</h4><div class="views-grid">`;
+    side += m.views.map(v => `
+      <div class="view-tile">
+        <div class="view-sketch">${viewSketch(v.sketch)}</div>
+        <div class="view-label">${v.label}</div>
+      </div>
+    `).join('');
+    side += `</div></div>`;
+  }
+
+  if (m.admin && m.admin.length) {
+    side += `<div><h4>Administration</h4><ul class="admin-list">`;
+    side += m.admin.map(a => `<li>${a}</li>`).join('');
+    side += `</ul></div>`;
+  }
+
+  document.getElementById('modal-side').innerHTML = side;
+
+  document.body.classList.add('modal-open');
+  backdrop.classList.add('open');
+  modal.classList.add('open');
+  modal.querySelector('.modal-body').scrollTop = 0;
+}
+
+function closeModal() {
+  backdrop.classList.remove('open');
+  modal.classList.remove('open');
+  document.body.classList.remove('modal-open');
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+backdrop.addEventListener('click', closeModal);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* =================================================================
+ *  Kleinigkeiten: Begrüßung, Nav-Farbe, Reveal
+ * =================================================================*/
+(function greeting() {
+  const h = new Date().getHours();
+  let greet;
+  if (h < 5)       greet = "Gute Nacht, Thomas";
+  else if (h < 11) greet = "Guten Morgen, Thomas";
+  else if (h < 14) greet = "Moin, Thomas";
+  else if (h < 18) greet = "Guten Tag, Thomas";
+  else if (h < 22) greet = "Guten Abend, Thomas";
+  else             greet = "Gute Nacht, Thomas";
+  document.getElementById('greeting').textContent = greet;
+  document.getElementById('today-label').textContent = new Date().toLocaleDateString('de-DE', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
+})();
+
+(function navColor() {
+  const nav = document.getElementById('topnav');
+  const hero = document.querySelector('.hero');
+  function update() {
+    const heroBottom = hero.getBoundingClientRect().bottom;
+    if (heroBottom > 60) nav.classList.add('on-dark');
+    else                 nav.classList.remove('on-dark');
+  }
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+})();
+
+(function reveal() {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
+</script>
+
+</body>
+</html>

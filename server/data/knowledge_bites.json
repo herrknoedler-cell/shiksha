@@ -1,0 +1,218 @@
+[
+  {
+    "id": "lang-1000",
+    "tags": ["sprache", "0-3"],
+    "title": "Sprach-Explosion",
+    "body": "Kinder zwischen 2 und 3 Jahren bauen ihren Wortschatz manchmal um bis zu 1000 Wörter pro Monat aus. Sprachvorbild zu sein ist gerade in dieser Phase besonders wirkungsvoll.",
+    "audience": ["paedagogin", "traegerin"],
+    "season": "always"
+  },
+  {
+    "id": "schlaf-3-5",
+    "tags": ["schlaf", "3-5"],
+    "title": "Mittagsschlaf",
+    "body": "Drei- bis Fünfjährige brauchen meist 11–13 Stunden Schlaf täglich — Mittagsschlaf bleibt oft bis zum 4. Geburtstag wichtig, manche Kinder brauchen ihn länger.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "trotz-2",
+    "tags": ["entwicklung", "2-3"],
+    "title": "Autonomie-Phase",
+    "body": "Was wir umgangssprachlich Trotzphase nennen, ist die Autonomie-Phase: Kinder begreifen, dass sie eine eigene Person mit eigenen Wünschen sind. Das Nein ist kein Angriff, sondern eine Selbstentdeckung.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "freispiel-100",
+    "tags": ["spiel", "padagogik"],
+    "title": "Freispiel",
+    "body": "Im freien Spiel finden bei kleinen Kindern bis zu 100 Lernprozesse pro Stunde gleichzeitig statt — sozial, motorisch, kognitiv. Freispiel ist nie nur spielen.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "bewegung-90",
+    "tags": ["bewegung"],
+    "title": "Bewegungsbedarf",
+    "body": "Kinder unter 6 Jahren sollten täglich mindestens 90 Minuten in Bewegung sein, davon 30 Minuten mit erhöhter Pulsfrequenz. WHO-Empfehlung 2019.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "essen-vielfalt",
+    "tags": ["ernaehrung"],
+    "title": "Geschmacks-Lernen",
+    "body": "Kinder müssen ein neues Lebensmittel oft 8–15 Mal probieren, bis sie es mögen. Geduld beim gemeinsamen Essen lohnt sich.",
+    "audience": ["paedagogin", "traegerin", "eltern"]
+  },
+  {
+    "id": "bindung-eingewoehnung",
+    "tags": ["eingewoehnung", "bindung"],
+    "title": "Berliner Modell",
+    "body": "Eine sanfte Eingewöhnung dauert im Schnitt 2–4 Wochen. Kinder, die ohne Stress eingewöhnt werden, haben statistisch weniger Krankheitstage im ersten Jahr.",
+    "audience": ["paedagogin", "traegerin", "eltern"]
+  },
+  {
+    "id": "krankheit-saison",
+    "tags": ["gesundheit", "winter"],
+    "title": "Infekt-Realismus",
+    "body": "Kinder im Krippenalter haben pro Jahr 6–10 Infekte — das ist normal und Teil des Aufbaus eines starken Immunsystems. Mehr Infekte = später weniger Allergien.",
+    "audience": ["paedagogin", "eltern"],
+    "season": "winter"
+  },
+  {
+    "id": "vorlesen-magisch",
+    "tags": ["sprache", "lesen"],
+    "title": "Vorlesen verlängert das Leben",
+    "body": "Tägliches Vorlesen verbessert nicht nur Sprache und Wortschatz, sondern korreliert mit besserer Aufmerksamkeit, höherem Schulerfolg und sogar gesünderem Sozialverhalten in der Pubertät.",
+    "audience": ["paedagogin", "traegerin", "eltern"]
+  },
+  {
+    "id": "natur-5",
+    "tags": ["natur", "draussen"],
+    "title": "Draußen-Effekt",
+    "body": "Kinder, die täglich mindestens 1 Stunde draußen sind, schlafen besser, sind konzentrierter und entwickeln seltener Kurzsichtigkeit.",
+    "audience": ["paedagogin", "traegerin", "eltern"]
+  },
+  {
+    "id": "konflikte-paed",
+    "tags": ["sozial", "konflikte"],
+    "title": "Konflikte sind Lernchancen",
+    "body": "Kinderstreitigkeiten lösen sich am besten, wenn Erwachsene moderieren statt zu entscheiden. Beide Seiten anhören, Bedürfnis benennen, Kind selbst Lösung finden lassen.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "feinmotorik-3",
+    "tags": ["motorik", "3-5"],
+    "title": "Schere und Stift",
+    "body": "Vor dem 3. Geburtstag ist Schneiden mit der Schere meist noch zu früh. Der Pinzettengriff (Daumen + Zeigefinger) entwickelt sich zwischen 2 und 4 Jahren.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "emotion-vorbild",
+    "tags": ["emotion", "padagogik"],
+    "title": "Co-Regulation",
+    "body": "Kinder lernen Emotionsregulation durch Co-Regulation mit Erwachsenen. Wer ein wütendes Kind ruhig begleitet, baut Nervenbahnen mit auf — wortwörtlich.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "kbbg-vbz",
+    "tags": ["kbbg", "compliance"],
+    "title": "VB-Zeit Vorarlberg",
+    "body": "Pro Gruppe sind nach KBBG 16 Stunden Vorbereitungs- und Nachbereitungszeit pro Woche vorgesehen, plus zusätzliche VBZ für die Leitung. Das ist gesetzlicher Mindeststandard, kein Kann.",
+    "audience": ["traegerin"]
+  },
+  {
+    "id": "kbbg-stproz",
+    "tags": ["kbbg", "compliance"],
+    "title": "Stellenprozent (KKG)",
+    "body": "Variante 1 erlaubt 1 Pädagogin auf 9 Kinder mit 0,33 ST% pro Kind, Variante 2 erlaubt 1:5 auf 12 Kinder mit 0,20 ST%. Welche Variante besser passt, hängt von Gruppendynamik und Raumstruktur ab.",
+    "audience": ["traegerin"]
+  },
+  {
+    "id": "elternzeit-qualitaet",
+    "tags": ["eltern", "zeit"],
+    "title": "Qualität schlägt Quantität",
+    "body": "Die Forschung zeigt: 30 Minuten ungeteilte Aufmerksamkeit pro Tag tun mehr für die Kindesentwicklung als 4 Stunden gemeinsame Anwesenheit mit Bildschirm zwischendrin.",
+    "audience": ["paedagogin", "traegerin", "eltern"]
+  },
+  {
+    "id": "schlaf-essen",
+    "tags": ["ernaehrung", "schlaf"],
+    "title": "Zucker und Aufmerksamkeit",
+    "body": "Zuckerhaltige Frühstücke korrelieren mit Konzentrationseinbrüchen am Vormittag. Vollkornbrot und Eiweiß halten den Blutzucker stabiler — das merken Kinder am eigenen Verhalten.",
+    "audience": ["paedagogin", "eltern"]
+  },
+  {
+    "id": "musik-gehirn",
+    "tags": ["musik", "kognitiv"],
+    "title": "Musik formt das Gehirn",
+    "body": "Schon einfaches gemeinsames Singen aktiviert mehr Hirnareale als jede andere Tätigkeit gleichzeitig. Singen mit Kindern ist neurologisch ein Universal-Werkzeug.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "lob-effekt",
+    "tags": ["padagogik", "lob"],
+    "title": "Bestärkung statt Lob",
+    "body": "Statt eines pauschalen Toll-gemacht wirkt Ich sehe, Du hast viel Mühe in diesen Turm gesteckt stärker. Beschreibendes Feedback fördert das Mindset, dass Anstrengung sich lohnt.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "spielzeug-weniger",
+    "tags": ["spiel", "raum"],
+    "title": "Weniger ist mehr",
+    "body": "Räume mit weniger, dafür offen-verwendbarem Spielmaterial fördern Kreativität und Konzentration messbar mehr als überreichlich gefüllte Regale.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "morgens-uebergabe",
+    "tags": ["alltag", "uebergabe"],
+    "title": "Übergabe ist Beziehung",
+    "body": "Die ersten 5 Minuten beim Bringen prägen die Stimmung für den ganzen Tag. Zeit für ein Wort mit den Eltern und ein bewusstes Begrüßen des Kindes ist keine Zeit-Verschwendung — es ist Investition.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "dokumentation",
+    "tags": ["padagogik", "beobachtung"],
+    "title": "Beobachten statt bewerten",
+    "body": "Beobachtungen werden aussagekräftiger, wenn man Verhalten beschreibt statt zu interpretieren. Lio rollt 5 Minuten den Ball ist klarer als Lio konzentriert sich gut.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "team-sicherheit",
+    "tags": ["team", "fuehrung"],
+    "title": "Psychologische Sicherheit",
+    "body": "Teams, in denen Fehler offen besprochen werden können, machen messbar weniger Fehler. Das Gegenteil von Schuld-Kultur ist Lern-Kultur — und sie ist effektiver.",
+    "audience": ["traegerin"]
+  },
+  {
+    "id": "saison-fruehling",
+    "tags": ["saison", "fruehling"],
+    "title": "Frühlings-Müdigkeit",
+    "body": "Im Frühling brauchen Kinder oft mehr Schlaf — der Körper stellt Hormonhaushalt und Tageslicht-Empfindlichkeit um. Mehr Ruhepausen einplanen lohnt sich.",
+    "audience": ["paedagogin", "traegerin", "eltern"],
+    "season": "spring"
+  },
+  {
+    "id": "saison-sommer",
+    "tags": ["saison", "sommer"],
+    "title": "Hitze-Wachsamkeit",
+    "body": "Kinder dehydrieren schneller als Erwachsene. Bei Temperaturen über 28°C sollte alle 30 Minuten zu trinken angeboten werden — nicht erst auf Durstgefühl warten.",
+    "audience": ["paedagogin", "traegerin", "eltern"],
+    "season": "summer"
+  },
+  {
+    "id": "saison-herbst",
+    "tags": ["saison", "herbst"],
+    "title": "Erkältungs-Vorbereitung",
+    "body": "Im Herbst beginnt die Infektsaison. Frische Luft (auch bei kühlerem Wetter), Vitamin D und ausreichend Schlaf wirken erwiesen besser als jede Prophylaxe-Pille.",
+    "audience": ["paedagogin", "traegerin", "eltern"],
+    "season": "autumn"
+  },
+  {
+    "id": "saison-winter",
+    "tags": ["saison", "winter"],
+    "title": "Licht-Hunger",
+    "body": "Im Winter haben Menschen weniger Tageslicht — auch Kinder. Mindestens 30 Minuten draußen ohne Sonnenbrille hilft dem Stimmungs- und Schlafrhythmus enorm.",
+    "audience": ["paedagogin", "traegerin", "eltern"],
+    "season": "winter"
+  },
+  {
+    "id": "datenschutz",
+    "tags": ["dsgvo", "compliance"],
+    "title": "Bilder und DSGVO",
+    "body": "Kinderbilder dürfen nur mit dokumentierter Einwilligung beider Erziehungsberechtigten geteilt werden — auch in geschlossenen Eltern-Gruppen. Die Einwilligung gilt nicht automatisch für KITA-Webseiten.",
+    "audience": ["traegerin"]
+  },
+  {
+    "id": "elternarbeit",
+    "tags": ["eltern", "kommunikation"],
+    "title": "Elterngespräch-Faustregel",
+    "body": "In Elterngesprächen 70% zuhören, 20% beobachten, 10% bewerten — die meisten Eltern fühlen sich besser, wenn sie verstanden werden, nicht wenn sie informiert werden.",
+    "audience": ["paedagogin", "traegerin"]
+  },
+  {
+    "id": "shiksha-meta",
+    "tags": ["shiksha"],
+    "title": "Was SHIKSHA bedeutet",
+    "body": "Shiksha (शिक्षा) ist Sanskrit für Bildung, Lernen, Unterricht — und steht traditionell für die Lehre, die Generationen überdauert. Diese Software trägt diesen Namen, weil sie helfen will, Bildungsarbeit sichtbar zu machen.",
+    "audience": ["paedagogin", "traegerin"]
+  }
+]

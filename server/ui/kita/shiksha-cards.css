@@ -1,0 +1,582 @@
+/* ============================================================
+   SHIKSHA · Card-System — Apple-Look + Holi-dezent
+   ============================================================ */
+
+:root {
+  /* Holi nur als Akzent — Hauptpalette ist neutral */
+  --holi-pink:      #ff4d8d;
+  --holi-purple:    #a855f7;
+  --holi-turquoise: #00d4d4;
+  --holi-yellow:    #ffd93d;
+  --holi-orange:    #ff8c42;
+  --holi-green:     #6dd47e;
+  --holi-red:       #a0391f;
+
+  /* Apple-Tinten */
+  --ink:            #1a1a1f;        /* fast schwarz */
+  --ink-2:          #4a4a55;
+  --ink-3:          #8a8a95;        /* Hilfstexte */
+  --line:           #e8e6e0;        /* Trenner ganz dezent */
+  --bg:             #fafaf6;        /* Apple-Cream-Off-White */
+  --card-bg:        #ffffff;
+  --card-bg-2:      #fcfbf8;        /* Card-Variant */
+  --shadow-sm:      0 1px 2px rgba(20,16,30,0.04);
+  --shadow-md:      0 1px 3px rgba(20,16,30,0.04), 0 8px 24px rgba(20,16,30,0.04);
+  --shadow-lg:      0 4px 12px rgba(20,16,30,0.06), 0 20px 40px rgba(20,16,30,0.06);
+  --radius:         20px;
+  --radius-sm:      14px;
+
+  /* System-Blau für Edit-Mode (Apple-Style) */
+  --apple-blue:     #007aff;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-feature-settings: "ss01", "cv01";
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Top-Bar ---------- */
+.app-top {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 24px;
+  background: rgba(250,250,246,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--line);
+}
+.app-logo {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--holi-pink) 0%, var(--holi-purple) 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 17px;
+  box-shadow: 0 1px 3px rgba(255,77,141,0.25);
+}
+.app-title {
+  font-size: 17px; font-weight: 600; letter-spacing: -0.02em;
+}
+.app-sub {
+  font-size: 13px; color: var(--ink-3); margin-left: 4px;
+}
+.app-spacer { flex: 1; }
+.app-btn {
+  padding: 8px 14px; font-size: 13px; font-weight: 500;
+  border-radius: 10px; border: 0; cursor: pointer;
+  background: transparent; color: var(--ink-2);
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: background .15s, color .15s;
+}
+.app-btn:hover { background: var(--line); color: var(--ink); }
+.app-btn.primary { background: var(--ink); color: #fff; }
+.app-btn.primary:hover { background: #000; }
+.app-btn.edit-active {
+  background: var(--apple-blue); color: #fff;
+}
+.app-btn.edit-active:hover { background: #0064d4; }
+
+/* ---------- Container ---------- */
+.dashboard-wrap {
+  padding: 18px 20px 80px;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+/* ---------- Gridstack-Override für Apple-Look ---------- */
+.grid-stack {
+  background: transparent;
+}
+.grid-stack-item-content {
+  inset: 4px !important;          /* etwas Atmen zwischen Cards */
+  border-radius: var(--radius);
+  overflow: visible !important;   /* damit Hover-Schatten nicht abgeschnitten wird */
+  background: transparent;
+}
+
+/* Drag-Handle (nur im Edit-Mode sichtbar) */
+.grid-stack-item > .grid-stack-item-content > .card { cursor: default; }
+body.edit-mode .grid-stack-item > .grid-stack-item-content > .card {
+  cursor: grab;
+  outline: 1.5px dashed rgba(0,122,255,0.35);
+  outline-offset: 4px;
+}
+body.edit-mode .grid-stack-item > .grid-stack-item-content > .card:active { cursor: grabbing; }
+body.edit-mode .ui-resizable-handle {
+  background: var(--apple-blue);
+  border-radius: 50%;
+  width: 12px !important; height: 12px !important;
+  opacity: 0.85;
+}
+
+/* ---------- Card Base ---------- */
+.card {
+  width: 100%; height: 100%;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  display: flex; flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: transform .18s cubic-bezier(.4,0,.2,1), box-shadow .18s;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Holi-Akzent — 2px Strich oben, sehr subtil */
+.card::before {
+  content: ""; position: absolute; top: 0; left: 16px; right: 16px; height: 2px;
+  border-radius: 2px;
+  background: var(--card-accent, transparent);
+  opacity: 0.7;
+}
+.card[data-accent="pink"]      { --card-accent: linear-gradient(90deg, var(--holi-pink), var(--holi-purple)); }
+.card[data-accent="purple"]    { --card-accent: linear-gradient(90deg, var(--holi-purple), var(--holi-pink)); }
+.card[data-accent="turquoise"] { --card-accent: linear-gradient(90deg, var(--holi-turquoise), var(--holi-green)); }
+.card[data-accent="yellow"]    { --card-accent: linear-gradient(90deg, var(--holi-yellow), var(--holi-orange)); }
+.card[data-accent="green"]     { --card-accent: linear-gradient(90deg, var(--holi-green), var(--holi-turquoise)); }
+.card[data-accent="orange"]    { --card-accent: linear-gradient(90deg, var(--holi-orange), var(--holi-pink)); }
+
+.card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px 8px;
+}
+.card-title {
+  font-size: 12px; font-weight: 600;
+  color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em;
+}
+.card-menu {
+  border: 0; background: transparent; cursor: pointer;
+  width: 26px; height: 26px; border-radius: 8px; color: var(--ink-3);
+  display: none; align-items: center; justify-content: center;
+  font-size: 16px; line-height: 1;
+}
+body.edit-mode .card-menu { display: inline-flex; }
+.card-menu:hover { background: var(--line); color: var(--ink); }
+
+.card-body {
+  flex: 1; padding: 6px 18px 18px;
+  display: flex; flex-direction: column;
+  min-height: 0;
+}
+
+/* ---------- Card: Mini-Number ---------- */
+.card-mini-number .num {
+  font-size: 44px; font-weight: 700; line-height: 1;
+  letter-spacing: -0.04em; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.card-mini-number .num .total {
+  font-size: 22px; font-weight: 500; color: var(--ink-3);
+  letter-spacing: -0.02em;
+}
+.card-mini-number .sub {
+  font-size: 13px; color: var(--ink-3); margin-top: auto; padding-top: 8px;
+}
+.card-mini-number .delta {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px;
+  margin-top: 8px; align-self: flex-start;
+}
+.card-mini-number .delta.ok    { background: #e8f5ec; color: #1f7a4d; }
+.card-mini-number .delta.warn  { background: #fff5e6; color: #b86b00; }
+.card-mini-number .delta.alert { background: #fee5ee; color: #b8255f; }
+
+/* ---------- Card: Action Round ----------
+   Quadratisch (aspect-ratio:1), zentriert, kein Resize-Handle.
+   Funktioniert auch wenn der Container nicht 1:1 ist — die runde
+   Card nimmt das Minimum aus Höhe und Breite und zentriert sich. */
+.grid-stack-item-content:has(> .card-action-round) {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+}
+.card-action-round {
+  border-radius: 50%;
+  background: var(--card-bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 6px;
+  cursor: pointer;
+  text-decoration: none; color: inherit;
+
+  /* Quadrat-Erzwingung: nimmt das kleinere von Höhe/Breite */
+  aspect-ratio: 1 / 1;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100%;
+  max-height: 100%;
+  /* Mit aspect-ratio + max-width/max-height: bleibt automatisch im
+     Container, aber immer quadratisch */
+  flex: 0 1 min(100%, 100%);
+}
+.card-action-round::before { display: none; }
+.card-action-round .ico {
+  font-size: clamp(20px, 28%, 38px); line-height: 1;
+}
+.card-action-round .lbl {
+  font-size: clamp(10px, 11%, 14px); font-weight: 600;
+  color: var(--ink-2); text-align: center;
+  padding: 0 8%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 90%;
+}
+.card-action-round[data-accent="pink"] {
+  background: linear-gradient(135deg, #fff 0%, #fff5f8 100%);
+}
+.card-action-round[data-accent="purple"] {
+  background: linear-gradient(135deg, #fff 0%, #faf5ff 100%);
+}
+.card-action-round[data-accent="turquoise"] {
+  background: linear-gradient(135deg, #fff 0%, #f0fcfc 100%);
+}
+.card-action-round[data-accent="yellow"] {
+  background: linear-gradient(135deg, #fff 0%, #fffbe6 100%);
+}
+.card-action-round[data-accent="orange"] {
+  background: linear-gradient(135deg, #fff 0%, #fff5ee 100%);
+}
+.card-action-round[data-accent="green"] {
+  background: linear-gradient(135deg, #fff 0%, #f0fcf0 100%);
+}
+.card-action-round:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+/* Kein Resize-Handle, kein Drag-Outline für Round-Cards */
+.grid-stack-item[data-no-resize="true"] .ui-resizable-handle {
+  display: none !important;
+}
+body.edit-mode .grid-stack-item[data-no-resize="true"] > .grid-stack-item-content > .card-action-round {
+  outline: 1.5px dashed rgba(0,122,255,0.35);
+  outline-offset: 4px;
+}
+
+/* ---------- Card: Avatar-Live ---------- */
+.card-anwesenheit-live .avatar-row {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  overflow-y: auto;
+}
+.live-avatar {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  cursor: default;
+}
+.live-avatar .circle {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #f4f1eb, #e8e4dc);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; color: var(--ink-2);
+  border: 2px solid var(--card-bg);
+}
+.live-avatar.present .circle { background: linear-gradient(135deg, #fff5f8, #ffe4ee); color: var(--holi-pink); border-color: #fff; }
+.live-avatar.absent  .circle { opacity: 0.35; }
+.live-avatar .lbl {
+  font-size: 9px; color: var(--ink-3);
+  max-width: 44px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+}
+.live-section-title {
+  font-size: 11px; font-weight: 600; color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  margin-top: 12px; margin-bottom: 6px;
+}
+.live-section-title:first-child { margin-top: 0; }
+
+/* ---------- Card: Events Upcoming ---------- */
+.card-events-upcoming .event-list {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 0; padding: 0; list-style: none;
+}
+.event-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 4px; border-radius: 10px;
+  transition: background .12s;
+}
+.event-row:hover { background: var(--card-bg-2); }
+.event-bar {
+  width: 4px; height: 32px; border-radius: 3px;
+  background: var(--ev-color, #888);
+}
+.event-when {
+  min-width: 64px; font-size: 12px; font-weight: 600;
+  color: var(--ink-2); font-variant-numeric: tabular-nums;
+}
+.event-text {
+  flex: 1; min-width: 0;
+}
+.event-text .t1 {
+  font-size: 13px; font-weight: 500; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.event-text .t2 {
+  font-size: 11px; color: var(--ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ---------- Card: Birthday-Hero ---------- */
+.card-birthday-hero {
+  background:
+    linear-gradient(135deg, #fff 0%, #fffbe8 50%, #fff5f8 100%);
+}
+.card-birthday-hero .head-row {
+  display: flex; align-items: center; gap: 12px;
+}
+.card-birthday-hero .ico {
+  font-size: 36px;
+}
+.card-birthday-hero .head-text .h {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+}
+.card-birthday-hero .head-text .s {
+  font-size: 13px; color: var(--ink-3); margin-top: 2px;
+}
+.card-birthday-hero .bday-list {
+  margin-top: 14px; display: flex; flex-direction: column; gap: 6px;
+}
+.bday-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px;
+}
+.bday-row .when {
+  min-width: 60px; font-size: 11px; font-weight: 600; color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.bday-row .name { font-weight: 500; }
+.bday-row .age {
+  font-size: 11px; color: var(--ink-3);
+  background: rgba(255,217,61,0.25); padding: 1px 6px; border-radius: 6px;
+}
+.bday-row.today { background: linear-gradient(90deg, rgba(255,217,61,0.2), transparent); padding: 4px 8px; border-radius: 8px; margin-left: -8px; }
+
+/* ---------- Card: Compliance Status ---------- */
+.compliance-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 0.5px solid var(--line);
+}
+.compliance-row:last-child { border-bottom: 0; }
+.compliance-row .l {
+  display: flex; align-items: center; gap: 10px;
+}
+.compliance-row .l .ico {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; background: var(--bg);
+}
+.compliance-row .l .t {
+  font-size: 13px; font-weight: 500;
+}
+.compliance-row .l .s {
+  font-size: 11px; color: var(--ink-3);
+}
+.status-dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+}
+.status-dot.ok    { background: var(--holi-green); box-shadow: 0 0 0 3px rgba(109,212,126,0.15); }
+.status-dot.warn  { background: var(--holi-yellow); box-shadow: 0 0 0 3px rgba(255,217,61,0.2); }
+.status-dot.alert { background: var(--holi-pink); box-shadow: 0 0 0 3px rgba(255,77,141,0.18); }
+.status-dot.unknown { background: #d8d4ce; }
+
+/* ---------- Card: Messages-Recent ---------- */
+.msg-row {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 0; border-bottom: 0.5px solid var(--line);
+}
+.msg-row:last-child { border-bottom: 0; }
+.msg-row .meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--ink-3);
+}
+.msg-row .audience {
+  background: var(--bg); padding: 1px 6px; border-radius: 6px;
+  font-weight: 600;
+}
+.msg-row .title { font-size: 13px; font-weight: 500; }
+.msg-row .body {
+  font-size: 12px; color: var(--ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ---------- Card-Picker (Modal) ---------- */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(20,16,30,0.4);
+  display: none; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.modal-bg.show { display: flex; }
+.modal {
+  background: #fff; border-radius: 24px;
+  padding: 24px; max-width: 720px; width: 100%; max-height: 80vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+.modal h2 {
+  font-size: 20px; font-weight: 700; letter-spacing: -0.02em;
+  margin: 0 0 16px;
+}
+.picker-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;
+}
+.picker-item {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 14px 12px; cursor: pointer; background: #fff;
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.picker-item:hover {
+  border-color: var(--apple-blue);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+.picker-item .ico { font-size: 22px; margin-bottom: 6px; }
+.picker-item .name { font-size: 13px; font-weight: 600; }
+.picker-item .desc { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+.picker-item .size { font-size: 10px; color: var(--ink-3); margin-top: 4px; opacity: 0.7; }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff;
+  padding: 10px 18px; border-radius: 12px; font-size: 13px;
+  box-shadow: var(--shadow-lg); opacity: 0;
+  transition: opacity .2s, transform .2s; pointer-events: none;
+  z-index: 300;
+}
+.toast.show { opacity: 1; transform: translate(-50%, -4px); }
+
+/* ============================================================
+   SHIKSHA-Greeting Card — Hero, persönlich, lebendig
+   ============================================================ */
+.card-shiksha-greeting {
+  background:
+    linear-gradient(135deg, #ffffff 0%, #fffbf5 100%);
+  position: relative;
+  overflow: hidden;
+}
+/* Tageszeit-abhängiger sanfter Tint (links unten) */
+.card-shiksha-greeting[data-daypart="morning"]   { background: linear-gradient(135deg, #fffdf6 0%, #fff5e8 60%, #fff8f0 100%); }
+.card-shiksha-greeting[data-daypart="midday"]    { background: linear-gradient(135deg, #ffffff 0%, #fefdfa 100%); }
+.card-shiksha-greeting[data-daypart="afternoon"] { background: linear-gradient(135deg, #ffffff 0%, #faf6ff 100%); }
+.card-shiksha-greeting[data-daypart="evening"]   { background: linear-gradient(135deg, #fefcff 0%, #f3edff 100%); }
+.card-shiksha-greeting[data-daypart="night"]     { background: linear-gradient(135deg, #fafafe 0%, #ecedfa 100%); }
+.card-shiksha-greeting::before {
+  background: linear-gradient(90deg, var(--holi-yellow), var(--holi-pink), var(--holi-purple), var(--holi-turquoise)) !important;
+  opacity: 0.5 !important;
+  height: 3px !important;
+  left: 0 !important; right: 0 !important;
+  border-radius: 0 !important;
+}
+.card-shiksha-greeting .card-body {
+  padding: 22px 26px;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 22px;
+  align-items: stretch;
+}
+@media (max-width: 760px) {
+  .card-shiksha-greeting .card-body { grid-template-columns: 1fr; }
+}
+
+/* Hero-Spalte (links): Begrüßung + Stimmungs-Satz */
+.g-hero {
+  display: flex; flex-direction: column; justify-content: space-between;
+  gap: 14px;
+}
+.g-greeting {
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  background: linear-gradient(120deg, var(--ink) 30%, var(--holi-purple) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.g-mood {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin-top: 6px;
+  max-width: 36ch;
+}
+.g-tip {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-style: italic;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 0.5px solid var(--line);
+  letter-spacing: 0.01em;
+}
+
+/* Rows-Spalte (rechts): Wissen, Theme, Insight */
+.g-rows {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.g-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 12px; border-radius: 12px;
+  background: rgba(255,255,255,0.6);
+  border: 0.5px solid rgba(232,230,224,0.6);
+}
+.g-row:hover { background: rgba(255,255,255,0.95); }
+.g-icon {
+  font-size: 18px; line-height: 1.2; flex-shrink: 0;
+  width: 24px; text-align: center;
+}
+.g-content { flex: 1; min-width: 0; }
+.g-row-head {
+  font-size: 10px; font-weight: 600;
+  color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 1px;
+}
+.g-row-title {
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.3;
+}
+.g-row-body {
+  font-size: 12px; color: var(--ink-2);
+  line-height: 1.5; margin-top: 3px;
+}
+/* Akzent-farbige Linke Kante pro Row-Typ */
+.g-row.knowledge { border-left: 3px solid var(--holi-yellow); }
+.g-row.theme     { border-left: 3px solid var(--holi-pink); }
+.g-row.insight   { border-left: 3px solid var(--holi-turquoise); }
+.g-row.insight.g-insight-notice { border-left-color: var(--holi-orange); }
+.g-row.insight.g-insight-warn   { border-left-color: var(--holi-pink); }
+
+.g-actions {
+  display: flex; gap: 6px; margin-top: 8px;
+}
+.g-action-primary {
+  display: inline-flex; align-items: center;
+  font-size: 12px; font-weight: 600;
+  color: var(--holi-pink); text-decoration: none;
+  padding: 4px 10px; border-radius: 8px;
+  background: rgba(255,77,141,0.08);
+  transition: background .15s, transform .12s;
+}
+.g-action-primary:hover {
+  background: rgba(255,77,141,0.15);
+  transform: translateX(2px);
+}
+.g-action-secondary {
+  border: 0; cursor: pointer;
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-3);
+  padding: 4px 10px; border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+}
+.g-action-secondary:hover { color: var(--ink); background: var(--line); }
+
+/* ---------- Empty State ---------- */
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; color: var(--ink-3); padding: 20px; text-align: center;
+}
+.empty .em { font-size: 36px; margin-bottom: 8px; opacity: 0.4; }
+.empty .lbl { font-size: 13px; }
