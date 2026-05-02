@@ -16,9 +16,8 @@ import json as _ins_json
 from datetime import date, timedelta, datetime
 import sqlalchemy as sa
 
-# Database connection (gleich wie main app)
-DB_URL = os.environ.get("DATABASE_URL") or "postgresql://shiksha:shiksha@127.0.0.1/shiksha"
-engine = sa.create_engine(DB_URL)
+# Database connection — zentral aus database.py (env-driven, hard-fail)
+from database import engine
 
 
 def _upsert_insight(conn, key, audience, severity, icon, title, body,

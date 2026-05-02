@@ -108,8 +108,10 @@ import uuid
 from datetime import datetime, timezone
 from sqlalchemy import create_engine, MetaData, Table, Column, String, Float, Text, DateTime
 
-# DB setup for document tables
-_doc_engine = create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
+from database import engine as _db_engine
+
+# DB setup for document tables — Engine kommt zentral aus database.py
+_doc_engine = _db_engine
 _doc_meta = MetaData()
 
 _documents = Table("documents", _doc_meta,
@@ -456,7 +458,7 @@ async def get_documents(entity_id: str = None, status: str = None):
     """
     try:
         import sqlalchemy as _sa
-        engine = _sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
+        engine = _db_engine
 
         with engine.connect() as conn:
             # Base query: documents + links join
@@ -588,7 +590,7 @@ async def accounting_open_items(entity_id: str = None, entry_type: str = None):
 @app.get("/accounting/entries")
 async def accounting_get_entries(entity_id: str = None, status: str = None):
     import sqlalchemy as _sa
-    engine = _sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
+    engine = _db_engine
     query = "SELECT * FROM ledger_entries WHERE 1=1"
     params = {}
     if entity_id:
@@ -622,7 +624,7 @@ async def accounting_export(year: int, month: int, entity_id: str = None):
     from fastapi.responses import StreamingResponse
     import sqlalchemy as _sa
 
-    engine = _sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
+    engine = _db_engine
 
     query = """
         SELECT

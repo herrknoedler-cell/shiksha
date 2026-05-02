@@ -1,11 +1,29 @@
+import os
+from datetime import datetime, timezone
+
 from sqlalchemy import create_engine, Column, String, Float, Boolean, DateTime, Integer, Text, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime, timezone
 
-DATABASE_URL = "postgresql://shiksha:shiksha2026@localhost/shiksha"
+# Optionaler dotenv-Loader für lokale Entwicklung.
+# In Production setzen systemd-Drop-Ins die Variablen direkt — dort tut
+# load_dotenv() nichts (keine .env vorhanden).
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
-engine = create_engine(DATABASE_URL)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL ist nicht gesetzt.\n"
+        "Setup: docs/DEPLOY.md → systemd-Drop-In\n"
+        "  /etc/systemd/system/shiksha.service.d/database.conf\n"
+        "Reload: systemctl daemon-reload && systemctl restart shiksha"
+    )
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 

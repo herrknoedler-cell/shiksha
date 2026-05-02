@@ -33,8 +33,10 @@ from accounting_models import (
 # DB CONNECTION
 # ---------------------------------------------------------------------------
 
+from database import engine as _shared_engine
+
 def _engine():
-    return sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
+    return _shared_engine
 
 
 # ---------------------------------------------------------------------------

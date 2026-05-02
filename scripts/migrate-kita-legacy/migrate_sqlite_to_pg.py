@@ -3,14 +3,24 @@ SHIKSHA · KITA · SQLite → PostgreSQL Migration (V3)
 Verlustfrei. Filter: nur letzte 5 staff (echte Mitarbeiter).
 Mit autocommit + temp deaktivierten FK-Triggers.
 
+Asymmetrische ENV-Konvention:
+  DATABASE_URL         — Ziel (PostgreSQL), gleiche Konvention wie Hauptstrang
+  LEGACY_SQLITE_PATH   — Quelle (Pfad zur SQLite-Datei der alten KITA-App)
+
 Aufruf:
   /opt/shiksha/venv/bin/python /tmp/migrate_sqlite_to_pg.py
 """
+import os
 import sqlite3
 import psycopg2
 
-SQLITE_PATH = "/opt/shiksha-kita/shiksha_kita.db"
-PG_DSN = "host=localhost dbname=shiksha user=shiksha password=shiksha2026"
+SQLITE_PATH = os.environ.get("LEGACY_SQLITE_PATH", "/opt/shiksha-kita/shiksha_kita.db")
+PG_DSN = os.environ.get("DATABASE_URL")
+if not PG_DSN:
+    raise RuntimeError(
+        "DATABASE_URL ist nicht gesetzt.\n"
+        "Setup: docs/DEPLOY.md → systemd-Drop-In oder Shell-Export."
+    )
 
 TABLES_ORDER = [
     "areas", "rooms", "groups", "staff", "children",

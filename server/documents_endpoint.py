@@ -13,7 +13,7 @@ async def get_documents(entity_id: str = None, status: str = None):
     """
     try:
         import sqlalchemy as _sa
-        engine = _sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
+        from database import engine
 
         with engine.connect() as conn:
             # Base query: documents + links join

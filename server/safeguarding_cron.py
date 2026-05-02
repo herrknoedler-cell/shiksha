@@ -63,13 +63,9 @@ TARGET_EDITIONS = ["schule.shiksha", "camping.shiksha", "club.shiksha"]
 
 
 def get_db_connection():
-    return psycopg.connect(
-        host=os.getenv("SHIKSHA_DB_HOST", "localhost"),
-        dbname=os.getenv("SHIKSHA_DB_NAME", "shiksha"),
-        user=os.getenv("SHIKSHA_DB_USER", "postgres"),
-        password=os.getenv("SHIKSHA_DB_PASSWORD", ""),
-        row_factory=dict_row,
-    )
+    """Verbindet mit der Production-DB via DATABASE_URL (env-driven)."""
+    from database import DATABASE_URL  # delayed import (Cron-Standalone)
+    return psycopg.connect(DATABASE_URL, row_factory=dict_row)
 
 
 def log(msg, level="INFO"):

@@ -923,7 +923,7 @@ def build_document_analysis(
 def get_known_entities(entity_type="customer"):
     try:
         import sqlalchemy as _sa
-        engine = _sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
+        from database import engine
         with engine.connect() as conn:
             rows = conn.execute(_sa.text("SELECT id,name,aliases,contacts,addresses FROM customers ORDER BY name")).fetchall()
             return [{"id":r[0],"name":r[1],"aliases":r[2] or [],"contacts":r[3] or [],"addresses":r[4] or []} for r in rows]

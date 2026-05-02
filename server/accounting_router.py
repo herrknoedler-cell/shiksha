@@ -8,9 +8,8 @@ import sqlalchemy as sa
 from accounting_models import ACCOUNTING_MODULE_PROFILE, AccountingInvoice, BankTransaction
 from accounting_orchestrator import score_match, THRESHOLD_HIGH_CONFIDENCE, THRESHOLD_MEDIUM_CONFIDENCE
 from bank_statement_parser import parse_csv, parse_camt053, parse_mt940, detect_duplicates
+from database import engine
 
-DB_URL = "postgresql://shiksha:shiksha2026@localhost/shiksha"
-engine = sa.create_engine(DB_URL, pool_pre_ping=True)
 accounting_router = APIRouter(prefix="/accounting", tags=["accounting"])
 
 def _read(filename):

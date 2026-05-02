@@ -15,8 +15,8 @@ import sys
 import pathlib
 import sqlalchemy as sa
 
-DB_URL = os.environ.get("DATABASE_URL") or "postgresql://shiksha:shiksha@127.0.0.1/shiksha"
-engine = sa.create_engine(DB_URL)
+# Database connection — zentral aus database.py (env-driven, hard-fail)
+from database import engine
 
 POOL_ROOT = pathlib.Path("/opt/shiksha/marketing_assets/pool")
 

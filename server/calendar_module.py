@@ -30,8 +30,10 @@ from calendar_models import (
 # DB
 # ---------------------------------------------------------------------------
 
+from database import engine as _shared_engine
+
 def _engine():
-    return sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
+    return _shared_engine
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)

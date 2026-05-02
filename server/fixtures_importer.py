@@ -37,13 +37,9 @@ from psycopg.types.json import Json
 # ---------------------------------------------------------------------------
 
 def get_db_connection():
-    """Liest aus Standard SHIKSHA-Umgebungsvariablen oder Default."""
-    return psycopg.connect(
-        host=os.getenv("SHIKSHA_DB_HOST", "localhost"),
-        dbname=os.getenv("SHIKSHA_DB_NAME", "shiksha"),
-        user=os.getenv("SHIKSHA_DB_USER", "postgres"),
-        password=os.getenv("SHIKSHA_DB_PASSWORD", ""),
-    )
+    """Verbindet mit der Production-DB via DATABASE_URL (env-driven)."""
+    from database import DATABASE_URL  # delayed import (Module wird auch standalone aufgerufen)
+    return psycopg.connect(DATABASE_URL)
 
 
 # ---------------------------------------------------------------------------
