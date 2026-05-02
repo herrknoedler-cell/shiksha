@@ -1,0 +1,246 @@
+# SHIKSHA · Deploy
+
+Diese Doku ist für jemanden, der morgen das Repo erbt — sie sollte
+ausreichen, um ohne Rückfrage einen Code-Deploy zu fahren. Die Kurzform
+ist: aus Repo-Root `bash deploy/scripts/sync.sh --confirmed`.
+
+---
+
+## Stack-Überblick
+
+| Komponente | Wert |
+|---|---|
+| Server | Hetzner CX21, Ubuntu 24.04 (`ubuntu-4gb-nbg1-1`, `88.99.174.186`) |
+| Backend | Python 3.12 + FastAPI auf Port 8000 |
+| Datenbank | PostgreSQL 16 (DB-User `shiksha`) |
+| Reverse-Proxy | nginx + Let's Encrypt |
+| systemd-Service | `shiksha.service` |
+| App-Verzeichnis | `/opt/shiksha/` (flach, keine Modul-Subdirs) |
+| Venv | `/opt/shiksha/venv/` |
+| Statische Dateien | `/opt/shiksha/static/` |
+| Aktive Domain | `kita.shiksha.tun.zone` (KITA-Pilot) |
+| Geplante Domain | `shiksha.world` (Plattform-Site, Domain wird registriert) |
+
+## Server-Zugang
+
+```bash
+ssh -i ~/.ssh/shiksha_key root@88.99.174.186
+```
+
+---
+
+## Deploy-Pfade
+
+### Standard: Code + Migrations + Templates
+
+```bash
+# Aus dem Repo-Root:
+bash deploy/scripts/sync.sh                  # Dry-Run (Default — sicher)
+bash deploy/scripts/sync.sh --confirmed      # Echter Sync
+```
+
+`sync.sh` macht in dieser Reihenfolge:
+
+1. **Pre-flight** — `git status` clean, branch=main, `server/main.py` da,
+   Deploy-Commit-Hash erfassen.
+2. **Dry-Run mit `--delete`** — zeigt **zuerst** die Lösch-Liste, dann
+   Transfer-Count.
+3. **Confirmation-Gate** — ohne `--confirmed` passiert nichts.
+4. **`rsync -a --delete server/ → /opt/shiksha/`** mit allen Excludes.
+5. **`systemctl restart shiksha`** + `is-active`-Check.
+6. **5 Curl-Smoke-Tests** (siehe unten).
+7. **Bericht.** Kein Auto-Rollback (würde aus `.bak`-Files restoren —
+   riskant).
+
+### Schnell: Nur Templates + UIs
+
+Wenn nur Marketing-Templates oder UIs geändert wurden — kein Service-
+Restart nötig (Jinja lädt Templates zur Laufzeit, UIs sind statisch):
+
+```bash
+bash deploy/scripts/sync-templates.sh                # Dry-Run
+bash deploy/scripts/sync-templates.sh --confirmed    # Push
+```
+
+Synct nur `server/marketing_templates/` und `server/ui/`.
+
+---
+
+## Excludes
+
+`sync.sh` syncht alles aus `server/` AUSSER:
+
+| Exclude | Grund |
+|---|---|
+| `*.bak`, `*.bak.*`, `*.bak.v*` | Auto-Backups historischer Deploy-Skripte |
+| `__pycache__/`, `*.pyc` | Python-Build-Artefakte |
+| `venv/` | Lokale Python-Umgebung |
+| `uploads/` | User-Uploads (Identity-Fotos, Rechnungen) |
+| `secrets/` | VAPID-Keys, andere Server-Geheimnisse |
+| `archive/` | Runtime-PDF-Archiv der Anwesenheits-Daten |
+| `marketing_assets/pool/` | Vom Cron befüllter Bilder-Pool — Runtime-Daten, nicht Repo-Inhalt |
+| `*.log`, `tmp/`, `.DS_Store` | Lärm |
+
+---
+
+## Secrets
+
+**Nichts davon gehört ins Repo.** `.gitignore` hat `secrets/`, `*.pem`,
+`*.key`, `vapid_*.json`, `anthropic_key*` schon abgedeckt.
+
+### ANTHROPIC_API_KEY
+
+systemd-Drop-In: `/etc/systemd/system/shiksha.service.d/anthropic.conf`
+
+```ini
+[Service]
+Environment="ANTHROPIC_API_KEY=sk-ant-..."
+```
+
+Nach Änderung:
+
+```bash
+systemctl daemon-reload && systemctl restart shiksha
+```
+
+### VAPID (Web-Push)
+
+VAPID-Keys liegen unter `/opt/shiksha/secrets/.vapid/`. Erst-Setup mit
+`deploy/scripts/vapid_setup.sh` (auf dem Server ausführen). Public-Key
+wird vom Client (`shiksha-push.js`) zum Subscribe gebraucht.
+
+systemd-Drop-In für die Server-seitige Konfig:
+`/etc/systemd/system/shiksha.service.d/vapid.conf`.
+
+### DATABASE_URL
+
+**Aktuell hardcoded** in `server/calendar_module.py` — Critical Security
+Debt, siehe [`tech-debt.md`](tech-debt.md). Ziel: per
+`os.getenv("DATABASE_URL")` aus systemd-Drop-In `database.conf`. Eigener
+Mini-Sprint nach Phase 6.
+
+---
+
+## nginx-Konfiguration
+
+| Pfad | Zweck |
+|---|---|
+| `/etc/nginx/sites-available/shiksha` | Haupt-Config |
+| `/etc/nginx/sites-available/shiksha.bak.YYYYMMDD-HHMMSS` | Auto-Backups vor Änderungen |
+
+**Wichtige Rewrites:**
+
+- `/m/...` → `/kita/m/...` (FastAPI-Routes leben unter `/kita`-Prefix
+  via `kita_router`)
+- `/static/...` → direkt aus `/opt/shiksha/static/` ausgeliefert
+
+Bei nginx-Änderungen:
+
+```bash
+# Backup vorher
+cp /etc/nginx/sites-available/shiksha \
+   /etc/nginx/sites-available/shiksha.bak.$(date +%Y%m%d-%H%M%S)
+
+# Edit, dann
+nginx -t && systemctl reload nginx
+```
+
+Letzten nginx-Backup finden:
+
+```bash
+ls -t /etc/nginx/sites-available/shiksha.bak.* | head -1
+```
+
+---
+
+## Datenbank-Migrations
+
+`sync.sh` synct die `*_migration.sql`-Files nach `/opt/shiksha/`, wendet
+sie aber **nicht automatisch** an. Manuell mit:
+
+```bash
+ssh -i ~/.ssh/shiksha_key root@88.99.174.186 \
+  "sudo -u postgres psql -d shiksha -f /opt/shiksha/<migration>.sql"
+```
+
+Alle Migrations sind idempotent (`CREATE TABLE IF NOT EXISTS`,
+`CREATE INDEX IF NOT EXISTS`) — safe re-run.
+
+---
+
+## Smoke-Test-URLs
+
+Genau die Liste, die `sync.sh` automatisch nach Deploy testet:
+
+- `GET /health`
+- `GET /kita/api/platform/editions`     (sollte 6 Editionen liefern)
+- `GET /kita/api/platform/live-stats`   (sollte `modules_live > 0`)
+- `GET /m/krummelus`                    (Marketing-Site Krummelus, 200)
+- `GET /accounting/ui/kita/dashboard_traegerin`
+
+Bei einem Fehlschlag in einem davon: kein Auto-Rollback. Bericht zeigt
+welche URL fehlt, manueller Eingriff. Häufigste Ursache: Service-Restart-
+Fehler (siehe `journalctl -u shiksha -n 50 --no-pager`).
+
+---
+
+## Rollback
+
+Falls ein Deploy schiefgeht:
+
+1. `git revert <bad-commit>` lokal.
+2. `bash deploy/scripts/sync.sh --confirmed` — synct den Revert.
+3. Smoke-Tests grün?
+
+Beispiel aus Phase 4: erster `--confirmed`-Lauf hatte ImportError wegen
+inkompatibler `compression.py`-Version. Recovery: `git show <safe-commit>:server/compression.py > server/compression.py`,
+neuer Commit `revert: restore working compression.py`, redeploy. ~30 Sekunden.
+
+---
+
+## Häufige Operationen
+
+```bash
+# Service-Status / Logs
+systemctl status shiksha
+journalctl -u shiksha -n 50 --no-pager
+
+# Health-Check
+curl https://kita.shiksha.tun.zone/health
+
+# DB-Schema (read-only — siehe CLAUDE.md "Dauerhaft erlaubt")
+sudo -u postgres psql -d shiksha -c "\dt"
+sudo -u postgres psql -d shiksha -c "\d <tabelle>"
+
+# Letzten nginx-Backup finden
+ls -t /etc/nginx/sites-available/shiksha.bak.*
+```
+
+---
+
+## Architektur-Regel: Keine neuen Endpoints an `kita_compliance_router.py` anhängen
+
+Historisch wurden viele Module via `echo >> kita_compliance_router.py`
+deployt. Resultat: ein 5178-Zeilen-Omnibus-Router mit Routing-Konflikten.
+Phase 4 hat das erste Modul herausgelöst (`world_router.py`). Neue Module
+gehören als **eigenständiger** `APIRouter` ins Repo, in `main.py` registriert
+**vor** `kita_router` wenn sie spezifischere Routes als der dortige
+Catch-all haben. Siehe [`ARCHITECTURE.md`](ARCHITECTURE.md) für die
+Decomposition-Roadmap.
+
+---
+
+## Lessons aus Phase 4
+
+- **Pre-flight check ist nicht Optional.** Ohne ihn würde ein dirty
+  working tree silent in production landen.
+- **Confirmation-Gate für `--delete`.** Erste Bug-Fang-Stelle: das
+  Pool-Verzeichnis-Problem (`marketing_assets/pool/` nach `git clone`
+  nicht da → `--delete` würde server-seitig löschen). Im Dry-Run-Output
+  sofort sichtbar.
+- **API-Kompatibilität bei File-Overlays prüfen.** Datum/Größe allein
+  reicht nicht — siehe Phase-4-Recovery (compression.py-Inkompatibilität).
+  Quick-Check: `diff <(grep '^def \|^class ' alt) <(grep '^def \|^class ' neu)`.
+- **Smoke-Tests sind wertvoll, auch wenn sie nicht alles fangen.**
+  In Phase 4 hat der Service-Status-Check den ImportError sofort offenbart.
+  Smoke-Test-Failures != Auto-Rollback — manueller Eingriff.
