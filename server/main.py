@@ -99,6 +99,7 @@ from document_models import (
 )
 from document_module import build_document_analysis
 from kita_compliance_router import kita_router
+from world_router import world_router
 from identity_router import identity_router
 import extractor_extensions  # patches FIELD_EXTRACTORS
 from compression import compress, DocumentSummary
@@ -724,5 +725,8 @@ async def calendar_sync_deadlines(edition: str = "business.shiksha"):
     return sync_deadlines_from_ledger(edition=edition)
 
 app.include_router(accounting_router)
+# world_router MUSS vor kita_router stehen — sonst fängt der dortige
+# /m/{slug}-Catch-all spezifische Routes wie /m/shiksha ab.
+app.include_router(world_router)
 app.include_router(kita_router)
 app.include_router(identity_router)
