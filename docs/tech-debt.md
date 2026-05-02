@@ -1,66 +1,50 @@
 # Tech-Schulden
 
-Lebende Liste bekannter Findings, die identifiziert, aber noch nicht
-behoben sind — getrennt in **Critical Security Debt** (etwas, was uns
-beim öffentlichen Repo-Push beißt) und **Unfinished Refactors**
-(angefangene Umbauten, deren beide Hälften nie zusammen deployt wurden).
-
-Pro Eintrag: Severity bzw. Risiko, Fundstelle, Befund, Fix-Pfad,
-geplanter Sprint. Sobald ein Eintrag behoben ist: streichen **und**
-den Fix-Commit hier verlinken — die Git-History dieser Datei wird so
-zur Audit-Spur.
+Lebende Liste — offene Findings (**Critical Security Debt** +
+**Unfinished Refactors**) sowie ein **Operational Audit Trail** über
+bereits aufgelöste Einträge und operationale Cleanups. Sobald ein
+Eintrag behoben ist: nicht löschen, sondern auf RESOLVED-Status mit
+Datum + Commit-Hash umstellen — die Datei wird so zur lesbaren Historie.
 
 ---
 
 ## Critical Security Debt
 
-### ~~Hardcoded DB-Credentials in `server/calendar_module.py`~~
+### ✅ Hardcoded DB-Credentials in 9 server files — RESOLVED 2026-05-02
 
-> ✅ **Code-Refactor erledigt am 2026-05-02 in Phase 7** — Commit
-> [`0c4864a`](../../../commit/0c4864a). Der Audit hat **9 Files** mit
-> hardcoded `postgresql://shiksha:shiksha2026@…` aufgedeckt (nicht nur
-> `calendar_module.py`); alle wurden auf zentrale env-driven Engine in
-> `server/database.py` umgestellt, mit Hard-Fail-Pattern bei fehlender
-> `DATABASE_URL`. Plus Vereinheitlichung der psycopg-Scripts auf dieselbe
-> Konvention (`SHIKSHA_DB_*` → `DATABASE_URL`). Setup-Doku in
-> [`DEPLOY.md`](DEPLOY.md#required-environment-variables).
->
-> **Noch offen (Phase 7 Schritte 3 + 4):** server-seitige `database.conf`
-> anlegen, Cron-Job-Aufrufpfad bestätigen, DB-Passwort rotieren. Dieser
-> Eintrag wird beim finalen Phase-7-Commit komplett entfernt.
+|                  |                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| **Status**       | **RESOLVED 2026-05-02** (Phase 7 — Audit + Refactor + Server-Rotation)                           |
+| **Resolved-by**  | Commits [`0c4864a`](../../../commit/0c4864a) (refactor) + [`7576467`](../../../commit/7576467) (docs), plus server-side Rotation am gleichen Tag |
+| **Found**        | 2026-05-02 (initial: Phase-2-Migration, A.5 Kalender; voller Umfang via Phase-7-Audit)           |
+| **File(s)**      | `server/database.py`, `server/main.py` (4×), `server/calendar_module.py`, `server/accounting_module.py`, `server/accounting_router.py`, `server/documents_endpoint.py`, `server/document_module.py`, plus `scripts/migrate-kita-legacy/migrate_sqlite_to_pg.py` |
 
-<details>
-<summary>Original-Eintrag (historisch, durchgestrichen)</summary>
+**Was passiert ist:**
 
-|              |                                                          |
-| ------------ | -------------------------------------------------------- |
-| **Severity** | Critical                                                 |
-| **Found**    | 2026-05-02 (Phase-2-Migration, A.5 Kalender)             |
-| **File**     | `server/calendar_module.py:33` (plus 8 weitere, beim Audit aufgedeckt) |
+1. **Code:** Zentrale env-driven Engine in `server/database.py` mit
+   Hard-Fail-Pattern bei fehlender `DATABASE_URL`. Alle Caller importieren
+   `engine` von dort, niemand ruft mehr `create_engine()` mit Klartext-URL.
+2. **Server:** Neues Passwort generiert via `openssl rand -hex 24`, gesetzt
+   in `/etc/systemd/system/shiksha.service.d/database.conf` (root-only)
+   sowie `/etc/cron.d/shiksha-insights` (für Cron-Jobs, die nicht zur
+   `shiksha.service` gehören und das Drop-In nicht erben).
+3. **PostgreSQL:** `ALTER USER shiksha WITH PASSWORD '<new>'` — der
+   alte Wert ist invalidiert.
+4. **Naming-Vereinheitlichung:** psycopg-Scripts (`fixtures_importer`,
+   `safeguarding_cron`) auf `DATABASE_URL` migriert; das vorherige
+   `SHIKSHA_DB_*`-Schema ist abgeschafft.
 
-**Befund:**
+**Audit-Spur:**
 
-```python
-def _engine():
-    return sa.create_engine("postgresql://shiksha:shiksha2026@localhost/shiksha")
-```
+- Cron-Backup vor Rotation: `/etc/cron.d/shiksha-insights.20260502-123423.bak`
+  (zeigt den State ohne `DATABASE_URL=`-Zeile).
+- Git-History des alten Passworts wurde **nicht** rewritten — Rotation
+  macht den alten Wert kraftlos.
+- **Pre-Commit-Hook für Secret-Detection** (`gitleaks` / `trufflehog`)
+  bleibt offen als eigener kleiner Folge-Sprint.
 
-DB-User, Passwort, Host und Datenbankname standen im Klartext im
-Quellcode. Mehrfach repliziert in `database.py`, `main.py` (4×),
-`accounting_router.py`, `accounting_module.py`, `documents_endpoint.py`,
-`document_module.py`, plus Migrations-Skript.
-
-**Fix-Pfad (umgesetzt):**
-
-1. ~~Passwort rotieren~~ → Phase 7 Schritt 4.
-2. ✓ Code: `database.py` zentral, env-driven, hard-fail bei fehlender
-   `DATABASE_URL`. Alle Caller importieren `engine` von dort.
-3. Git-History des alten Passworts wurde **nicht** rewritten — Rotation
-   macht den alten Wert kraftlos. Repo bleibt privat bis Rotation läuft.
-4. Pre-Commit-Hook für Secret-Detection (z.B. `gitleaks`, `trufflehog`)
-   bleibt offen — eigener kleiner Folge-Sprint.
-
-</details>
+**Runbook für künftige Rotationen:** siehe
+[`DEPLOY.md → Secret Rotation`](DEPLOY.md#secret-rotation).
 
 ---
 
@@ -118,8 +102,52 @@ Entscheidung hängt davon ab, ob die Per-Doc-Type-Compression einen
 echten Mehrwert bringt (besseres Field-Extraction-Routing, klarere
 Domain-Models pro Doc-Type) oder nur Komplexität ohne Gegenleistung.
 
-**Plan:** Eigener Mini-Sprint nach Phase 6, parallel oder nach dem
-Security-Sprint.
+**Plan:** Eigener Mini-Sprint nach Phase 7.
+
+---
+
+## Operational Audit Trail
+
+Nicht-Sicherheits-Cleanups, die wir gemacht haben — dokumentiert
+inklusive Restore-Pfad für den unwahrscheinlichen Fall, dass jemand
+sie rückgängig machen muss.
+
+### shiksha-kita Legacy-Service archiviert (2026-05-02)
+
+|              |                                                                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | **ARCHIVED 2026-05-02** (Phase-7-Side-Discovery)                                                                                         |
+| **Where**    | `/opt/_archive/shiksha-kita-20260502-123423/` (App-Verzeichnis), `/etc/systemd/system/shiksha-kita.service.20260502-123423.bak` (Service-Datei-Backup) |
+
+**Kontext:** Beim Audit für Phase 7 (Secret-Rotation) wurde der Legacy-
+KITA-Service auf Port 8001 (alte SQLite-App) entdeckt. Die echten Pilot-
+Daten — 18 Kinder + 5 Mitarbeiter — sind seit der Compliance-Engine-
+Migration in der PostgreSQL-DB; der Legacy-Service war seither inaktiv
+im Workflow, lief aber weiter und hatte das alte DB-Passwort hardcoded.
+Statt mit-zu-rotieren: sauber stillgelegt.
+
+**Was passiert ist:**
+
+```bash
+systemctl disable --now shiksha-kita
+mv /opt/shiksha-kita /opt/_archive/shiksha-kita-20260502-123423
+cp /etc/systemd/system/shiksha-kita.service \
+   /etc/systemd/system/shiksha-kita.service.20260502-123423.bak
+```
+
+**Restore-Pfad** (sehr unwahrscheinlich nötig):
+
+```bash
+mv /opt/_archive/shiksha-kita-20260502-123423 /opt/shiksha-kita
+cp /etc/systemd/system/shiksha-kita.service.20260502-123423.bak \
+   /etc/systemd/system/shiksha-kita.service
+systemctl daemon-reload
+systemctl enable --now shiksha-kita
+```
+
+Cutover-Tooling unter [`scripts/migrate-kita-legacy/`](../scripts/migrate-kita-legacy/)
+bleibt im Repo — falls jemals rückwärts migriert oder aus der archivierten
+SQLite-DB nachgelesen werden muss.
 
 ---
 

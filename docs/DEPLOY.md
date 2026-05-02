@@ -93,7 +93,7 @@ RuntimeError, die direkt auf die richtige Doku-Stelle zeigt.
 
 | Name | Pflicht | Wo gesetzt | Hinweis |
 |---|---|---|---|
-| `DATABASE_URL` | **ja** | `database.conf` | `postgresql://shiksha:<pass>@localhost/shiksha` |
+| `DATABASE_URL` | **ja** | `database.conf` (für `shiksha.service`) **+** `/etc/cron.d/shiksha-insights` (für Cron-Jobs) | `postgresql://shiksha:<pass>@localhost/shiksha` |
 | `ANTHROPIC_API_KEY` | für `/marketing/generate`, `/kita/ai/*` | `anthropic.conf` | `sk-ant-...` aus Anthropic Console |
 | `VAPID_PRIVATE_KEY` | für Web-Push | `vapid.conf` | absoluter Pfad zur `.pem`-Datei |
 | `VAPID_PUBLIC_KEY` | für Web-Push | `vapid.conf` | base64-string aus `vapid_setup.sh` |
@@ -127,14 +127,22 @@ keine eigenen `create_engine()`-Aufrufe mehr im Repo.
 **Cron-Jobs** (`shiksha_insights_cron.py`, `marketing_pool_import.py`,
 `fixtures_importer.py`, `safeguarding_cron.py`) brauchen `DATABASE_URL`
 ebenfalls. Sie laufen **nicht** als Teil von `shiksha.service` — das
-systemd-Drop-In wird also nicht automatisch geerbt. Optionen:
+systemd-Drop-In wird also nicht automatisch geerbt. Aktuelle Lösung:
+eigene `Environment=`-Zeile in `/etc/cron.d/shiksha-insights`.
 
-- `/etc/cron.d/shiksha-*`: `Environment=`-Zeile vor der Cron-Zeile setzen
-- Oder systemd-Timer + eigene `shiksha-cron-*.service` mit gleichem Drop-In
-- Oder `/opt/shiksha/.env`-Datei + `python-dotenv` (dann liest `database.py`
-  per `load_dotenv()`)
+Beispiel:
 
-Konkret geregelt im server-seitigen Setup ([Schritt 3 von Phase 7]).
+```cron
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+DATABASE_URL=postgresql://shiksha:<pass>@localhost/shiksha
+
+0 3 * * *  root  /opt/shiksha/venv/bin/python /opt/shiksha/shiksha_insights_cron.py >> /var/log/shiksha-insights.log 2>&1
+```
+
+Bei jeder Passwort-Rotation **beide** Stellen synchron updaten —
+`database.conf` und `/etc/cron.d/shiksha-insights`. Siehe
+[Secret Rotation](#secret-rotation).
 
 ### `ANTHROPIC_API_KEY`
 
@@ -151,6 +159,74 @@ VAPID-Keys liegen unter `/opt/shiksha/secrets/.vapid/`. Erst-Setup auf
 dem Server: `bash deploy/scripts/vapid_setup.sh` — generiert das Key-Paar
 und schreibt das Drop-In `/etc/systemd/system/shiksha.service.d/vapid.conf`.
 Public-Key wird vom Client (`shiksha-push.js`) zum Subscribe gebraucht.
+
+---
+
+## Secret Rotation
+
+Standard-Vorgehen für eine DB-Passwort-Rotation. Ist im Phase-7-Sprint
+am 2026-05-02 das erste Mal so durchgespielt worden — funktioniert mit
+einer kurzen Auth-Lücke zwischen `ALTER USER` und `restart`, die im
+Pilot-Betrieb akzeptabel ist.
+
+```bash
+# 1. Neues Passwort generieren (24 Bytes hex, lokal — nie ins Repo)
+NEW_PASS=$(openssl rand -hex 24)
+
+# 2. Beide Drop-In-Dateien aktualisieren (Service + Cron)
+sudo tee /etc/systemd/system/shiksha.service.d/database.conf <<EOF
+[Service]
+Environment="DATABASE_URL=postgresql://shiksha:${NEW_PASS}@localhost/shiksha"
+EOF
+sudo chmod 600 /etc/systemd/system/shiksha.service.d/database.conf
+
+# Cron-Datei: Backup, dann ersetzen
+sudo cp /etc/cron.d/shiksha-insights \
+        /etc/cron.d/shiksha-insights.$(date +%Y%m%d-%H%M%S).bak
+sudo sed -i "s|^DATABASE_URL=.*|DATABASE_URL=postgresql://shiksha:${NEW_PASS}@localhost/shiksha|" \
+        /etc/cron.d/shiksha-insights
+
+# 3. systemd das neue Env mitteilen (lädt Drop-Ins, KEIN Restart)
+sudo systemctl daemon-reload
+
+# 4. PostgreSQL: Passwort umstellen
+sudo -u postgres psql -d shiksha -c "ALTER USER shiksha WITH PASSWORD '${NEW_PASS}'"
+
+# 5. Service neu starten — liest jetzt das neue Env
+sudo systemctl restart shiksha
+
+# 6. Verifikation
+curl -s -o /dev/null -w 'health: %{http_code}\n'   https://kita.shiksha.tun.zone/health
+curl -s -o /dev/null -w 'editions: %{http_code}\n' https://kita.shiksha.tun.zone/kita/api/platform/editions
+# Altes Passwort muss FATAL geben — Sanity-Check (OLD_PASS lokal in der
+# Shell aus dem Rotations-Vorlauf bekannt; nie ins Repo, nie in History):
+PGPASSWORD="$OLD_PASS" psql -h localhost -U shiksha -d shiksha -c "SELECT 1" 2>&1 | grep -i 'authentication failed' && echo "✓ altes Passwort invalidiert"
+
+# 7. Variable im Shell-Kontext löschen (kein History-Leak)
+unset NEW_PASS
+history -d $(history 1)
+```
+
+**Reihenfolge ist wichtig:** Step 3 (`daemon-reload`) lädt die Drop-In-
+Werte in den Service-Manager, ohne den laufenden Prozess zu touchen.
+Step 4 invalidiert das alte Passwort — neue DB-Connections schlagen
+fehl, bestehende Connections laufen noch kurz weiter. Step 5 startet
+den Service mit dem neuen Env neu, ab dann läuft alles mit dem neuen
+Passwort. Auth-Lücke insgesamt ~1-2 Sekunden.
+
+**Falls etwas schief geht** zwischen Step 4 und Step 5:
+
+```bash
+# Altes Passwort im PG wiederherstellen (Wert kennst Du aus dem Drop-In
+# vor der Rotation oder dem Cron-Backup-File). Service hängt sonst.
+sudo -u postgres psql -d shiksha -c "ALTER USER shiksha WITH PASSWORD '<previous-password>'"
+sudo systemctl restart shiksha
+# Dann Rotation neu starten, sauber.
+```
+
+**Audit-Spur:** Cron-Backup-Files in `/etc/cron.d/shiksha-insights.*.bak`
+werden bei jeder Rotation automatisch erzeugt — nicht löschen, sind die
+History.
 
 ---
 

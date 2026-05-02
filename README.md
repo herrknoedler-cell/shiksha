@@ -48,15 +48,16 @@ Mehr: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 
 ## Tech-Schulden
 
-Bekannte Findings stehen in [`docs/tech-debt.md`](docs/tech-debt.md).
-Stand: das ehemalige **Critical Security Debt** (hardcoded DB-Credentials)
-ist code-seitig in Phase 7 aufgelöst — alle Connection-Strings laufen
-jetzt über `DATABASE_URL` mit Hard-Fail-Pattern in `server/database.py`.
-Server-seitige Passwort-Rotation und Cron-ENV-Setup folgen unmittelbar
-danach.
+Bekannte Findings + Audit-Trail in [`docs/tech-debt.md`](docs/tech-debt.md).
+Stand: das **Critical Security Debt** (hardcoded DB-Credentials in 9 Files)
+ist in Phase 7 vollständig aufgelöst — Code env-driven via `DATABASE_URL`
+mit Hard-Fail-Pattern, server-seitige Passwort-Rotation durchgeführt,
+alter Wert auf PostgreSQL-Seite invalidiert. Plus Side-Cleanup: der
+inaktive Legacy-Service `shiksha-kita` ist sauber archiviert.
 
 Noch offen: ein **Unfinished Refactor** (Document-Compression-Split,
-nicht Service-kritisch).
+nicht Service-kritisch). Rotation-Runbook für künftige DB-Passwort-
+Wechsel: [`docs/DEPLOY.md → Secret Rotation`](docs/DEPLOY.md#secret-rotation).
 
 ## Lizenz
 
