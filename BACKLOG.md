@@ -162,6 +162,70 @@
 
 ---
 
+## 🌱 INTRO-Modul "Wir lernen uns kennen"
+
+### Build-Pack v1.0 fertig
+- **Status:** done ✓
+- **Quelle:** Cowork-Session 2026-05-03
+- **Notizen:** Vollständige Spec in `docs/build-packs/INTRO_AND_CHAT_MODULE_BUILD_PACK_V1.md`. 16-Schritte-Sequenz für KITA, Cross-Edition-Architektur, DB-Schema, UI-Sketches.
+
+### Phase 1.1 — Engine + KITA-Code
+- **Status:** planned, nach Krummelus-Pilot-Lessons
+- **Aufwand:** 1 Tag (~6h)
+- **Quelle:** Cowork-Session 2026-05-03
+- **Notizen:** intro_engine.py, intro_steps_kita.py, DB-Migration (intro_progress + intro_step_data), API-Endpoints, einfaches Wizard-Modal-UI. Lessons aus dem Krummelus-Manual-Lauf am 4. Mai fließen direkt in die Sequenz-Daten ein (siehe Notiz-Block in `INTRO_KITA_KRUMMELUS_KICKOFF.md`).
+
+### Phase 1.2 — UI-Polish
+- **Status:** planned, nach 1.1
+- **Aufwand:** 1 Tag (~6h)
+- **Notizen:** Holi-Wizard mit GSAP-Übergängen, Skip-Logik mit Defaults, Bilder-Pool-Integration in Schritt 12, Marketing-Builder-Trigger in Schritt 11, Identity-Wizard in Schritt 3.
+
+### Phase 1.3 — Andere Editionen
+- **Status:** idea, nach KITA-Stabilisierung
+- **Aufwand:** ~2-3h pro Edition
+- **Notizen:** intro_steps_camping.py, intro_steps_schule.py, intro_steps_yoga.py, intro_steps_surfschule.py, intro_steps_club.py. Wiederverwendung der Engine + UI, nur Sequenz-Daten edition-spezifisch. Build-Pack hat Skizzen für alle.
+
+### Krummelus-Lessons-Loop
+- **Status:** in-progress (Pilot-Lauf 4. Mai 2026)
+- **Aufwand:** laufend
+- **Notizen:** Nach jedem Pilot-Schritt notieren: Was war zu lang, welche Begriffe unklar, was wurde geskipt, was hat begeistert. Notiz-Felder im Kickoff-File. Auswertung am Abend des 4. Mai → konkrete Sequenz-Anpassungen für v1.1.
+
+---
+
+## 💬 CHAT-Modul "shiksha ist da"
+
+### Phase 1.0 — Claude-only MVP
+- **Status:** planned
+- **Aufwand:** 1 Tag (~6-8h)
+- **Quelle:** Cowork-Session 2026-05-03
+- **Notizen:** Floating-Bubble + Chat-Window-UI im Holi-Look. Anthropic Claude API mit System-Prompt + kontextabhängigem Greeting. Memory-Loader liest BACKLOG.md, tech-debt.md, EDITIONS.md. 6 read-only Tools (get_kita_overview, get_st_calculation, list_audit_findings, get_calendar_today, get_intro_status, search_memory). Konversations-Persistenz (chat_conversations + chat_messages).
+
+### Phase 1.1 — Multi-LLM Support
+- **Status:** idea, nach 1.0 stabil
+- **Aufwand:** 1 Tag (~4-6h)
+- **Notizen:** OpenAI ChatGPT + Google Gemini als Provider-Adapter. Settings-UI für Provider-Wahl. Provider-Status-Check (welche API-Keys verfügbar). DSGVO-Hinweis bei Multi-LLM (KITA-Daten gehen an externe APIs).
+
+### Phase 1.2 — Action-Tools
+- **Status:** idea
+- **Aufwand:** 1-2 Tage (~8-12h)
+- **Notizen:** Schreibende Tools: create_anmeldung, send_email_to_parents, generate_marketing_text, create_audit_report, schedule_event. Alle mit Bestätigungs-Gate (User klickt explizit "Ja, mach"). Audit-Log für jede Aktion.
+
+### Phase 1.3 — Voice
+- **Status:** idea, optional
+- **Aufwand:** mittel
+- **Notizen:** Browser-Speech-API für Eingabe, TTS-Cloud-Service für Ausgabe. Nicht-Ziel für 2026, kommt wenn überhaupt nach Multi-LLM.
+
+### Persona-Konsistenz über LLMs
+- **Status:** tech-debt, ab 1.1 relevant
+- **Aufwand:** Stil-Postprocessing oder Prompt-Engineering
+- **Notizen:** ChatGPT und Gemini interpretieren Persona-Prompts unterschiedlich. Bei Multi-LLM darauf achten, dass die SHIKSHA-Stimme konsistent bleibt — selbe System-Prompts über alle Provider, plus eventuelle Stil-Filter.
+
+### ANTHROPIC_API_KEY ist im Server
+- **Status:** done ✓
+- **Notizen:** Seit Phase 7 (2. Mai 2026) im systemd Drop-In `/etc/systemd/system/shiksha.service.d/anthropic.conf`. Chat-MVP kann direkt darauf zugreifen.
+
+---
+
 ## 🌟 Pilot-Aktivierung
 
 ### Krummelus mit echten Daten onboarden
