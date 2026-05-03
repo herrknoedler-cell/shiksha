@@ -254,6 +254,70 @@
 
 ---
 
+## 🔧 REPAIR-Network (Lokal-Reparatur-Marktplatz)
+
+### V0.2 — Erster manueller Pilot-Auftrag (Krummelus)
+- **Status:** planned, sobald Krummelus stabil läuft
+- **Aufwand:** 4-6 Wochen, manuell vermittelt
+- **Quelle:** `docs/build-packs/SHIKSHA_REPAIR_NETWORK_CONCEPT_V0_1.md`
+- **Notizen:** Heidi nennt einen Reparatur-Bedarf (kaputtes Spielzeug, Möbel-Beschlag), Founder vermittelt manuell an FAB Lab Dornbirn oder lokalen Maker. Ohne Code, nur Process. Lessons → V1.0-Spec.
+
+### V1.0 — MVP-Marketplace
+- **Status:** idea (Code-Sprint nach Pilot-Lessons)
+- **Aufwand:** 3-4 Monate
+- **Quelle:** Konzept V0.1 in build-packs/
+- **Notizen:** Drucker-Registry mit PostGIS, Auftrag-Routing, Stripe Connect für Marketplace-Zahlungen, Bewertungssystem, Climate-Tracker, geographischer Cluster Vorarlberg.
+
+### Climate-Tracker als Cross-Edition-Feature
+- **Status:** idea
+- **Aufwand:** 1-2 Tage
+- **Notizen:** Pro Reparatur-Auftrag CO2-Ersparnis berechnen (lokal vs. Versand-Alternative). Sichtbar im Trägerin/Operator-Dashboard. Auch nutzbar für andere Edition-Aktionen mit Climate-Bezug.
+
+---
+
+## 🌟 Vision-Layer (langfristig, Master-Vision)
+
+### Master-Vision konsultieren
+- **Status:** done ✓ (`docs/master_vision.md`)
+- **Notizen:** Pflicht-Lektüre für jede Code-Session. Bei Konflikt zwischen Implementations-Idee und Vision gewinnt die Vision. Aktualisierungen via `vision:`-Commits, nur mit Founder-Beschluss.
+
+### Sonnenstands-Farbraum (Dynamic UI)
+- **Status:** idea
+- **Aufwand:** 1-2h Backend + Frontend-Integration
+- **Quelle:** `master_vision.md` Sektion 3
+- **Notizen:** `get_color_palette(time, location)` mit `astral` oder `pyephem`. Output: Hex-Codes als CSS-Custom-Properties via SSE-Push. 07:00 = Sunrise-Yellow, 20:00 = Strategic-Deep-Blue.
+
+### Theorie-Brücke (Wetter-API)
+- **Status:** idea
+- **Aufwand:** 4-6h
+- **Quelle:** `master_vision.md` Sektion 3
+- **Notizen:** Bei Wetterumschwung Outdoor → Indoor-Alternative vorschlagen. KITA: Bewegungsraum-Vorschläge. SCHULE: Theorie-Module statt Sport. Cross-Edition-Modul.
+
+### GASTRO-Edition (LUNCHBOX-Konzept)
+- **Status:** vision
+- **Aufwand:** Build-Pack noch zu schreiben
+- **Quelle:** `master_vision.md` Sektion 2
+- **Notizen:** 17% Wareneinsatz-Logik, Cook&Chill (vegetarisch, 12 Tage @ 3°C), Idle-Time-Production (14-17 Uhr Kombidämpfer-Batches), Veredelungs-Modul ("Technik macht Logistik, Mensch macht das Lächeln").
+
+### MOBILITY-Edition (Hardware-Layer)
+- **Status:** vision (CAMPING-Build-Pack existiert, Hardware-Erweiterung neu)
+- **Aufwand:** Build-Pack-Erweiterung + IoT-Integration
+- **Quelle:** `master_vision.md` Sektion 2
+- **Notizen:** GPS/Tankdaten, IoT-Schranken/Strom, Auto-Check-in via Geofencing, Dynamic Pricing nach Wetter+Auslastung.
+
+### Efficiency-Tracker (ROI sichtbar)
+- **Status:** idea
+- **Aufwand:** 1-2 Tage
+- **Quelle:** `master_vision.md` Sektion 4 ("Amazon-Moment")
+- **Notizen:** Pro Tool-Call Zeitersparnis berechnen ("check-in spart 45s vs. manuelle Liste"). Aggregiert: ROI-Beweis fürs Sales-Pitch.
+
+### 1€-Pricing-Vision (globale Skalierung)
+- **Status:** vision (langfristig)
+- **Quelle:** `master_vision.md` Sektion 1
+- **Notizen:** Bei massiver Skalierung Preis-Reduktion auf 1€/Monat mit 90% Social Impact. Manifest-Vision, kein 12-Monats-Plan.
+
+---
+
 ## 📚 Dokumentations-Schulden
 
 ### EDITIONS.md mit STITCH erweitern
