@@ -151,8 +151,9 @@ Der Efficiency-Tracker (siehe Build-Pack v2 TEIL 6) macht diese Frage messbar: p
 **Diese Datei ist Pflicht-Lektüre für jede Code-Session.** Wenn Claude beim nächsten Sprint eingreift:
 1. CLAUDE.md lesen (Architektur-Regeln, Lessons)
 2. **`master_vision.md` lesen (Philosophie, Pricing, Marken-DNA)** ← diese Datei
-3. SHIKSHA_BACKLOG.md lesen (was geplant ist)
-4. tech-debt.md lesen (was als Schulden bekannt ist)
+3. **`docs/WORDING_AND_LANGUAGE.md` lesen (bindender Sprach-Codex für UI-Texte und Persona)**
+4. SHIKSHA_BACKLOG.md lesen (was geplant ist)
+5. tech-debt.md lesen (was als Schulden bekannt ist)
 
 **Wann wird master_vision.md aktualisiert?**
 
