@@ -226,13 +226,127 @@
 
 ---
 
+## 🌅 TAGESAUSKLANG-Modul (NEU — aus Krummelus-Pilot)
+
+### Tagesausklang-Modul konzipieren
+- **Status:** idea (sehr stark, aus Mira-Pilot direkt)
+- **Aufwand:** Konzept-Sprint ~3-4h, Code-Sprint ~3-5 Tage
+- **Quelle:** Mira-Pilot Nachgespräch 4. Mai 2026
+- **Notizen:** 5-10-Minuten-Ritual am Tagesende. Push-Notification "Tagesausklang. 5 Minuten?". Mira öffnet PWA, SHIKSHA stellt 3-5 kontextuelle Fragen ("Wie war heute?", "Welches Kind hat Dich überrascht?", "Was musst Du Dir merken für morgen?"). Beobachtungen + Aufgaben + Audit-Trigger entstehen daraus. **Habitualisiert die SHIKSHA-Beziehung — Schlüssel zur echten Mit-Arbeiterin-Erfahrung.**
+
+### Eigenes Build-Pack: TAGESAUSKLANG
+- **Status:** planned
+- **Aufwand:** ~3h Schreib-Sprint
+- **Notizen:** Analog zu Dialog-Build-Pack v2.0. Sektionen: Vision, Trigger-Logik, Frage-Templates pro Tageszeit/Wochentag/Saison, kontextuelle Anpassung, Persistenz (Beobachtungs-Tagebuch), Datenschutz-Profil.
+
+---
+
+## 🤝 ONBOARDING v2.1 — Zwei-Phasen-Architektur (aus Mira-Pilot)
+
+### Phase 1 — Kennenlernen (getippt, nicht Audio)
+- **Status:** planned (Update zu Build-Pack v2.0)
+- **Aufwand:** Build-Pack-Update ~2h, Code ~2-3 Tage
+- **Quelle:** Mira-Pilot Nachgespräch
+- **Notizen:** Mira will tippen, nicht reden. Persona-Stimme bleibt (Du, erste Person), aber Eingabe-Medium ist Text. Conversational-First-Pattern stimmt — Eingabe-Modus ändert sich. **Implikation: SHIKSHA muss textlich funktionieren, nicht audio-zentriert.**
+
+### Phase 2 — Einrichten (Folgetag oder später)
+- **Status:** planned
+- **Aufwand:** mittlerer Sprint
+- **Notizen:** Nach Kennenlern-Phase eigene Einrichtungs-Phase: Mitarbeiter-Daten, Kinder-Daten, Webseite, Subdomain, Compliance-Setup. Geführt, schrittweise, mit Excel-Import-Option. Trennung schafft Atempause statt Termin-Marathon.
+
+### PWA-Onboarding-Flow nach Kennenlern-Phase
+- **Status:** planned
+- **Aufwand:** ~1 Tag
+- **Notizen:** Am Ende der Phase 1: Link + QR-Code zur PWA-Installation. Plus pro-OS-Anleitung (iOS Safari "Teilen → Zum Home-Screen", Android Chrome "Installieren"). Subscribe-Trigger triggert nach Install. Anleitung-Anzeige: kollabiert, expandiert auf Click ("Anleitung anzeigen").
+
+### Folge-Termin mit Verbindlichkeit
+- **Status:** idea
+- **Aufwand:** ~1 Tag
+- **Notizen:** Tool `schedule_followup_meeting` für Termin-Vereinbarung am Ende von Phase 1. Am Tag X: SHIKSHA hat vorbereitete Zusammenfassung des ersten Gesprächs + 2-3 Rückfragen. Iterativer Onboarding-Aufbau.
+
+---
+
+## 👥 Multi-Operator + Daily Workflows (aus Mira-Pilot)
+
+### Multi-Operator-Logik (Mira + Mama)
+- **Status:** idea
+- **Aufwand:** mittel (Datenmodell-Erweiterung)
+- **Quelle:** Mira-Pilot — Krummelus ist Familien-KITA mit Ko-Leitung
+- **Notizen:** Mehrere Trägerinnen pro KITA, jede mit eigener Identity, klare Rollen. Geteilte Sicht aufs Tagesgeschehen, individuelle Push-Inboxen, geteilte Beobachtungen. Single-Point-of-Failure beheben.
+
+### Wochenend-Bereitschafts-Modus
+- **Status:** planned
+- **Aufwand:** ~1 Tag
+- **Quelle:** Mira-Pilot — Beispiel "3× Anruf am Wochenende, niemand mitbekommen"
+- **Notizen:** Eltern-Push-Inbox sammelt Wochenend-Meldungen (statt Anrufe). Diensthabender Operator sieht sortierte Übersicht — nicht 3× Klingel, sondern eine Liste. Optional: Auto-Reply *"Bereitschaft sieht das, meldet sich Montag früh."*
+
+### Beobachtungen direkt eingeben (Pädagogen-PWA)
+- **Status:** idea
+- **Aufwand:** mittel
+- **Quelle:** Mira-Pilot — *"wo Du Beobachtung speisen kannst, ohne dass ein Zettel verloren geht"*
+- **Notizen:** In der Pädagogen-PWA pro Kind eine Quick-Beobachtung-Eingabe. Audio-Memo-Option für on-the-go. Auto-Transkript (später). Direkt zum Kind-Datensatz, kein Nachtragen.
+
+### Volltext-Suche über alle Dokumente
+- **Status:** planned
+- **Aufwand:** mittel
+- **Quelle:** Mira-Pilot — *"Zettel vom Jahr 22 wiederfinden"*
+- **Notizen:** Suche über alle Module (Beobachtungen, Anmeldungen, Audit, Dokumente). Volltext + Filter (Zeitraum, Kind, Mitarbeiterin, Edition).
+
+### Land-Audit auf Knopfdruck
+- **Status:** idea
+- **Aufwand:** mittel-hoch (abhängig von Land-Schnittstellen-Recherche)
+- **Quelle:** Mira-Pilot — *"das müssen wir bei der Stadt abgeben"*
+- **Notizen:** Welche Daten will das Land — auf Klick zusammenstellen, exportieren, abgeben. Vorarlberger KGG-Spezifikation als Referenz, später andere Bundesländer.
+
+---
+
+## 🪟 Trägerin-Dashboard UI-Polish
+
+### Klickbare Card-Deep-Links
+- **Status:** ready-to-build
+- **Aufwand:** ~30 Min
+- **Quelle:** Mira-Pilot-Vorabend 4. Mai 2026 (vor dem ersten echten Lauf erkannt)
+- **Notizen:** Cards im Trägerin-Dashboard sollen direkt zur jeweiligen Bearbeitungs-UI führen. Aktuell sind sie nur Anzeige.
+
+  Pro Card ein `<a>` oder onclick-Handler:
+
+  ```
+  Anwesend Heute       → /accounting/ui/kita/anwesenheit
+  Stellenprozent       → /accounting/ui/kita/st-rechner
+  Personen             → /accounting/ui/kita/personen
+  Kalender             → /accounting/ui/kita/calendar
+  Push                 → /accounting/ui/kita/push
+  Compliance           → /accounting/ui/kita/compliance
+  Anstehende Termine   → /accounting/ui/kita/calendar?view=week
+  Wer ist gerade da    → /accounting/ui/kita/anwesenheit
+  ```
+
+  Plus:
+  - Hover-State (cursor: pointer, subtle box-shadow-lift)
+  - Mobile-tauglich (Touch wie Click)
+  - Optional: Card-Klick mit subtle Animation (transform: scale(0.98) on :active)
+
+  Risiko: niedrig (additive UI-Änderung, kein Backend-Refactor). Test
+  vor Deploy: Klick auf jede Card → richtige URL.
+
+### Inkonsistenz Card-Layout (drei ovale vs. rechteckige)
+- **Status:** idea
+- **Aufwand:** ~1h Polish
+- **Quelle:** Mira-Pilot-Vorabend
+- **Notizen:** Aktuell sind drei Cards (Personen / Kalender / Push) als
+  ovale Schatten gerendert mit kleinen Icons, alle anderen rechteckig
+  mit Text. Vereinheitlichen: alle Cards mit gleichem Layout-Typ
+  (rechteckig empfohlen, plus optionale Icons als Akzent).
+
+---
+
 ## 🌟 Pilot-Aktivierung
 
 ### Krummelus mit echten Daten onboarden
 - **Status:** highest-priority
 - **Aufwand:** 8-Wochen-Sprint laut Pilot-Onboarding-Checkliste
 - **Quelle:** Pilot-Onboarding-Checkliste (existiert in /outputs/)
-- **Notizen:** Heidi (Schwester) als erster echter Pilot. Mitarbeiter-Stammdaten, Kinder, Eltern. Anwesenheit live, Eltern-Anmeldungen, Audit-Reports mit echten Zahlen. **Aus dem Pilot kommen: Screenshots, Storys, Testimonials, Conversion-Material.**
+- **Notizen:** Mira (Schwester) als erster echter Pilot. Mitarbeiter-Stammdaten, Kinder, Eltern. Anwesenheit live, Eltern-Anmeldungen, Audit-Reports mit echten Zahlen. **Aus dem Pilot kommen: Screenshots, Storys, Testimonials, Conversion-Material.**
 
 ### VAPID-Keys generieren + Push-Subscribe in Pädagogen-PWA
 - **Status:** planned, blocking für echte Push-Demo
@@ -260,7 +374,7 @@
 - **Status:** planned, sobald Krummelus stabil läuft
 - **Aufwand:** 4-6 Wochen, manuell vermittelt
 - **Quelle:** `docs/build-packs/SHIKSHA_REPAIR_NETWORK_CONCEPT_V0_1.md`
-- **Notizen:** Heidi nennt einen Reparatur-Bedarf (kaputtes Spielzeug, Möbel-Beschlag), Founder vermittelt manuell an FAB Lab Dornbirn oder lokalen Maker. Ohne Code, nur Process. Lessons → V1.0-Spec.
+- **Notizen:** Mira nennt einen Reparatur-Bedarf (kaputtes Spielzeug, Möbel-Beschlag), Founder vermittelt manuell an FAB Lab Dornbirn oder lokalen Maker. Ohne Code, nur Process. Lessons → V1.0-Spec.
 
 ### V1.0 — MVP-Marketplace
 - **Status:** idea (Code-Sprint nach Pilot-Lessons)

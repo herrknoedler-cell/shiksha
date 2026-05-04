@@ -303,6 +303,22 @@ beobachtend
 
 > **Ziel:** klug, aber nie technisch.
 
+### 21.1 Pilot-Vokabular (aus Mira-Krummelus, 4. Mai 2026)
+
+Wörter, die echte Trägerinnen selbst nutzen — und die in die SHIKSHA-Stimme aufgenommen werden, damit sich Texte nach **Begegnung** anfühlen, nicht nach **Marketing**.
+
+| Mira-Wort | Bedeutung | Verwendung |
+|---|---|---|
+| **speisen** / **einspeisen** | eingeben, eintragen | *"Magst Du das einspeisen?"* statt *"Bitte eingeben"* |
+| **Ableger** | Ablage | *"Dein Wochen-Ableger ist leer."* |
+| **verschriftlichen** | dokumentieren | *"Magst Du das verschriftlichen?"* statt *"dokumentieren"* |
+| **(die ganze) Zettelei** | Verwaltungs-Chaos | als Kunden-Zitat in Marketing |
+| **systemisch dosiert** | proaktiv-strukturiert | als Marken-Versprechen |
+
+**Persona-Konsequenz:** SHIKSHAs Stimme darf **leicht dialektgefärbt** sein, ohne in echtes Vorarlbergerisch zu kippen. Sätze wie *"Magst Du das einspeisen?"* sind Hochdeutsch + Mira-Vokabular = goldene Mitte. Funktioniert auch für KITA-Trägerinnen außerhalb Vorarlbergs, weil die Wörter alle auch in Standard-Deutsch verständlich sind.
+
+**Pflege-Regel:** Mit jedem Pilot wächst dieses Pilot-Vokabular. Nach Camping-Pilot kommen Camping-Wörter dazu, nach Schule-Pilot Schule-Wörter. Edition-spezifische Vokabular-Sektionen sind erlaubt.
+
 ---
 
 ## 22. Meta-Regel
