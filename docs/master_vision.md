@@ -49,7 +49,7 @@ Fokus auf:
 - **Echtzeit-Berechnung des ST%-Schlüssels** (Stellenprozent nach KGG-Förderstaffel)
 - **Proaktive Warnung bei Personalengpässen** — Push an Leitung, Mitarbeiter und Eltern
 
-→ Pilotpartner: Krummelus, Dornbirn (Trägerin: Heidi Knödler)
+→ Pilotpartner: Krummelus, Dornbirn (Trägerin: Mira Fiel)
 → Status: **live ab morgen**, Hybrid-Lauf mit Founder als SHIKSHA-Sprecher
 → Build-Packs: `docs/build-packs/SHIKSHA_DIALOG_BUILD_PACK_V2.md`
 
@@ -143,6 +143,20 @@ Bei Wetterumschwung (via Wetter-API):
 Konsequenz für jeden Implementations-Sprint: bei jedem Feature die Frage stellen — *spart das jemandem echte Lebenszeit, oder ist es nur Spielerei?*
 
 Der Efficiency-Tracker (siehe Build-Pack v2 TEIL 6) macht diese Frage messbar: pro Aktion eine Zeitersparnis-Berechnung. Aggregiert über Wochen ergibt das den **ROI-Beweis** für jede Trägerin, die SHIKSHA bezahlt.
+
+### 4.1 Pilot-Validierung — Mira spricht den Vision-Satz
+
+Im ersten echten Pilot-Gespräch (Mira Fiel, Krummelus Dornbirn, 4. Mai 2026) hat Mira den Kern der Master-Vision **in eigenen Worten formuliert** — ohne unsere Architektur zu kennen:
+
+> *"Ein Programm, was mir die ganze Zettelei und Denkerei abnimmt."*
+> 
+> — **Mira Fiel**, Trägerin · Krummelus, Dornbirn
+
+Dass eine Trägerin den Vision-Satz selbst sagt, bevor sie das Produkt vollständig sieht, ist **die stärkste Validierung dafür, dass die Master-Vision Marktrealität ist** — nicht nur strategische Hoffnung.
+
+**Konsequenz für die Marken-Kommunikation:** Mira-Wortlaut wird zur Marken-Subline. Statt der ursprünglichen Tech-orientierten Tagline (*"Plattform, die mitlernt"*) wird die Mira-Stimme zum Hero-Element auf der Plattform-Site und auf Edition-Sales-Pages — siehe `docs/proposals/HERO_UPDATE_MIRA_STIMME.md` für die konkrete Umsetzung.
+
+Pflege-Regel: Mit jedem neuen Pilot kommen weitere Stimmen dazu. Camping-Pilot, Schule-Pilot, Surfschule-Pilot — alle dürfen ihre eigenen Mira-Sätze beitragen. Das ist nicht "Marketing-Material sammeln", das ist **Marken-Realität durch Pilot-Stimmen erweitern**.
 
 ---
 
