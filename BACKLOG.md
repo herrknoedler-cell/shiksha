@@ -241,7 +241,10 @@
 
 ---
 
-## 🤝 ONBOARDING v2.1 — Zwei-Phasen-Architektur (aus Mira-Pilot)
+## 🤝 PHASEN-ARCHITEKTUR — Kennenlernen → Verdichten (aus Mira-Pilot)
+
+> **Kanon:** Phase 1 = Kennenlernen, Phase 2 = Verdichten.
+> Volle Definition: `VERDICHTEN_PHASE_SPEC.md` · Wording-Regeln: `WORDING_AND_LANGUAGE.md` Sektion 21.2.
 
 ### Phase 1 — Kennenlernen (getippt, nicht Audio)
 - **Status:** planned (Update zu Build-Pack v2.0)
@@ -249,20 +252,25 @@
 - **Quelle:** Mira-Pilot Nachgespräch
 - **Notizen:** Mira will tippen, nicht reden. Persona-Stimme bleibt (Du, erste Person), aber Eingabe-Medium ist Text. Conversational-First-Pattern stimmt — Eingabe-Modus ändert sich. **Implikation: SHIKSHA muss textlich funktionieren, nicht audio-zentriert.**
 
-### Phase 2 — Einrichten (Folgetag oder später)
+### Phase 2 — Verdichten (im Alltag, nicht als Termin)
 - **Status:** planned
-- **Aufwand:** mittlerer Sprint
-- **Notizen:** Nach Kennenlern-Phase eigene Einrichtungs-Phase: Mitarbeiter-Daten, Kinder-Daten, Webseite, Subdomain, Compliance-Setup. Geführt, schrittweise, mit Excel-Import-Option. Trennung schafft Atempause statt Termin-Marathon.
+- **Aufwand:** kontinuierlich, kein Sprint-Format
+- **Notizen:** Im Alltag werden wiederkehrende Situationen sichtbar, Aussagen werden zu Mustern, Beobachtungen bleiben erhalten, erste Klarheit entsteht. Kein Termin. Kein Workshop. Kein Audit. Konkrete Rituale, durch die Verdichten geschieht: **Tagesausklang** (zentral, siehe `TAGESAUSKLANG_BUILD_PACK_V0_1.md`), Pädagogen-Beobachtungen, Wochen-Rückblick.
 
-### PWA-Onboarding-Flow nach Kennenlern-Phase
+### Bridge — Einrichten (zwischen Kennenlernen und Verdichten)
+- **Status:** planned
+- **Aufwand:** mittel
+- **Notizen:** Mitarbeiter-Daten, Kinder-Daten, Webseite, Subdomain, Compliance-Setup. **Keine eigene Phase**, sondern eine schrittweise Bridge — geführt, mit Excel-Import-Option, mit Atempausen. Geschieht nach Kennenlernen, läuft in Verdichten hinein. Wird in der Trägerin-Sicht nicht als "Phase" benannt, sondern bleibt unauffällig praktisch.
+
+### PWA-Onboarding-Flow nach Kennenlernen
 - **Status:** planned
 - **Aufwand:** ~1 Tag
-- **Notizen:** Am Ende der Phase 1: Link + QR-Code zur PWA-Installation. Plus pro-OS-Anleitung (iOS Safari "Teilen → Zum Home-Screen", Android Chrome "Installieren"). Subscribe-Trigger triggert nach Install. Anleitung-Anzeige: kollabiert, expandiert auf Click ("Anleitung anzeigen").
+- **Notizen:** Am Ende von Kennenlernen: Link + QR-Code zur PWA-Installation. Plus pro-OS-Anleitung (iOS Safari "Teilen → Zum Home-Screen", Android Chrome "Installieren"). Subscribe-Trigger triggert nach Install. Anleitung-Anzeige: kollabiert, expandiert auf Click ("Anleitung anzeigen").
 
 ### Folge-Termin mit Verbindlichkeit
 - **Status:** idea
 - **Aufwand:** ~1 Tag
-- **Notizen:** Tool `schedule_followup_meeting` für Termin-Vereinbarung am Ende von Phase 1. Am Tag X: SHIKSHA hat vorbereitete Zusammenfassung des ersten Gesprächs + 2-3 Rückfragen. Iterativer Onboarding-Aufbau.
+- **Notizen:** Tool `schedule_followup_meeting` für Termin-Vereinbarung am Ende von Kennenlernen. Am Tag X: SHIKSHA hat vorbereitete Zusammenfassung des ersten Gesprächs + 2-3 Rückfragen. Iterativer Aufbau hinüber ins Verdichten.
 
 ---
 

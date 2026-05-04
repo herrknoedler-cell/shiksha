@@ -110,7 +110,7 @@ Mira hat im Nachgespräch klar formuliert:
 
 > *"Schritt 1 — wie jetzt gemacht, allerdings hätte ich es lieber getippt (Chat). Schritt 2 — Erfassung der Daten + Webseite + Daten einrichten."*
 
-**Implikation für Build-Pack v2.0:**
+**Implikation für Build-Pack v2.0** (kanonisierte Phasen-Architektur — siehe `VERDICHTEN_PHASE_SPEC.md`):
 
 ```
 Phase 1 — Kennenlernen (Conversational, getippt)
@@ -120,14 +120,24 @@ Phase 1 — Kennenlernen (Conversational, getippt)
   Output: Ein erster "Steckbrief" + offene Themen-Liste
   
   → Kein Druck, nichts wird "fertig" am ersten Tag.
-  
-Phase 2 — Einrichten (Folgetag oder später)
+
+Bridge — Einrichten (zwischen Phase 1 und Phase 2)
   Themen: Mitarbeiter-Daten, Kinder-Daten, Webseite, Subdomain,
            Compliance-Setup
   Format: Geführt, schrittweise, mit Excel-Import-Option
-  Dauer: 30-45 Min
+  Dauer: 30-45 Min, gerne über Tage verteilt
   Output: System ist live mit echten Daten
+  
+  → Keine eigene Phase. Eine praktische Bridge.
+
+Phase 2 — Verdichten (im Alltag, nicht als Termin)
+  Themen: Beobachtungen, Tagesausklang, Wochen-Rückblick
+  Format: tägliche und wöchentliche Rituale, kein Workshop
+  Output: wiederkehrende Situationen werden sichtbar,
+          Aussagen werden zu Mustern, erste Klarheit entsteht
 ```
+
+> **Anmerkung:** Was Mira oben "Schritt 2" nannte (Daten einrichten), ist in der finalen Architektur die **Bridge**, nicht Phase 2. Phase 2 ist *Verdichten* — und beginnt, sobald Mira mit dem System lebt. Die Trennung ist bewusst: Einrichten ist Pflicht-Praktisch, Verdichten ist Atem-Räumig.
 
 **Schlüssel-Insight:** Mira will **getippt**, nicht **Audio**. Audio-Konversation ist Thomas-präferiert (er ist Sprecher-Typ), Mira ist Tipp-Typ. Conversational-First-Pattern aus v2.0 stimmt — aber das **Eingabe-Medium** ist Text, nicht Sprache.
 

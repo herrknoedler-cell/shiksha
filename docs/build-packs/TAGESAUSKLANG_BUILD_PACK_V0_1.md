@@ -3,10 +3,14 @@
 **Stand:** 4. Mai 2026
 **Status:** Konzept-Skizze · Umsetzung nach Krummelus-Pilot-Stabilisierung
 **Cross-Reference:**
-- `master_vision.md` — strategische DNA
+- `master_vision.md` — strategische DNA (Sektion 4.2 Phasen-Architektur)
+- `VERDICHTEN_PHASE_SPEC.md` — Phase 2 = Verdichten · Definition + Wording
+- **`TAGESAUSKLANG_KONTEXTUELLE_REAKTION.md`** — bindende Reaktions-Logik (fünf Pfade)
 - `docs/build-packs/SHIKSHA_DIALOG_BUILD_PACK_V2.md` — Conversational-Engine
-- `docs/WORDING_AND_LANGUAGE.md` — Persona + Vokabular
+- `docs/WORDING_AND_LANGUAGE.md` — Persona + Vokabular (Sektion 21.2 Phasen-Vokabular)
 - `docs/pilot/krummelus-lessons-v1.md` — Ursprung der Idee
+
+**Position im System:** TAGESAUSKLANG ist das zentrale Ritual, durch das **Verdichten** (Phase 2) im Alltag geschieht. Kennenlernen findet einmalig statt; Verdichten geschieht täglich — und Tagesausklang ist sein Anker.
 
 ---
 
@@ -18,23 +22,23 @@ Aus Mira-Pilot, 4. Mai 2026:
 
 > *"Sie kann sich auch gut vorstellen, kurz vor Feierabend ein Ritual von 5-10 Minuten einzuführen, an dem sie an SHIKSHA die Beobachtungen des Tages mitteilt und auf Fragen von SHIKSHA antwortet."*
 
-Diese Aussage hat die Architektur-Strategie verändert: **Onboarding ist einmalig — Tagesausklang ist das Beziehung-bauende Modul.**
+Diese Aussage hat die Architektur-Strategie verändert: **Kennenlernen ist einmalig — Tagesausklang ist das Verdichtungs-Ritual, das Beziehung baut.**
 
 ---
 
 ## 2. Warum das Modul wichtig ist
 
-### Onboarding bringt Daten. Tagesausklang baut Beziehung.
+### Kennenlernen bringt einen ersten Steckbrief. Tagesausklang verdichtet das Bild — Tag für Tag.
 
 Vergleich:
 
-| Onboarding | Tagesausklang |
+| Kennenlernen (Phase 1) | Tagesausklang (Teil von Verdichten / Phase 2) |
 |---|---|
 | 15-30 Min, einmalig | 5-10 Min, täglich |
-| Stammdaten erfassen | Beobachtungen sammeln |
-| Setup-Charakter | Ritual-Charakter |
+| Erste Stimme, erste Themen | Beobachtungen sammeln |
+| Konversationell | Ritual-Charakter |
 | Frage: *"Wer bist Du?"* | Frage: *"Wie war heute?"* |
-| User lernt Software | User trifft eine Person |
+| User lernt SHIKSHA kennen | User trifft eine Person — die mitlernt |
 
 ### Was das Modul für Mira (und vergleichbare Trägerinnen) löst
 
@@ -123,92 +127,68 @@ SHIKSHA:    Schönen Abend, Mira.
 
 ---
 
-## 4. Frage-Architektur
+## 4. Reaktions-Architektur
 
-### Kern-Fragen (immer mindestens eine davon)
+> **Kanon: `TAGESAUSKLANG_KONTEXTUELLE_REAKTION.md`** — fünf Pfade, Entscheidungs-Heuristik, Persona-Prompt-Skelett, Formulierungs-Repository.
 
-```
-1. Wie war heute?                          → Stimmungs-Anker
-2. Welches Kind hat Dich heute überrascht? → Beobachtungs-Trigger
-3. Was musst Du Dir merken für morgen?     → Aufgaben-Anker
-4. Hast Du heute irgendwo gestockt?        → Friction-Logging
-5. Hast Du etwas dem Land zu melden?       → Audit-Trigger
-```
+Die Reaktions-Logik ist nicht „welche Frage stellt SHIKSHA als nächstes", sondern „**reicht ein Satz, oder hilft genau eine Frage?**"
 
-### Kontextuelle Anpassung
+### Die fünf Pfade (Kurzfassung)
 
-SHIKSHA wählt Fragen basierend auf:
+| Pfad | Wann | Beispiel |
+|---|---|---|
+| **1 — Liebevoller Satz** | Eintrag in sich rund | *„Das nehme ich mit."* |
+| **2 — Unsicherheit benennen** | Offene Stelle steht im Eintrag | *„Du warst Dir bei der Warnung nicht sicher."* |
+| **3 — Überlastung** | Viel auf einmal | *„Das war viel auf einmal."* |
+| **4 — Gespräch offen halten** | Eintrag lebendig, lang | *„Erzähl ruhig weiter."* |
+| **5 — Eine Frage** | Wichtige offene Stelle für morgen | *„Was sollten wir morgen nicht vergessen?"* |
 
-```python
-def select_questions(context):
-    questions = []
+**Maximal-Form pro Tagesausklang:** Begrüßung (1 Satz) · Bezug (1–2 Sätze) · höchstens **eine** Frage **oder** 1–3 stille Sätze · Abschluss (1 Satz). Niemals drei Fragen.
 
-    # Stimmungs-Anker — immer
-    questions.append("wie_war_heute")
+**Default bei Zweifel:** Pfad 1.
 
-    # Bei viel Aktivität: konkretere Folgefragen
-    if context.activity_level == 'high':
-        questions.append("was_war_heute_anders")
-        questions.append("hast_du_gestockt")
+### Beispiel-Eintrag
 
-    # Bei ruhigem Tag: kürzer
-    elif context.activity_level == 'low':
-        return questions[:1]  # nur Stimmungs-Anker
+> *„Heute war es chaotisch. Zwei Kinder waren früher da, Kerstin war krank, dann wollten wir raus, dann hat es gedonnert und ich wusste nicht, ob die Warnung wirklich rausging."*
 
-    # Wenn Eltern-Push reinkam und unbeantwortet:
-    if context.unread_parent_messages > 0:
-        questions.append("eltern_push_uebersicht")
+| Variante | Reaktion |
+|---|---|
+| A — ohne Frage | *„Das war viel auf einmal. Gut, dass Du es festgehalten hast."* |
+| B — eine Frage | *„Da kam einiges zusammen. Was hat heute am meisten Druck gemacht?"* |
+| C — Unsicherheit | *„Du warst Dir bei der Warnung nicht sicher. Das sollten wir im Blick behalten."* |
+| D — entlastend | *„Du hast heute viel aufgefangen."* |
+| E — offen halten | *„Erzähl ruhig noch ein bisschen. Ich höre zu."* |
 
-    # Wenn ST% unter Soll:
-    if context.st_percent_below_threshold:
-        questions.append("personal_situation")
+Volle Erläuterung der Pfade, Entscheidungs-Heuristik, verbotene Wörter und der Persona-Prompt-Block für den LLM stehen in `TAGESAUSKLANG_KONTEXTUELLE_REAKTION.md`.
 
-    # Wenn Audit fällig:
-    if context.audit_due_within_7_days:
-        questions.append("audit_vorbereitung")
+### Frage-Reservoir (nur für Pfad 5)
 
-    # Wenn Geburtstag morgen:
-    if context.birthday_tomorrow:
-        questions.append("geburtstag_vorbereitung")
-
-    return questions
-```
-
-### Frage-Templates pro Kontext
+Wenn die Heuristik tatsächlich auf Pfad 5 fällt, kann **eine** dieser Fragen passend sein:
 
 ```yaml
-wie_war_heute:
-  default: "Wie war heute?"
-  high_activity: "Volltag heute. Wie ist's gelaufen?"
-  monday: "Wie war der Wochenstart?"
-  friday: "Wie war die Woche zum Schluss?"
+allgemein:
+  - "Was sollten wir morgen nicht vergessen?"
+  - "Was hätte Dir heute geholfen?"
+  - "Was war der schwierigste Moment?"
+  - "Soll ich das für morgen festhalten?"
 
-was_war_heute_anders:
-  default: "Was war heute anders als sonst?"
-  with_birthday: "Mit Lenas Geburtstag heute — wie war die Stimmung?"
+bei_eltern_push_offen:
+  - "Drei Eltern haben heute geschrieben — magst Du sie morgen früh durchsehen?"
 
-hast_du_gestockt:
-  default: "Hast Du heute irgendwo gestockt?"
-  alternativ: "Wo hat's heute gehakt?"
-  alternativ_2: "Was hätte einfacher gehen sollen?"
+bei_audit_naht:
+  - "Audit ist in {days} Tagen. Gibt's noch eine offene Stelle?"
 
-eltern_push_uebersicht:
-  default: "Drei Eltern haben heute geschrieben — magst Du sie kurz durchsehen?"
-  with_count: "{count} Eltern-Nachrichten warten — willst Du sie jetzt oder morgen?"
-
-audit_vorbereitung:
-  default: "Audit ist in {days} Tagen. Was fehlt Dir noch?"
-  urgent: "Audit ist morgen. Lass uns die letzten Punkte durchgehen."
-
-geburtstag_vorbereitung:
-  default: "Morgen hat {kind} Geburtstag. Habt Ihr was vorbereitet?"
+bei_geburtstag_morgen:
+  - "Morgen hat {kind} Geburtstag. Ist alles vorbereitet?"
 ```
+
+Diese sind **kein Pflicht-Programm**. Wenn keine davon trifft, wird auch keine gestellt.
 
 ### Tonalitäts-Regeln (aus Wording-Codex)
 
-- Kurze Sätze (8-14 Wörter)
-- Mira-Vokabular wo möglich (*"speisen"*, *"verschriftlichen"*)
-- Niemals technisch (*"Daten erfassen"*, *"Eintrag speichern"*)
+- Kurze Sätze (8–14 Wörter)
+- Mira-Vokabular wo möglich (*„speisen"*, *„verschriftlichen"*)
+- Niemals technisch (*„Daten erfassen"*, *„Eintrag speichern"*, *„Ich habe analysiert"*)
 - Sätze fühlen sich an wie sie entstehen, nicht wie vorbereitet
 
 ---
@@ -348,7 +328,7 @@ Tools, die Du nutzen darfst (alle still im Hintergrund):
 
 Tools, die Du im Tagesausklang NICHT nutzt:
 - save_user_identity, save_traeger, save_kita_basics 
-  (das ist Onboarding-Material)
+  (das gehört zu Kennenlernen / Bridge — nicht ins Verdichten)
 - create_marketing_site (das ist gezielte Aktion, nicht Tagesausklang)
 - Action-Tools mit Bestätigungs-Gates (außer Mira fordert es explizit)
 ```
@@ -461,7 +441,7 @@ Diese Insights als monatlicher "Tagesausklang-Bericht" für die Trägerin.
 
 ### Wann?
 
-Nach Onboarding-Phase 2 abgeschlossen ist (Daten in der DB, PWA installiert, Folge-Termin durchgelaufen). Realistisch: **Mitte/Ende Mai 2026.**
+Sobald die Bridge (Daten eingerichtet, PWA installiert, Folge-Termin durchgelaufen) abgeschlossen ist und Mira tatsächlich mit dem System lebt — das ist der Übergang in Verdichten. Realistisch: **Mitte/Ende Mai 2026.**
 
 ### Konkretes Setup
 

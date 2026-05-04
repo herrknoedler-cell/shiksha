@@ -319,6 +319,32 @@ Wörter, die echte Trägerinnen selbst nutzen — und die in die SHIKSHA-Stimme 
 
 **Pflege-Regel:** Mit jedem Pilot wächst dieses Pilot-Vokabular. Nach Camping-Pilot kommen Camping-Wörter dazu, nach Schule-Pilot Schule-Wörter. Edition-spezifische Vokabular-Sektionen sind erlaubt.
 
+### 21.2 Phasen-Vokabular — Kennenlernen + Verdichten
+
+Die zwei kanonischen Bezeichnungen für die menschlichen Übergänge in SHIKSHA. Bindend für UI-Texte, Persona-Stimme, Marketing.
+
+```
+Phase 1 — Kennenlernen
+Phase 2 — Verdichten
+```
+
+**Subline (optional):** *Verdichten — was aus dem Alltag bleibt.*
+
+**Was Verdichten meint:** wiederkehrende Situationen werden sichtbar, Aussagen werden zu Mustern, Beobachtungen bleiben erhalten, erste Klarheit entsteht. Ohne Bewertung, ohne Druck, ohne technische Erklärung.
+
+**Verbotene Synonyme für Phase 2:**
+
+| Verboten | Lieber |
+|---|---|
+| Sprint, Workshop, Audit | *(weglassen — Verdichten allein reicht)* |
+| Setup-Phase, Onboarding-Phase 2 | *Verdichten* |
+| Analyse, Strukturmodell, Daten-Erfassung | *Was aus dem Alltag bleibt.* |
+| Backlog-Processing | *(nicht in Trägerin-Sicht)* |
+
+**Zielgefühl:** *"Das passt. Genau das passiert gerade."* — nicht *"Ich bin in einem Prozess."*
+
+**Volle Definition:** `VERDICHTEN_PHASE_SPEC.md`
+
 ---
 
 ## 22. Meta-Regel

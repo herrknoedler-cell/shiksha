@@ -158,6 +158,25 @@ Dass eine Trägerin den Vision-Satz selbst sagt, bevor sie das Produkt vollstän
 
 Pflege-Regel: Mit jedem neuen Pilot kommen weitere Stimmen dazu. Camping-Pilot, Schule-Pilot, Surfschule-Pilot — alle dürfen ihre eigenen Mira-Sätze beitragen. Das ist nicht "Marketing-Material sammeln", das ist **Marken-Realität durch Pilot-Stimmen erweitern**.
 
+### 4.2 Phasen-Architektur — Kennenlernen → Verdichten
+
+Die menschliche Bewegung durch SHIKSHA hat zwei kanonische Phasen. Andere Begriffe (Onboarding, Setup, Sprint, Audit, Workshop) werden für die Trägerin-Sicht nicht verwendet.
+
+```
+Phase 1 — Kennenlernen
+Phase 2 — Verdichten
+```
+
+**Phase 1 · Kennenlernen.** Das erste Gespräch. Konversationell, getippt. SHIKSHA hört zu, fragt vorsichtig, hält fest. Nichts wird "fertig" am ersten Tag.
+
+**Phase 2 · Verdichten.** Im Alltag. Wiederkehrende Situationen werden sichtbar, Aussagen werden zu Mustern, Beobachtungen bleiben erhalten, erste Klarheit entsteht. Kein Termin, kein Sprint — ein Mit-Atmen.
+
+**Subline für UI / Marketing:** *Verdichten — was aus dem Alltag bleibt.*
+
+**Praktische Setup-Tätigkeiten** (Mitarbeiter-Daten, Kinder-Daten, Subdomain, Compliance) sind keine eigene Phase, sondern eine **Bridge**, die zwischen Kennenlernen und Verdichten geführt verläuft — schrittweise, nach Atemraum, nicht als Termin-Marathon.
+
+**Volle Definition + Wording-Regeln:** `VERDICHTEN_PHASE_SPEC.md` und `WORDING_AND_LANGUAGE.md` Sektion 21.2.
+
 ---
 
 ## 5. Verbindlichkeit & Pflege
