@@ -149,6 +149,30 @@ Cutover-Tooling unter [`scripts/migrate-kita-legacy/`](../scripts/migrate-kita-l
 bleibt im Repo — falls jemals rückwärts migriert oder aus der archivierten
 SQLite-DB nachgelesen werden muss.
 
+### ✅ Transitive Deps explizit deklarieren — RESOLVED 2026-05-11
+
+|              |                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| **Severity** | Medium — Service-Crashloop beim ersten Start, vor erstem produktiven Traffic gefangen            |
+| **Found**    | 2026-05-11 (Schritt-1-Deploy SHIKSHA-Engine)                                                     |
+| **File(s)**  | `server/shiksha_engine/pyproject.toml`                                                           |
+| **Fixed-by** | Commit [`79b4cc6`](../../../commit/79b4cc6)                                                      |
+
+**Symptom:** Auf dem Server `ModuleNotFoundError: email_validator` beim
+Service-Start der SHIKSHA-Engine. `pydantic.EmailStr` (genutzt via WebAuthn-
+Schemas) braucht `email-validator`; das war in der lokalen Entwicklungs-
+Umgebung transitiv über `pydantic` da, in der frischen Production-venv
+aber nicht.
+
+**Fix:** `pyproject.toml` deklariert jetzt `pydantic[email]` statt `pydantic`
+— der `[email]`-Extra-Marker zieht `email-validator` explizit. Niemals auf
+transitive Pulls verlassen, wenn ein optionaler Extra gebraucht wird.
+
+**Lesson:** Bei pydantic + WebAuthn-Schemas (oder allem, was `EmailStr`
+nutzt): immer `pydantic[email]` mit Extra-Marker deklarieren. Gleiches
+Prinzip gilt für `pydantic[timezone]`, `passlib[bcrypt]`, `python-jose
+[cryptography]` — alle bereits korrekt im pyproject mit Extras.
+
 ---
 
 ## Wie ein neuer Eintrag aussieht
