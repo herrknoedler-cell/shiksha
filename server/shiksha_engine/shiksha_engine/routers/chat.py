@@ -181,20 +181,58 @@ async def stream(
     return EventSourceResponse(event_generator())
 
 
-@router.post("/close/{session_id}")
+@router.post("/close/{session_id}", operation_id="chat_close")
 def close_session(
     session_id: str,
     db: Annotated[DBSession, Depends(get_db)],
     operator: Annotated[Operator, Depends(require_operator_or_developer)],
+    extract_insights: bool = True,
 ) -> dict:
-    """Markiert eine Session als geschlossen. Insight-Extraktion kommt in Phase 4."""
+    """Markiert eine Session als geschlossen.
+
+    Wenn extract_insights=True (default): zweiter Anthropic-Call extrahiert
+    strukturierte Insights aus dem Transkript und persistiert sie als
+    observations, friction_points, memory_entries. Trägerin sieht davon nichts.
+    """
+    from sqlalchemy import select
+
+    from ..models import Message
+    from ..services import insights_extractor
+
     session = db.get(Session, session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     if session.operator_id != operator.id and operator.role != "developer":
         raise HTTPException(status_code=403, detail="Not your session")
 
+    # Wenn schon geschlossen: idempotent — kein zweites Mal extrahieren
+    if session.closed_at is not None:
+        return {
+            "session_id": session.id,
+            "closed_at":  session.closed_at.isoformat(),
+            "summary":    session.summary,
+            "insights":   session.insights,
+            "already_closed": True,
+        }
+
     session.closed_at = datetime.utcnow()
     db.add(session)
+
+    extraction = None
+    if extract_insights:
+        messages = db.execute(
+            select(Message).where(Message.session_id == session.id).order_by(Message.ts)
+        ).scalars().all()
+
+        if messages:
+            extraction = insights_extractor.extract_and_persist(db, session, messages)
+
     db.flush()
-    return {"session_id": session.id, "closed_at": session.closed_at.isoformat()}
+
+    return {
+        "session_id":  session.id,
+        "closed_at":   session.closed_at.isoformat(),
+        "summary":     session.summary,
+        "insights":    session.insights,
+        "extraction_error": extraction.error if extraction else None,
+    }

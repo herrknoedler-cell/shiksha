@@ -8,6 +8,7 @@ from .observation import Observation
 from .operator import Operator
 from .organization import Organization
 from .persona import PersonaPrompt
+from .rate_limit import RateLimitBucket
 from .session import Session
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "Operator",
     "Organization",
     "PersonaPrompt",
+    "RateLimitBucket",
     "Session",
 ]

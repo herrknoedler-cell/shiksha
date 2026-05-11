@@ -18,11 +18,24 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="SHIKSHA Engine",
-        description="Backend-Proxy + Developer Portal. Edition-agnostisch.",
+        description=(
+            "Backend-Proxy + Developer Portal. Edition-agnostisch.\n\n"
+            "Auth: WebAuthn/Passkey via Presence-Switch. Tokens als Bearer-JWT.\n"
+            "Rate-Limit: 200 Calls/Operator/Tag (Developer unlimited).\n"
+        ),
         version=__version__,
         docs_url="/docs" if not settings.is_production else None,
         redoc_url="/redoc" if not settings.is_production else None,
         openapi_url="/openapi.json" if not settings.is_production else None,
+        openapi_tags=[
+            {"name": "auth",     "description": "Authentifizierung — WebAuthn, JWT, Refresh"},
+            {"name": "chat",     "description": "Chat-Endpoints — /respond (block) und /stream (SSE)"},
+            {"name": "sessions", "description": "Sessions — Liste mit Filter, Detail mit Messages"},
+            {"name": "memory",   "description": "Memory — CRUD über persistente Erinnerungen pro Operator"},
+            {"name": "tools",    "description": "Tools — Function-Call-Endpoints (log_observation, log_friction, …)"},
+            {"name": "dev",      "description": "Developer-Only — Stats, Persona-Editor, Operator-Liste, Audit-Logs"},
+            {"name": "meta",     "description": "Meta — Health, Root"},
+        ],
     )
 
     # ---- CORS ----
@@ -35,16 +48,19 @@ def create_app() -> FastAPI:
         expose_headers=["X-Request-ID"],
     )
 
-    # ---- Audit-Middleware (Schritt 1.6) ----
+    # ---- Middleware (Reihenfolge wichtig: Rate-Limit VOR Audit) ----
     from .middleware.audit_log import AuditLogMiddleware  # noqa: E402
+    from .middleware.rate_limit import RateLimitMiddleware  # noqa: E402
     app.add_middleware(AuditLogMiddleware)
+    app.add_middleware(RateLimitMiddleware)
 
     # ---- Router ----
-    from .routers import auth, chat, dev, sessions, tools  # noqa: E402
+    from .routers import auth, chat, dev, memory, sessions, tools  # noqa: E402
 
     app.include_router(auth.router,     prefix="/api/v1/auth",     tags=["auth"])
     app.include_router(chat.router,     prefix="/api/v1/chat",     tags=["chat"])
     app.include_router(sessions.router, prefix="/api/v1/sessions", tags=["sessions"])
+    app.include_router(memory.router,   prefix="/api/v1/memory",   tags=["memory"])
     app.include_router(tools.router,    prefix="/api/v1/tools",    tags=["tools"])
     app.include_router(dev.router,      prefix="/api/v1/dev",      tags=["dev"])
 

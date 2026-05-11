@@ -1,11 +1,12 @@
-"""Sessions-Router — Liste, Detail, eigene Daten."""
+"""Sessions-Router — Liste mit Filter, Detail, Search."""
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session as DBSession
 
 from ..db import get_db
@@ -15,18 +16,57 @@ from ..models import Message, Operator, Session
 router = APIRouter()
 
 
-@router.get("")
+@router.get("", operation_id="sessions_list")
 def list_sessions(
     db: Annotated[DBSession, Depends(get_db)],
     operator: Annotated[Operator, Depends(get_current_operator)],
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    edition: str | None = Query(None, description="Filter nach Edition (kita, camping, ...)"),
+    persona: str | None = Query(None, description="Filter nach Persona (tagesausklang, kennenlernen, ...)"),
+    since: datetime | None = Query(None, description="Nur Sessions gestartet ab diesem Zeitpunkt"),
+    until: datetime | None = Query(None, description="Nur Sessions gestartet bis zu diesem Zeitpunkt"),
+    has_summary: bool | None = Query(None, description="True: nur Sessions mit Summary; False: nur ohne"),
+    q: str | None = Query(None, min_length=2, description="Volltext-Suche in summary"),
+    target_operator_id: str | None = Query(
+        None,
+        description="Nur für Developer: Sessions eines anderen Operators",
+    ),
 ) -> list[dict]:
-    """Eigene Sessions (operator) bzw. alle (developer)."""
-    stmt = select(Session).order_by(Session.started_at.desc()).limit(limit)
-    if operator.role != "developer":
+    """Eigene Sessions (operator) oder gefilterte Cross-Operator-Liste (developer)."""
+
+    stmt = select(Session).order_by(Session.started_at.desc())
+
+    # Scope
+    if operator.role == "developer":
+        if target_operator_id:
+            stmt = stmt.where(Session.operator_id == target_operator_id)
+        # else: alle Sessions (developer sieht alle)
+    else:
+        if target_operator_id and target_operator_id != operator.id:
+            raise HTTPException(status_code=403, detail="Cross-operator listing requires developer role")
         stmt = stmt.where(Session.operator_id == operator.id)
 
-    results = db.execute(stmt).scalars().all()
+    # Filter
+    if edition:
+        stmt = stmt.where(Session.edition == edition)
+    if persona:
+        stmt = stmt.where(Session.persona == persona)
+    if since:
+        stmt = stmt.where(Session.started_at >= since)
+    if until:
+        stmt = stmt.where(Session.started_at <= until)
+    if has_summary is True:
+        stmt = stmt.where(Session.summary.is_not(None))
+    elif has_summary is False:
+        stmt = stmt.where(Session.summary.is_(None))
+    if q:
+        # Simpler ILIKE — Volltextsearch wenn Postgres-FTS später eingerichtet
+        stmt = stmt.where(Session.summary.ilike(f"%{q}%"))
+
+    stmt = stmt.limit(limit).offset(offset)
+    rows = db.execute(stmt).scalars().all()
+
     return [
         {
             "id":          s.id,
@@ -39,11 +79,11 @@ def list_sessions(
             "insights":    s.insights,
             "tokens_used": s.tokens_used,
         }
-        for s in results
+        for s in rows
     ]
 
 
-@router.get("/{session_id}")
+@router.get("/{session_id}", operation_id="sessions_detail")
 def get_session(
     session_id: str,
     db: Annotated[DBSession, Depends(get_db)],

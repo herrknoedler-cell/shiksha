@@ -30,12 +30,27 @@ def test_invalid_token():
 
 
 def test_refresh():
+    """Refresh-Token ist semantisch korrekt: neue iat >= alte iat.
+
+    Hinweis: bytewise-Vergleich (fresh != original) wäre nicht
+    deterministisch, weil JWT-iat nur sekunden-präzise ist — wenn
+    issue + refresh in derselben Sekunde laufen, ist der Token
+    bytewise identisch. Strukturelle Assertion ist semantisch klarer.
+    """
     original = issue_token(operator_id="thomas", role="developer", edition="kita")
+    original_payload = verify_token(original)
+
     fresh = refresh_token(original)
-    assert fresh != original  # neuer iat/exp
-    payload = verify_token(fresh)
-    assert payload["sub"] == "thomas"
-    assert payload["role"] == "developer"
+    fresh_payload = verify_token(fresh)
+
+    # Refresh hat aktuelle iat (>= alte) und aktuelle exp
+    assert fresh_payload["iat"] >= original_payload["iat"]
+    assert fresh_payload["exp"] >= original_payload["exp"]
+
+    # Claims werden korrekt übernommen
+    assert fresh_payload["sub"] == "thomas"
+    assert fresh_payload["role"] == "developer"
+    assert fresh_payload["edition"] == "kita"
 
 
 def test_extra_claims():

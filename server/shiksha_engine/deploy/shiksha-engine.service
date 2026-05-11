@@ -8,8 +8,10 @@ Type=simple
 User=shiksha-app
 Group=shiksha-app
 WorkingDirectory=/opt/shiksha-engine
-# Standard-Env aus .env (Pfad relativ zu WorkingDirectory)
-EnvironmentFile=/opt/shiksha-engine/.env
+# Standard-Env aus .env (optional — Minus-Präfix macht es nicht-mandatory.
+# Drop-Ins unter shiksha-engine.service.d/ liefern alle Werte für Production.
+# .env wird nur in dev gebraucht.)
+EnvironmentFile=-/opt/shiksha-engine/.env
 # Drop-Ins für Secrets (siehe shiksha-engine.service.d/)
 ExecStart=/opt/shiksha-engine/.venv/bin/uvicorn shiksha_engine.main:app \
   --host 127.0.0.1 \
