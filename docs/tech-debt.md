@@ -104,6 +104,33 @@ Domain-Models pro Doc-Type) oder nur Komplexität ohne Gegenleistung.
 
 **Plan:** Eigener Mini-Sprint nach Phase 7.
 
+### ⏳ Setup-Token-Service ist process-local (in-memory dict) — OPEN
+
+|              |                                                              |
+| ------------ | ------------------------------------------------------------ |
+| **Severity** | Low — bei Multi-Worker oder Service-Restart Token-Verlust    |
+| **Found**    | 2026-05-12 (Schritt-3-Deploy, Phase E)                       |
+| **File(s)**  | `server/shiksha_engine/services/setup_token_service.py`      |
+| **Resolves** | Schritt 4 (Tool-Calling) oder eigener Refactor-Sprint        |
+
+**Symptom:** `_tokens: dict[str, ...]` lebt im Prozess-Speicher des
+uvicorn-Workers. Bei `--workers 2`: nur einer der Worker sieht den Token.
+Bei `systemctl restart`: Token weg. Bei `python -m scripts.issue_token`:
+isolierter Subprozess, Token NIE im Worker.
+
+**Workaround heute:** Token ausschließlich via API erzeugen
+(POST /api/v1/dev/setup-tokens mit Developer-JWT) — der Endpoint läuft
+im Worker, also ist der Token sofort dort verfügbar. Für Erst-Setup
+ohne bestehende Credentials braucht's keinen Token (auth.py-Logik).
+
+**Fix-Pfad:** Redis als Token-Store, oder PostgreSQL-Tabelle
+`setup_tokens(token PK, operator_id, expires_at, consumed_at)`. SQL ist
+konsistent mit Rate-Limit-Pattern aus Schritt 2.4 — Redis nur wenn
+mehrere Server.
+
+**Lesson:** Bei jedem in-memory Store: testen *welcher Prozess
+genau* schreibt vs. liest. uvicorn Workers haben getrennten Speicher.
+
 ---
 
 ## Operational Audit Trail
