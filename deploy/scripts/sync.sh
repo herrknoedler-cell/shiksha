@@ -111,6 +111,16 @@ case "$TARGET" in
       --exclude='*.bak'
       --exclude='*.log'
       --exclude='.DS_Store'
+      # /opt/shiksha-engine ist gleichzeitig Home des shiksha-app-Users
+      # (useradd -d /opt/shiksha-engine). Skel- und Runtime-Dotfiles
+      # gehören nicht zum Repo und dürfen nicht gelöscht werden.
+      --exclude='.cache/'
+      --exclude='.bashrc'
+      --exclude='.bash_logout'
+      --exclude='.bash_history'
+      --exclude='.profile'
+      --exclude='.cloud-locale-test.skip'
+      --exclude='.ssh/'
     )
     SMOKE_URLS=(
       "$DOMAIN/health"
@@ -177,8 +187,10 @@ echo "→ ~$TRANSFERS Files würden übertragen/aktualisiert."
 
 # --- confirmation gate ------------------------------------------------------
 if [ $CONFIRMED -eq 0 ]; then
+  HINT_FLAG=""
+  [ "$TARGET" = "engine" ] && HINT_FLAG=" --engine"
   echo ""
-  echo "ℹ Dry-Run-Modus. Für echten Sync: bash $0${TARGET:+ --$TARGET} --confirmed"
+  echo "ℹ Dry-Run-Modus. Für echten Sync: bash $0${HINT_FLAG} --confirmed"
   exit 0
 fi
 
