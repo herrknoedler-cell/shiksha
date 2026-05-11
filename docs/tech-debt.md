@@ -173,6 +173,28 @@ nutzt): immer `pydantic[email]` mit Extra-Marker deklarieren. Gleiches
 Prinzip gilt für `pydantic[timezone]`, `passlib[bcrypt]`, `python-jose
 [cryptography]` — alle bereits korrekt im pyproject mit Extras.
 
+### ✅ sync.sh-.venv-chmod-Bug — RESOLVED 2026-05-12
+
+|              |                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| **Severity** | High — latenter Production-Killer beim nächsten Engine-Sync                                      |
+| **Found**    | 2026-05-12 (Schritt-2-Pre-Flight)                                                                |
+| **File(s)**  | `deploy/scripts/sync.sh`                                                                         |
+| **Fixed-by** | Commit [`820fdfa`](../../../commit/820fdfa)                                                      |
+
+**Symptom:** sync.sh setzt nach rsync `chmod -R 644` auf den Engine-Zielpfad.
+Das überschreibt auch die Executable-Bits in `/opt/shiksha-engine/.venv/bin/*`
+(uvicorn, python, alembic, pytest), wodurch beim nächsten `systemctl restart`
+der Service nicht mehr startet.
+
+**Fix:** chmod-Aufruf schließt `.venv/` aus —
+`find ... -not -path '*/.venv*' -exec chmod 644 {} +`. Plus: chmod-Block kommt
+erst nach den rsync-Excludes, damit das Pattern wirkt.
+
+**Lesson:** Bei post-rsync-Permissionizing immer venv/dist/build-Pfade
+ausnehmen — Executable-Bits in venv-Symlinks sind nicht regenerierbar ohne
+`pip install -e`.
+
 ---
 
 ## Wie ein neuer Eintrag aussieht
