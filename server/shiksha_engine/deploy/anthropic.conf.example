@@ -1,0 +1,8 @@
+# =============================================================
+# systemd Drop-In: ANTHROPIC_API_KEY für shiksha-engine
+# Ziel: /etc/systemd/system/shiksha-engine.service.d/anthropic.conf
+# chmod 600, owner root:shiksha-app
+# =============================================================
+
+[Service]
+Environment="ANTHROPIC_API_KEY=sk-ant-REPLACE_WITH_REAL_KEY"

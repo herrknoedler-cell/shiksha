@@ -1,0 +1,29 @@
+edition: camping
+
+vocabulary:
+  operator_role:  Wirt
+  org_word:       Campingplatz
+  member_word:    Gast
+  pain_words:
+    - Belegung
+    - No-Shows
+    - Wetter
+    - Müll
+  ritual_time:    "21:00"
+
+tools:
+  - log_observation
+  - log_friction
+  - save_day_summary
+  - add_memory
+
+dashboard_cards:
+  - camping.belegung
+  - camping.bookings
+  - camping.weather
+  - camping.gast_inbox
+  - core.tagesausklang_status
+
+site_template: camping_v1
+
+reminder_default_time: "21:00"

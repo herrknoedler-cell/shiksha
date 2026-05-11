@@ -1,0 +1,54 @@
+# =============================================================
+# SHIKSHA Engine — Caddy Snippet
+# =============================================================
+# In Dein Caddyfile einbinden oder als import_snippet referenzieren.
+# Setzt voraus, dass die Engine auf 127.0.0.1:8000 läuft (siehe systemd).
+# =============================================================
+
+api.shiksha.world {
+    encode gzip zstd
+
+    # CORS-Header (FastAPI macht auch CORS, hier nur Backup)
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options    nosniff
+        X-Frame-Options           DENY
+        Referrer-Policy           strict-origin-when-cross-origin
+    }
+
+    # SSE braucht keine Buffering
+    @sse path /api/v1/chat/stream
+    handle @sse {
+        reverse_proxy 127.0.0.1:8000 {
+            flush_interval -1
+            transport http {
+                read_buffer 4096
+            }
+        }
+    }
+
+    handle {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    log {
+        output file /var/log/caddy/shiksha-engine.access.log
+        format json
+    }
+}
+
+# Developer-Console (statisch, später dynamisch)
+dev.shiksha.world {
+    encode gzip zstd
+    root * /var/www/shiksha-dev
+    file_server
+
+    # API-Calls von /dev gehen auch nach api.shiksha.world
+    # (Browser nutzt CORS, Token im Header)
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options    nosniff
+        Referrer-Policy           strict-origin-when-cross-origin
+    }
+}

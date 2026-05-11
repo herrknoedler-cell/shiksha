@@ -1,0 +1,11 @@
+edition: club
+vocabulary:
+  operator_role: Club-Manager
+  org_word:      Club
+  member_word:   Mitglied
+  pain_words: [Mitgliedsbeiträge, Events, Räume, Engagement]
+  ritual_time:   "22:00"
+tools: [log_observation, log_friction, save_day_summary, add_memory]
+dashboard_cards: [club.mitglieder, club.events, club.beitraege, core.tagesausklang_status]
+site_template: club_v1
+reminder_default_time: "22:00"

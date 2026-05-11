@@ -1,0 +1,35 @@
+[Unit]
+Description=SHIKSHA Engine — Backend-Proxy + Developer Portal API
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=shiksha-app
+Group=shiksha-app
+WorkingDirectory=/opt/shiksha-engine
+# Standard-Env aus .env (Pfad relativ zu WorkingDirectory)
+EnvironmentFile=/opt/shiksha-engine/.env
+# Drop-Ins für Secrets (siehe shiksha-engine.service.d/)
+ExecStart=/opt/shiksha-engine/.venv/bin/uvicorn shiksha_engine.main:app \
+  --host 127.0.0.1 \
+  --port 8001 \
+  --workers 2 \
+  --proxy-headers \
+  --forwarded-allow-ips=127.0.0.1
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/shiksha-engine/logs
+ReadOnlyPaths=/opt/shiksha-engine
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

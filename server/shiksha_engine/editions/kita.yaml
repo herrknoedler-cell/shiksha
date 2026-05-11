@@ -1,0 +1,34 @@
+edition: kita
+
+vocabulary:
+  operator_role:  Trägerin
+  org_word:       KITA
+  member_word:    Kind
+  pain_words:
+    - Zettelei
+    - Wochenend-Anrufe
+    - Personalausfall
+    - Eltern-Push
+  ritual_time:    "17:30"
+
+tools:
+  - log_observation
+  - log_friction
+  - save_day_summary
+  - add_memory
+
+dashboard_cards:
+  - kita.st_percent
+  - kita.compliance
+  - kita.eltern_inbox
+  - kita.beobachtungen
+  - kita.kalender
+  - core.tagesausklang_status
+
+site_template: kita_v3
+
+reminder_default_time: "17:30"
+
+persona_overrides:
+  kennenlernen: kennenlernen
+  tagesausklang: tagesausklang

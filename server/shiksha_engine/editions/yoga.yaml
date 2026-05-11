@@ -1,0 +1,11 @@
+edition: yoga
+vocabulary:
+  operator_role: Studio-Leitung
+  org_word:      Yogaschule
+  member_word:   Teilnehmer:in
+  pain_words: [Stundenplan, 10er-Karten, Lehrer-Vertretung, Online-Buchung]
+  ritual_time:   "20:00"
+tools: [log_observation, log_friction, save_day_summary, add_memory]
+dashboard_cards: [yoga.stundenplan, yoga.karten, yoga.teilnahmen, core.tagesausklang_status]
+site_template: yoga_v1
+reminder_default_time: "20:00"

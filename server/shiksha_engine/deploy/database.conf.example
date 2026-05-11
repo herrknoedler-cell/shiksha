@@ -1,0 +1,13 @@
+# =============================================================
+# systemd Drop-In: DATABASE_URL für shiksha-engine
+# Ziel: /etc/systemd/system/shiksha-engine.service.d/database.conf
+# chmod 600, owner root:shiksha-app
+# =============================================================
+#
+# Hinweis: Nutzt denselben DB-User wie /opt/shiksha (existing).
+# Eigenes Schema shiksha_core innerhalb derselben DB shiksha.
+# =============================================================
+
+[Service]
+Environment="DATABASE_URL=postgresql+psycopg2://shiksha:REPLACE_WITH_REAL_PW@localhost:5432/shiksha"
+Environment="DB_SCHEMA=shiksha_core"

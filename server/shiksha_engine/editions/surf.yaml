@@ -1,0 +1,11 @@
+edition: surf
+vocabulary:
+  operator_role: Surf-Lehrer:in
+  org_word:      Surfschule
+  member_word:   Teilnehmer:in
+  pain_words: [Wetter, Wellen, Equipment, Anmeldungen]
+  ritual_time:   "19:00"
+tools: [log_observation, log_friction, save_day_summary, add_memory]
+dashboard_cards: [surf.wetter, surf.buchungen, surf.equipment, core.tagesausklang_status]
+site_template: surf_v1
+reminder_default_time: "19:00"
