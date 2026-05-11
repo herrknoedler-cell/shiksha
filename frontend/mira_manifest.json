@@ -1,0 +1,28 @@
+{
+  "name": "Shiksha",
+  "short_name": "Shiksha",
+  "description": "Ein Gespräch am Tagesende.",
+  "start_url": "mira_app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0d2e",
+  "theme_color": "#1a0d2e",
+  "categories": ["lifestyle", "productivity"],
+  "lang": "de",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "mira_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "mira_icon_maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

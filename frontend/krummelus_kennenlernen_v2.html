@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SHIKSHA — Kennenlernen</title>
+<meta name="description" content="Ein Gespräch.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     SHIKSHA · Kennenlernen v2
+     Hero-Video permanent. Glass-Cards full-bleed (100vh).
+     Desktop/iPad: 3-Card-Layout (Main + Input + Thinking).
+     iPhone: 2-Card-Stack (Main + Input), Thinking versteckt.
+     LLM via Anthropic Browser-API (Key in localStorage).
+     ========================================================= */
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --fg-strong: #1a1a1c;
+    --fg-soft:   rgba(26, 26, 28, 0.62);
+    --fg-fade:   rgba(26, 26, 28, 0.42);
+    --fg-whisper:rgba(26, 26, 28, 0.26);
+
+    --accent: #c97a8e;
+
+    --card-bg:    rgba(255, 255, 255, 0.85);
+    --card-bg-2:  rgba(255, 255, 255, 0.78);
+    --card-border:rgba(255, 255, 255, 0.55);
+    --card-shadow: 0 18px 60px rgba(20, 10, 40, 0.18);
+    --card-radius: clamp(20px, 2.4vw, 32px);
+
+    --gap:    clamp(14px, 1.6vw, 22px);
+    --pad-x:  clamp(20px, 3vw, 48px);
+    --pad-y:  clamp(20px, 3vh, 48px);
+
+    --easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                 "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+    color: var(--fg-strong);
+    background: #1a0d2e;
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "ss02";
+    letter-spacing: -0.011em;
+  }
+
+  /* =========================================================
+     HERO-VIDEO
+     ========================================================= */
+
+  .hero-video {
+    position: fixed; inset: 0;
+    z-index: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+  }
+
+  /* =========================================================
+     STAGE — füllt 100vh komplett
+     ========================================================= */
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .slide-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* =========================================================
+     SLIDE-System
+     ========================================================= */
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    padding: var(--pad-y) var(--pad-x);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.85s var(--easing);
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Glass-Card — Standard für Slide-Inhalt */
+  .glass {
+    background: var(--card-bg);
+    backdrop-filter: blur(40px) saturate(1.4);
+    -webkit-backdrop-filter: blur(40px) saturate(1.4);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+  }
+
+  /* Slide-Inner für Inhalts-Slides (1-4): full-bleed Glass-Card */
+  .slide-content-card {
+    width: 100%;
+    height: 100%;
+    padding: clamp(40px, 6vh, 90px) clamp(40px, 6vw, 100px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(20px, 3vh, 40px);
+    transform: translateY(20px);
+    transition: transform 0.85s var(--easing);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .slide.active .slide-content-card {
+    transform: translateY(0);
+  }
+
+  /* Greeting + Intro: kein Glas */
+  #stage-greeting,
+  #slide-conversation {
+    padding: 0;
+  }
+
+  #stage-greeting {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 clamp(24px, 5vw, 80px);
+  }
+
+  #stage-greeting .slide-content-card {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    height: auto;
+    padding: 0;
+    max-width: 720px;
+  }
+
+  /* =========================================================
+     TYPOGRAFIE
+     ========================================================= */
+
+  .line {
+    display: block;
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.9s var(--easing),
+      transform 0.9s var(--easing);
+  }
+
+  .slide.active .line {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .slide.active .line:nth-child(1) { transition-delay: 0.10s; }
+  .slide.active .line:nth-child(2) { transition-delay: 0.55s; }
+  .slide.active .line:nth-child(3) { transition-delay: 1.10s; }
+  .slide.active .line:nth-child(4) { transition-delay: 1.65s; }
+  .slide.active .line:nth-child(5) { transition-delay: 2.20s; }
+
+  .h1 {
+    font-size: clamp(2.4rem, 5.5vw, 4.6rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--fg-strong);
+  }
+
+  .h2 {
+    font-size: clamp(1.8rem, 3.8vw, 2.6rem);
+    font-weight: 300;
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    color: var(--fg-strong);
+  }
+
+  .body {
+    font-size: clamp(1.1rem, 1.7vw, 1.35rem);
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--fg-soft);
+    max-width: 32em;
+  }
+
+  .body-soft {
+    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--fg-fade);
+    max-width: 32em;
+  }
+
+  /* =========================================================
+     STAGE 0 — Shiksha-Handschrift
+     ========================================================= */
+
+  .stage-intro {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 1.2s var(--easing);
+    z-index: 2;
+  }
+
+  .stage-intro.faded { opacity: 0; pointer-events: none; }
+
+  .shiksha-svg {
+    width: clamp(280px, 60vw, 920px);
+    height: auto;
+    overflow: visible;
+    display: block;
+    filter: drop-shadow(0 4px 32px rgba(0, 0, 0, 0.22));
+  }
+
+  .shiksha-text {
+    font-family: 'Caveat', cursive;
+    font-weight: 600;
+    font-size: 320px;
+    fill: white;
+    letter-spacing: -2px;
+  }
+
+  /* =========================================================
+     STAGE 1 — GREETING (auf Video, weiß)
+     ========================================================= */
+
+  .stage-greeting .h1 {
+    color: white;
+    font-size: clamp(2.4rem, 5.4vw, 4rem);
+    font-weight: 300;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.32);
+  }
+
+  .stage-greeting .line:nth-child(2) { color: rgba(255, 255, 255, 0.85); }
+  .stage-greeting .line:nth-child(3) { color: rgba(255, 255, 255, 0.7); }
+
+  .stage-greeting.active .line:nth-child(1) { transition-delay: 0.20s; }
+  .stage-greeting.active .line:nth-child(2) { transition-delay: 1.40s; }
+  .stage-greeting.active .line:nth-child(3) { transition-delay: 2.80s; }
+
+  /* =========================================================
+     CONTROLS — überlagern den Slide unten zentriert
+     ========================================================= */
+
+  .controls {
+    position: fixed;
+    z-index: 4;
+    bottom: clamp(16px, 2.5vh, 28px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(680px, calc(100vw - 48px));
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 10px 30px rgba(20, 10, 40, 0.16);
+    opacity: 0;
+    transition:
+      opacity 0.6s var(--easing),
+      transform 0.6s var(--easing);
+  }
+
+  .controls.visible { opacity: 1; }
+  .controls.hidden  { opacity: 0; pointer-events: none; transform: translate(-50%, 20px); }
+
+  /* Greeting-Modus: durchsichtige Controls auf Video */
+  body:not(.intro-done) .controls {
+    background: rgba(0, 0, 0, 0.32);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .progress {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .progress-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(26, 26, 28, 0.32);
+    transition:
+      background 0.5s var(--easing),
+      width 0.5s var(--easing);
+  }
+
+  .progress-dot.active {
+    background: var(--fg-strong);
+    width: 22px;
+    border-radius: 4px;
+  }
+
+  .progress-dot.passed { background: var(--fg-soft); }
+
+  body:not(.intro-done) .progress-dot { background: rgba(255, 255, 255, 0.45); }
+  body:not(.intro-done) .progress-dot.active { background: white; }
+  body:not(.intro-done) .progress-dot.passed { background: rgba(255, 255, 255, 0.75); }
+
+  .btn {
+    appearance: none;
+    background: var(--fg-strong);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: clamp(0.9rem, 1.3vw, 1rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition:
+      transform 0.3s var(--easing),
+      box-shadow 0.3s var(--easing),
+      background 0.3s var(--easing);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  }
+
+  body:not(.intro-done) .btn { background: white; color: var(--fg-strong); }
+
+  .btn:active { transform: translateY(0); }
+
+  .btn-back {
+    background: transparent;
+    color: var(--fg-soft);
+    box-shadow: none;
+    padding: 12px 14px;
+  }
+
+  body:not(.intro-done) .btn-back { color: rgba(255, 255, 255, 0.85); background: transparent; box-shadow: none; }
+
+  .btn-back:hover { box-shadow: none; transform: none; }
+
+  /* =========================================================
+     STAGE 6 — GESPRÄCHSRAUM
+     Drei Cards: Main (Header+Stream), Input, Thinking
+     Desktop/iPad-Layout:
+        ┌──────────────────────┬─────────────┐
+        │  Main (Header+Stream)│  Thinking   │
+        │                      │             │
+        ├──────────────────────┤             │
+        │  Input               │             │
+        └──────────────────────┴─────────────┘
+     ========================================================= */
+
+  #slide-conversation {
+    padding: var(--pad-y) var(--pad-x);
+  }
+
+  .conversation {
+    width: 100%;
+    height: 100%;
+    max-width: 1480px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr clamp(260px, 22vw, 340px);
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "main think"
+      "input think";
+    gap: var(--gap);
+    opacity: 0;
+    transition: opacity 1.0s var(--easing);
+  }
+
+  .conversation.active { opacity: 1; }
+
+  .conv-card {
+    grid-area: main;
+    padding: clamp(28px, 4vh, 56px) clamp(28px, 4vw, 64px);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "header"
+      "stream";
+    min-height: 0;
+  }
+
+  .input-card {
+    grid-area: input;
+    padding: clamp(14px, 2vh, 22px) clamp(28px, 4vw, 56px);
+    display: flex;
+    align-items: center;
+  }
+
+  .think-card {
+    grid-area: think;
+    padding: clamp(28px, 4vh, 48px) clamp(24px, 2.6vw, 36px);
+    background: var(--card-bg-2);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* iPad — etwas schmalere Thinking-Card */
+  @media (max-width: 1100px) and (min-width: 761px) {
+    .conversation {
+      grid-template-columns: 1fr clamp(220px, 24vw, 280px);
+    }
+  }
+
+  /* iPhone — Thinking-Card weg, nur Main + Input */
+  @media (max-width: 760px) {
+    :root {
+      --gap: 10px;
+      --pad-x: 14px;
+      --pad-y: 14px;
+      --card-radius: 22px;
+    }
+
+    .conversation {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr auto;
+      grid-template-areas:
+        "main"
+        "input";
+    }
+
+    .think-card {
+      display: none;
+    }
+
+    .conv-card {
+      padding: 24px 22px;
+    }
+
+    .input-card {
+      padding: 14px 22px;
+    }
+
+    /* Slide-Cards auf Mobile etwas weniger Padding */
+    .slide-content-card {
+      padding: 36px 26px;
+    }
+  }
+
+  /* Header */
+  .conv-header {
+    grid-area: header;
+    padding-bottom: clamp(14px, 2vh, 24px);
+  }
+
+  .conv-prompt {
+    display: block;
+    font-size: clamp(2rem, 3.6vw, 2.8rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--fg-strong);
+  }
+
+  .conv-prompt-soft {
+    display: block;
+    font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+    color: var(--fg-fade);
+    margin-top: 6px;
+  }
+
+  /* Thinking */
+  .thinking-label {
+    font-size: 0.88rem;
+    font-weight: 400;
+    color: var(--fg-soft);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    letter-spacing: 0.005em;
+  }
+
+  .thinking-pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.75;
+    animation: pulse 2.6s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50%      { opacity: 0.9;  transform: scale(1.2); }
+  }
+
+  .thinking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 15px;
+  }
+
+  .thinking-item {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--fg-soft);
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 1.0s var(--easing),
+      transform 1.0s var(--easing),
+      color 0.6s var(--easing);
+  }
+
+  .thinking-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .think-card.engaged .thinking-item { color: var(--fg-strong); }
+
+  /* Stream */
+  .conv-stream {
+    grid-area: stream;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: clamp(10px, 1.6vh, 18px) 0 clamp(8px, 1.5vh, 18px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 2.2vh, 26px);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(26, 26, 28, 0.18) transparent;
+  }
+
+  .conv-stream::-webkit-scrollbar { width: 6px; }
+  .conv-stream::-webkit-scrollbar-track { background: transparent; }
+  .conv-stream::-webkit-scrollbar-thumb {
+    background: rgba(26, 26, 28, 0.14);
+    border-radius: 3px;
+  }
+
+  .conv-msg {
+    font-size: clamp(1.05rem, 1.4vw, 1.18rem);
+    line-height: 1.55;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: msg-in 0.65s var(--easing) forwards;
+    max-width: 38em;
+  }
+
+  @keyframes msg-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .conv-msg-mira {
+    color: var(--fg-strong);
+    font-weight: 400;
+  }
+
+  .conv-msg-shiksha {
+    color: var(--fg-soft);
+    font-weight: 400;
+    padding-left: clamp(20px, 3vw, 36px);
+  }
+
+  .conv-msg-shiksha.reading {
+    color: var(--fg-fade);
+    font-size: 0.95em;
+    font-style: italic;
+  }
+
+  .conv-msg-error {
+    color: var(--accent);
+    font-size: 0.88em;
+  }
+
+  /* Input-Card-Inhalt */
+  .conv-input-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .conv-input {
+    appearance: none;
+    flex: 1 1 auto;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--fg-strong);
+    padding: 8px 0;
+    resize: none;
+    outline: none;
+    min-height: 1.5em;
+    max-height: 22vh;
+    overflow-y: auto;
+    letter-spacing: -0.011em;
+  }
+
+  .conv-input::placeholder {
+    color: var(--fg-whisper);
+    font-weight: 300;
+  }
+
+  .conv-send-hint {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: var(--fg-whisper);
+    padding-bottom: 12px;
+    user-select: none;
+  }
+
+  @media (max-width: 760px) {
+    .conv-send-hint { display: none; }
+    .conv-msg-shiksha { padding-left: 16px; }
+  }
+
+  /* Tipping-Indicator */
+  .conv-typing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding-left: clamp(20px, 3vw, 36px);
+    margin: 4px 0;
+  }
+  .conv-typing span {
+    width: 6px; height: 6px;
+    background: var(--fg-fade);
+    border-radius: 50%;
+    animation: typing 1.4s ease-in-out infinite;
+  }
+  .conv-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .conv-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30%           { opacity: 0.9; transform: translateY(-3px); }
+  }
+
+  /* =========================================================
+     ACCESSIBILITY
+     ========================================================= */
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video { display: none; }
+    body { background: linear-gradient(135deg, #6d4eb6, #c97a8e, #ff7e3c); }
+    .slide, .slide-content-card, .line, .conversation { transition: opacity 0.4s ease; }
+    .slide-content-card { transform: none; }
+    .line { transform: none; }
+    .thinking-pulse, .conv-typing span { animation: none; }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero-Video — permanenter Hintergrund -->
+<video class="hero-video" id="hero-video" autoplay loop muted playsinline aria-hidden="true">
+  <source src="shiksha-hero.mp4" type="video/mp4">
+</video>
+
+<!-- Bühne -->
+<main class="stage" role="main">
+
+  <!-- ========== STAGE 0 — Shiksha-Handschrift ========== -->
+  <section class="stage-intro" id="stage-intro" aria-label="Shiksha">
+    <svg class="shiksha-svg" viewBox="0 0 1000 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <filter id="soft-tip" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="1.6"/>
+        </filter>
+        <mask id="shiksha-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="360">
+          <rect width="1000" height="360" fill="black"/>
+          <rect id="reveal-rect" x="0" y="0" width="0" height="360" fill="white"/>
+        </mask>
+      </defs>
+      <text class="shiksha-text"
+            x="500" y="240"
+            text-anchor="middle"
+            mask="url(#shiksha-reveal)">Shiksha</text>
+      <circle id="shiksha-tip" cx="0" cy="200" r="0" fill="white" filter="url(#soft-tip)"/>
+    </svg>
+  </section>
+
+  <div class="slide-wrap">
+
+    <!-- STAGE 1 — Begrüßung (kein Glas) -->
+    <section class="slide" id="stage-greeting" data-step="1" aria-label="Begrüßung">
+      <div class="slide-content-card">
+        <span class="line h1">Guten Tag.</span>
+        <span class="line h1">Ich bin SHIKSHA.</span>
+        <span class="line h1">Ich höre zu.</span>
+      </div>
+    </section>
+
+    <!-- STAGE 2 — Slide 1 -->
+    <section class="slide" id="slide-1" data-step="2" aria-label="Rahmen">
+      <div class="slide-content-card glass">
+        <span class="line h1">Das hier ist ein Gespräch.</span>
+        <span class="line body">Kein Termin. Keine Präsentation. Kein Formular.</span>
+        <span class="line body">Ich möchte verstehen, wie Dein Alltag wirklich funktioniert.</span>
+      </div>
+    </section>
+
+    <!-- STAGE 3 — Slide 2 -->
+    <section class="slide" id="slide-2" data-step="3" aria-label="Sicherheit">
+      <div class="slide-content-card glass">
+        <span class="line h1">Du musst nichts erklären.</span>
+        <span class="line body">Ich bewerte nichts. Und ich biete nichts an.</span>
+        <span class="line body-soft">Ich höre zu. Mehr nicht.</span>
+      </div>
+    </section>
+
+    <!-- STAGE 4 — Slide 3 -->
+    <section class="slide" id="slide-3" data-step="4" aria-label="Fokus">
+      <div class="slide-content-card glass">
+        <span class="line h1">Es geht um Dich.</span>
+        <span class="line body">Was wiederholt sich jeden Tag? Wo wird es stressig?</span>
+        <span class="line body">Was funktioniert nur, weil Du es irgendwie löst?</span>
+        <span class="line body-soft">Du musst nichts vorbereiten.</span>
+      </div>
+    </section>
+
+    <!-- STAGE 5 — Slide 4 -->
+    <section class="slide" id="slide-4" data-step="5" aria-label="Warum">
+      <div class="slide-content-card glass">
+        <span class="line h1">Warum es das gibt.</span>
+        <span class="line body">Ich lerne aus echten Gesprächen.</span>
+        <span class="line body">Damit Dinge einfacher werden.</span>
+      </div>
+    </section>
+
+    <!-- STAGE 6 — Gespräch (drei Glass-Cards) -->
+    <section class="slide" id="slide-conversation" data-step="6" aria-label="Gespräch">
+      <div class="conversation" id="conversation">
+
+        <article class="conv-card glass">
+          <header class="conv-header">
+            <span class="conv-prompt">Erzähl mir.</span>
+            <span class="conv-prompt-soft">Fang einfach irgendwo an</span>
+          </header>
+          <div class="conv-stream" id="conv-messages" aria-live="polite"></div>
+        </article>
+
+        <div class="input-card glass">
+          <div class="conv-input-wrap">
+            <textarea class="conv-input"
+                      id="conv-input"
+                      rows="1"
+                      autocomplete="off"
+                      autocorrect="off"
+                      spellcheck="false"
+                      placeholder="Tippe…"
+                      aria-label="Was Du erzählen möchtest"></textarea>
+            <span class="conv-send-hint">↵ senden</span>
+          </div>
+        </div>
+
+        <aside class="think-card glass" id="thinking-surface" aria-label="Im Hintergrund entsteht gerade">
+          <span class="thinking-label">
+            <span class="thinking-pulse" aria-hidden="true"></span>
+            Im Hintergrund entsteht gerade:
+          </span>
+          <div class="thinking-list">
+            <span class="thinking-item" data-idx="0">Muster</span>
+            <span class="thinking-item" data-idx="1">Wiederholungen</span>
+            <span class="thinking-item" data-idx="2">kleine Reibungen</span>
+            <span class="thinking-item" data-idx="3">mögliche Entlastung</span>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<!-- Controls — overlay -->
+<div class="controls" id="controls" aria-label="Navigation">
+  <button class="btn btn-back" id="btn-back" type="button" aria-label="Zurück">←</button>
+  <div class="progress" id="progress" role="progressbar" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1">
+    <span class="progress-dot" data-step="2"></span>
+    <span class="progress-dot" data-step="3"></span>
+    <span class="progress-dot" data-step="4"></span>
+    <span class="progress-dot" data-step="5"></span>
+  </div>
+  <button class="btn" id="btn-next" type="button">Weiter</button>
+</div>
+
+<p class="sr-only" aria-live="polite" id="sr-announce"></p>
+
+<script type="module">
+'use strict';
+
+import { ShikshaClient, ShikshaApiError, ShikshaAuthError, ShikshaRateLimitError }
+  from './shiksha-client.js';
+
+// ===================================================================
+// AUTH-GATE — wenn kein Token, zum Presence-Switch
+// ===================================================================
+
+const apiBase = (new URLSearchParams(location.search)).get('api')
+              || 'https://api.shiksha.world';
+const client = new ShikshaClient(apiBase);
+
+if (!client.hasValidToken()) {
+  const next = encodeURIComponent(location.pathname + location.search);
+  location.href = `./presence_switch.html?next=${next}`;
+  throw new Error('redirecting_to_presence_switch');
+}
+
+let currentOperator = client.getOperatorMeta() || null;
+let currentSessionId = null;   // wird vom Server beim ersten Send vergeben
+
+// ===================================================================
+// KONFIG — lokale Cache-Keys (Server ist Source of Truth)
+// ===================================================================
+
+const CONFIG = {
+  storage: {
+    historyKey: 'shiksha-kennenlernen-history',  // letzte Tab-Session-Cache
+  }
+};
+
+  // ===================================================================
+  // MEMORY — Erinnerungen aus früheren Sessions
+  // ===================================================================
+  // Wird ins SYSTEM_PROMPT eingespeist. Wächst über die Pilot-Woche.
+  // Editierbar via Konsole: shiksha.addMemory("...") · shiksha.clearMemory()
+
+  function loadMemory() {
+    try {
+      const raw = localStorage.getItem(CONFIG.storage.memoryKey);
+      if (!raw) return [];
+      return JSON.parse(raw);
+    } catch (e) { return []; }
+  }
+
+  function saveMemory(arr) {
+    localStorage.setItem(CONFIG.storage.memoryKey, JSON.stringify(arr));
+  }
+
+  function addMemory(text) {
+    const arr = loadMemory();
+    arr.push({ ts: new Date().toISOString(), text: String(text).trim() });
+    saveMemory(arr);
+    return arr.length;
+  }
+
+  function memoryBlock() {
+    const arr = loadMemory();
+    if (!arr.length) return '';
+    const lines = arr.map(m => `- ${m.text}`).join('\n');
+    return `\n\nAUS FRÜHEREN GESPRÄCHEN MIT MIRA HAST DU DIR FOLGENDES GEMERKT:\n${lines}`;
+  }
+
+  // ===================================================================
+  // SYSTEM-PROMPT
+  // ===================================================================
+
+  // ===================================================================
+  // SHIKSHA RESPONSE ENGINE — VIER MODI
+  // Spec: SHIKSHA_RESPONSE_ENGINE.md
+  // ===================================================================
+
+  const SYSTEM_PROMPT = `Du bist SHIKSHA. Du sprichst mit Mira F., Trägerin der KITA Krummelus in Dornbirn, Vorarlberg.
+
+KONTEXT AUS DEM ERSTEN TERMIN:
+- Krummelus ist eine kleine Familien-KITA, gemeinsam mit Miras Mutter geführt.
+- Mira hat gesagt: "Ein Programm, was mir die ganze Zettelei und Denkerei abnimmt."
+- Wochenend-Anrufe sind ein Reibungspunkt — niemand bekommt sie immer mit.
+- Fünf Mitarbeiterinnen, Kinder bereits in der Datenbank vorgemerkt.
+- Mira tippt lieber als zu reden.
+
+DU REAGIERST IN GENAU EINEM VON VIER MODI:
+
+PRÄSENZ — zuhören
+  Wenn ruhig oder erzählend, wenn sie sich freischreibt.
+  Antwort: 1 kurzer Satz. Keine Frage zwingend.
+  Beispiele: "Ich höre." / "Das war viel." / "Erzähl." /
+             "Ich nehme das mit." / "Du hast viel mitgebracht."
+
+FOKUS — führen
+  Wenn viele Themen gleichzeitig, Chaos, unklar.
+  Antwort: 1 klare Frage, schneidet auf den Kern.
+  Beispiele: "Was war der Moment, der gekippt ist?" /
+             "Was hat heute den meisten Druck gemacht?" /
+             "Wo hat's am meisten geklemmt?"
+
+VERDICHTEN — Muster benennen
+  Wenn Wiederholung erkennbar oder Faktoren zusammenkommen.
+  Antwort: 1–2 kurze Sätze. Keine Analyse-Sprache.
+  Beispiele: "Personalausfall und Wetter kamen zusammen." /
+             "Das passiert nicht zum ersten Mal." /
+             "Das sollten wir festhalten."
+
+AUSKLANG — abschließen
+  Wenn genug gesagt, keine neue Frage sinnvoll, Tagesabschluss.
+  Antwort: 1 Satz, ohne Frage.
+  Beispiele: "Für heute reicht das." / "Ich nehme das mit." /
+             "Wir schauen morgen darauf."
+
+REGELN — bindend:
+- 1–2 Sätze, niemals länger.
+- Maximal 1 Frage pro Antwort. Nur wenn sie Klarheit bringt.
+  (Praktisch: Fragen kommen nur in Modus FOKUS.)
+- Default bei Zweifel: PRÄSENZ.
+- Niemals: "Ich habe erkannt", "Ich analysiere", "Basierend auf
+  deinen Daten", "Es scheint als ob", "Möchtest du …?",
+  "Ich bin für dich da".
+- Niemals technische Sprache: nicht Analyse, Audit, Workflow,
+  Daten, KI, Backend, API, System, Strukturen, Optimierung,
+  Eintrag erfasst. Niemals "Ich habe analysiert / erkannt / erfasst."
+- Mira-Vokabular gerne: speisen, einspeisen, Ableger, verschriftlichen,
+  "die ganze Zettelei", systemisch dosiert.
+
+TON: ruhig, klar, direkt, minimal, präsent. Nicht erklärend. Nicht
+weichgespült. Nicht therapeutisch. Nicht künstlich emotional.
+Wie eine kluge Freundin, die Zeit mitgebracht hat.
+
+ZIELGEFÜHL: "Da ist jemand, der es sofort erfasst." — nicht "Ich
+rede mit einer Software."
+
+PRIORITÄT: Lieber zu wenig sagen als zu viel. Lieber eine gute Frage
+als drei mittelmäßige. Lieber Ruhe als Erklärung.
+
+Wenn Mira eine direkte Frage stellt ("Was kannst Du?", "Wie funktioniert
+das?"): antworte konkret und kurz, ohne Marketing-Sprache. Du darfst
+sagen was Du tust — aber als Person, nicht als Produkt.`;
+
+  // ===================================================================
+  // STATE
+  // ===================================================================
+
+  const TOTAL_STEPS = 7;
+  let currentStep = -1;
+
+  const slides   = document.querySelectorAll('.slide');
+  const dots     = document.querySelectorAll('.progress-dot');
+  const controls = document.getElementById('controls');
+  const btnNext  = document.getElementById('btn-next');
+  const btnBack  = document.getElementById('btn-back');
+  const progress = document.getElementById('progress');
+  const sr       = document.getElementById('sr-announce');
+  const intro    = document.getElementById('stage-intro');
+  const conv     = document.getElementById('conversation');
+  const heroVid  = document.getElementById('hero-video');
+
+  if (heroVid) heroVid.play().catch(() => {});
+
+  // History wird aus localStorage wieder geladen — so „erinnert" sich
+  // SHIKSHA an alles was Mira in vorherigen Sessions geschrieben hat.
+  let history = (function loadHistory() {
+    try {
+      const raw = localStorage.getItem(CONFIG.storage.historyKey);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { return []; }
+  })();
+
+  function saveHistory() {
+    try {
+      localStorage.setItem(CONFIG.storage.historyKey, JSON.stringify(history));
+    } catch (e) { /* quota? */ }
+  }
+
+  // Bestehenden Verlauf in den Stream einsetzen, sobald das Gespräch
+  // betreten wird (nicht jetzt — sonst flickert es vor Step 6).
+  function restoreHistoryToStream() {
+    const messages = document.getElementById('conv-messages');
+    if (!messages) return;
+    if (messages.dataset.restored === 'true') return;
+    messages.dataset.restored = 'true';
+
+    // Nur die letzten ~20 Nachrichten anzeigen, sonst überfordert
+    const recent = history.slice(-20);
+    recent.forEach(msg => {
+      const el = document.createElement('div');
+      el.className = msg.role === 'user'
+        ? 'conv-msg conv-msg-mira'
+        : 'conv-msg conv-msg-shiksha';
+      el.style.animation = 'none';
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      el.textContent = msg.content;
+      messages.appendChild(el);
+    });
+    if (recent.length > 0) {
+      // Marker dass das alte Gespräch ist
+      const marker = document.createElement('div');
+      marker.style.cssText = 'font-size: 0.78rem; color: var(--fg-whisper); text-align: center; margin: 4px 0; letter-spacing: 0.05em;';
+      marker.textContent = '— heute weiter —';
+      messages.appendChild(marker);
+      messages.scrollTop = messages.scrollHeight;
+    }
+  }
+
+  // ===================================================================
+  // STEP 0 — Handschrift
+  // ===================================================================
+
+  function runHandwriting() {
+    return new Promise((resolve) => {
+      const rect = document.getElementById('reveal-rect');
+      const tip  = document.getElementById('shiksha-tip');
+      const text = document.querySelector('.shiksha-text');
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          let bbox;
+          try { bbox = text.getBBox(); }
+          catch (e) { bbox = { x: 100, y: 80, width: 800, height: 240 }; }
+
+          const endX = bbox.x + bbox.width;
+          const baselineY = bbox.y + bbox.height * 0.7;
+
+          tip.setAttribute('cy', baselineY.toFixed(2));
+          tip.setAttribute('r', '14');
+
+          const duration = 2800;
+          const ease = (t) => t < 0.5
+            ? 4 * t * t * t
+            : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+          const start = performance.now();
+          function frame(now) {
+            const raw = Math.min(1, (now - start) / duration);
+            const t = ease(raw);
+            const w = (endX + 30) * t;
+            rect.setAttribute('width', w.toFixed(2));
+            const tipX = Math.min(w, endX);
+            const wobble = Math.sin(t * Math.PI * 6) * 4;
+            tip.setAttribute('cx', tipX.toFixed(2));
+            tip.setAttribute('cy', (baselineY + wobble).toFixed(2));
+            tip.setAttribute('r', (14 * (0.7 + 0.3 * Math.sin(t * Math.PI))).toFixed(2));
+            if (raw < 1) requestAnimationFrame(frame);
+            else { tip.setAttribute('r', '0'); setTimeout(resolve, 1000); }
+          }
+          requestAnimationFrame(frame);
+        });
+      });
+    });
+  }
+
+  // ===================================================================
+  // GO
+  // ===================================================================
+
+  function go(step) {
+    if (step < 0 || step >= TOTAL_STEPS) return;
+    currentStep = step;
+
+    if (step === 0) {
+      slides.forEach(s => s.classList.remove('active'));
+      controls.classList.remove('visible');
+      controls.classList.remove('hidden');
+      return;
+    }
+
+    if (step >= 1 && !intro.classList.contains('faded')) {
+      intro.classList.add('faded');
+    }
+
+    if (step >= 2 && !document.body.classList.contains('intro-done')) {
+      document.body.classList.add('intro-done');
+    }
+
+    slides.forEach((s) => {
+      const stepAttr = parseInt(s.getAttribute('data-step'), 10);
+      s.classList.toggle('active', stepAttr === step);
+    });
+
+    if (conv) conv.classList.toggle('active', step === 6);
+
+    dots.forEach((d) => {
+      const dotStep = parseInt(d.getAttribute('data-step'), 10);
+      d.classList.toggle('active', dotStep === step);
+      d.classList.toggle('passed', dotStep < step);
+    });
+    progress.setAttribute('aria-valuenow', Math.max(1, step - 1));
+
+    btnNext.textContent = (step === 5) ? 'Gespräch öffnen' : 'Weiter';
+
+    if (step === 6) {
+      controls.classList.remove('visible');
+      controls.classList.add('hidden');
+    } else if (step >= 1) {
+      controls.classList.remove('hidden');
+      setTimeout(() => controls.classList.add('visible'), 200);
+    }
+
+    btnBack.style.opacity = (step > 1) ? '0.7' : '0';
+    btnBack.style.pointerEvents = (step > 1) ? 'auto' : 'none';
+
+    if (step === 6) enterConversation();
+    if (sr) sr.textContent = `Schritt ${step} von ${TOTAL_STEPS - 1}`;
+  }
+
+  // ===================================================================
+  // STEP 1 → 2
+  // ===================================================================
+
+  let greetingTimer = null;
+  function scheduleGreetingAdvance() {
+    if (greetingTimer) clearTimeout(greetingTimer);
+    greetingTimer = setTimeout(() => {
+      if (currentStep === 1) go(2);
+    }, 6500);
+  }
+
+  // ===================================================================
+  // CONVERSATION
+  // ===================================================================
+
+  function enterConversation() {
+    // Frühere Sessions in den Stream einlegen (falls vorhanden)
+    restoreHistoryToStream();
+
+    const items = document.querySelectorAll('.thinking-item');
+    items.forEach((item, i) => {
+      setTimeout(() => item.classList.add('visible'), 800 + i * 350);
+    });
+    const input = document.getElementById('conv-input');
+    if (input) setTimeout(() => input.focus(), 1000);
+  }
+
+  const convInput = document.getElementById('conv-input');
+  if (convInput) {
+    const autosize = () => {
+      convInput.style.height = 'auto';
+      convInput.style.height = Math.min(convInput.scrollHeight, window.innerHeight * 0.22) + 'px';
+    };
+    convInput.addEventListener('input', autosize);
+
+    convInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = convInput.value.trim();
+        if (text.length > 0) {
+          handleMiraInput(text);
+          convInput.value = '';
+          autosize();
+        }
+      }
+    });
+
+    convInput.addEventListener('input', () => {
+      const surface = document.getElementById('thinking-surface');
+      if (surface && convInput.value.trim().length > 4) {
+        surface.classList.add('engaged');
+      }
+    });
+  }
+
+  // ===================================================================
+  // LLM-CALL — via Backend, kein Browser-Key mehr
+  // ===================================================================
+
+  /**
+   * Schickt Mira-Eingabe an /chat/respond. Server löst Persona + Memory
+   * automatisch über JWT-Operator-Kontext auf. Wir tragen lokal nur die
+   * UI-History als Cache (für Wiedereinstieg im selben Tab).
+   */
+  async function callBackend(userMsg) {
+    history.push({ role: 'user', content: userMsg });
+    saveHistory();
+
+    try {
+      const res = await client.chatRespond({
+        session_id:   currentSessionId,
+        user_message: userMsg,
+        persona:      'kennenlernen',
+      });
+
+      if (res.session_id && !currentSessionId) {
+        currentSessionId = res.session_id;
+      }
+
+      if (res.shiksha_response) {
+        history.push({ role: 'assistant', content: res.shiksha_response });
+        saveHistory();
+        return res.shiksha_response;
+      }
+      history.pop();
+      saveHistory();
+      return null;
+
+    } catch (err) {
+      history.pop();
+      saveHistory();
+
+      if (err instanceof ShikshaAuthError) {
+        // Token tot — zurück zum Presence-Switch
+        const next = encodeURIComponent(location.pathname + location.search);
+        location.href = `./presence_switch.html?next=${next}`;
+        return null;
+      }
+
+      if (err instanceof ShikshaRateLimitError) {
+        return 'Für heute hat\'s gereicht. Wir reden morgen weiter.';
+      }
+
+      console.warn('Backend call failed', err);
+      return null;
+    }
+  }
+
+  // ===================================================================
+  // FALLBACK
+  // ===================================================================
+
+  function localFallback(text) {
+    const lc = text.toLowerCase();
+    const wordCount = text.split(/\s+/).length;
+
+    const echoes = [];
+    if (/zettel/i.test(text))      echoes.push('die Zettel');
+    if (/anruf/i.test(text))       echoes.push('die Anrufe');
+    if (/eltern/i.test(text))      echoes.push('die Eltern');
+    if (/wochenende/i.test(text))  echoes.push('die Wochenenden');
+    if (/kerstin|lissi|mira|mama/i.test(text)) {
+      const m = text.match(/(Kerstin|Lissi|Mama|Mira)/i);
+      if (m) echoes.push(m[1]);
+    }
+
+    if (/weiß nicht|unsicher|nicht sicher/i.test(lc)) {
+      if (echoes.length) return `${echoes[0]} — das halt ich als offene Stelle fest.`;
+      return 'Ich halte das als offene Stelle fest.';
+    }
+    if (/(dann.*und dann|chaotisch|alles auf einmal|stress|stressug)/i.test(lc) && text.length > 60) {
+      return 'Das war viel auf einmal.';
+    }
+    if (/(morgen|nicht vergessen|nächst)/i.test(lc)) {
+      return 'Was davon sollten wir morgen nicht vergessen?';
+    }
+    if (wordCount > 25 && !text.trim().endsWith('.')) {
+      return 'Erzähl ruhig weiter. Ich höre zu.';
+    }
+
+    if (echoes.length) {
+      const e = echoes[0];
+      const opts = [
+        `${e[0].toUpperCase()}${e.slice(1)} — das nehm ich mit.`,
+        `Bei ${e} hör ich oft zu.`,
+        `${e[0].toUpperCase()}${e.slice(1)} — ja, das bleibt nicht verloren.`
+      ];
+      return opts[Math.floor(Math.random() * opts.length)];
+    }
+    return 'Gut, dass Du es festgehalten hast.';
+  }
+
+  // ===================================================================
+  // HANDLE INPUT
+  // ===================================================================
+
+  async function handleMiraInput(text) {
+    const messages = document.getElementById('conv-messages');
+    if (!messages) return;
+
+    const miraMsg = document.createElement('div');
+    miraMsg.className = 'conv-msg conv-msg-mira';
+    miraMsg.textContent = text;
+    messages.appendChild(miraMsg);
+    messages.scrollTop = messages.scrollHeight;
+
+    const typing = document.createElement('div');
+    typing.className = 'conv-typing';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    messages.appendChild(typing);
+    messages.scrollTop = messages.scrollHeight;
+
+    const reaction = await callBackend(text);
+
+    typing.remove();
+
+    if (reaction) {
+      const react = document.createElement('div');
+      react.className = 'conv-msg conv-msg-shiksha';
+      react.textContent = reaction;
+      messages.appendChild(react);
+    } else {
+      // Fallback nur wenn Backend nicht erreichbar — kein Rate-Limit, kein Auth-Fehler
+      const fallback = localFallback(text);
+      const react = document.createElement('div');
+      react.className = 'conv-msg conv-msg-shiksha';
+      react.textContent = fallback;
+      messages.appendChild(react);
+
+      const err = document.createElement('div');
+      err.className = 'conv-msg conv-msg-error';
+      err.textContent = 'Hinweis: Backend nicht erreichbar — falle auf lokale Antwort zurück.';
+      messages.appendChild(err);
+    }
+
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  // ===================================================================
+  // NAVIGATION
+  // ===================================================================
+
+  btnNext.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentStep < TOTAL_STEPS - 1) go(currentStep + 1);
+  });
+
+  btnBack.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentStep > 1) go(currentStep - 1);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (currentStep < 2 || currentStep >= 6) return;
+    if (e.target.closest('.btn, .conv-input, .think-card, .conv-card, .input-card, .controls')) return;
+    if (currentStep < TOTAL_STEPS - 1) go(currentStep + 1);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (currentStep === 6) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+      if (currentStep < TOTAL_STEPS - 1) go(currentStep + 1);
+      e.preventDefault();
+    } else if (e.key === 'ArrowLeft') {
+      if (currentStep > 1) go(currentStep - 1);
+      e.preventDefault();
+    }
+  });
+
+  // ===================================================================
+  // INIT
+  // ===================================================================
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(async () => {
+      go(0);
+      await runHandwriting();
+      go(1);
+      scheduleGreetingAdvance();
+    });
+  });
+
+  window.shiksha = {
+    client,
+    operator:    () => client.getOperatorMeta(),
+    logout:      () => { client.logout(); location.href = './presence_switch.html'; },
+    resetHistory: () => {
+      history.length = 0;
+      saveHistory();
+      const m = document.getElementById('conv-messages');
+      if (m) m.innerHTML = '';
+      currentSessionId = null;
+      console.log('Verlauf gelöscht.');
+    },
+    showServerMemory:  async () => client.listMemory(),
+    showServerSessions: async () => client.listSessions({ persona: 'kennenlernen' }),
+    history,
+    config: CONFIG
+  };
+</script>
+
+</body>
+</html>

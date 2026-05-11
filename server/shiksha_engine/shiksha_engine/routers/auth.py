@@ -27,16 +27,40 @@ router = APIRouter()
 def register_begin(
     operator_id: str,
     db: Annotated[DBSession, Depends(get_db)],
+    setup_token: str | None = None,
 ) -> RegistrationStartResponse:
     """Beginne Passkey-Registrierung.
 
-    Setzt voraus, dass der Operator-Eintrag schon existiert (per Seed oder
-    durch einen Setup-Token-Flow). Dieser Endpoint ist NICHT
-    self-service offen — nur Operatoren, die bereits angelegt wurden.
+    Auth-Regeln:
+      - Operator hat NOCH KEINE webauthn_credentials → öffentlicher Zugang
+        (Erst-Setup-Fall, z.B. nach Seed)
+      - Operator hat schon Credentials → setup_token erforderlich
+        (verhindert Account-Übernahme)
+
+    Setup-Token wird via Query-Param ?setup_token=... übergeben. Er
+    wird vom Developer via /api/v1/dev/setup-tokens generiert und ist
+    10 Minuten gültig.
     """
+    from ..services import setup_token_service
+
     operator = db.get(Operator, operator_id)
     if operator is None:
         raise HTTPException(status_code=404, detail="Operator unknown")
+
+    has_existing_credentials = bool(operator.webauthn_credentials)
+
+    if has_existing_credentials:
+        # Schutz: nur mit gültigem Setup-Token
+        if not setup_token:
+            raise HTTPException(
+                status_code=403,
+                detail="Operator hat bereits einen Passkey. Setup-Token nötig um neuen anzulegen.",
+            )
+        if not setup_token_service.verify(setup_token, operator_id=operator_id):
+            raise HTTPException(
+                status_code=403,
+                detail="Setup-Token ungültig oder abgelaufen.",
+            )
 
     existing_ids = [c["credential_id"] for c in (operator.webauthn_credentials or [])]
     start = webauthn_service.start_registration(
@@ -55,8 +79,14 @@ def register_begin(
 def register_finish(
     payload: RegistrationFinishRequest,
     db: Annotated[DBSession, Depends(get_db)],
+    setup_token: str | None = None,
 ) -> TokenResponse:
-    """Verifiziere die Registration-Response, speichere Credential, gib Token aus."""
+    """Verifiziere die Registration-Response, speichere Credential, gib Token aus.
+
+    Wenn Setup-Token mitgegeben wurde: wird beim Erfolg konsumiert.
+    """
+    from ..services import setup_token_service
+
     operator = db.get(Operator, payload.operator_id)
     if operator is None:
         raise HTTPException(status_code=404, detail="Operator unknown")
@@ -65,6 +95,10 @@ def register_finish(
         cred = webauthn_service.finish_registration(operator.id, payload.credential)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+    # Setup-Token konsumieren wenn vorhanden
+    if setup_token:
+        setup_token_service.consume(setup_token)
 
     # Anhängen — copy on write damit SQLAlchemy die Änderung sieht
     creds = list(operator.webauthn_credentials or [])

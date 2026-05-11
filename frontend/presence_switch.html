@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SHIKSHA · Der Raum ist bereit</title>
+<meta name="description" content="Wer tritt ein?">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     SHIKSHA · Presence Switch
+     Eintrittsgeste statt Login. Vier Karten als Tagesmomente.
+     WebAuthn-ready (Mock-Passkey-Flow heute).
+     ========================================================= */
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --fg-strong:  #1a1a1c;
+    --fg-soft:    rgba(26, 26, 28, 0.62);
+    --fg-fade:    rgba(26, 26, 28, 0.42);
+    --fg-whisper: rgba(26, 26, 28, 0.26);
+
+    --white:      #ffffff;
+    --white-soft: rgba(255, 255, 255, 0.85);
+    --white-fade: rgba(255, 255, 255, 0.6);
+    --white-whisper: rgba(255, 255, 255, 0.35);
+
+    --pad-x: clamp(24px, 4vw, 64px);
+    --pad-y: clamp(24px, 4vh, 56px);
+    --easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    color: var(--fg-strong);
+    background: #1a0d2e;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em;
+  }
+
+  /* =========================================================
+     CALM BACKGROUND
+     Sehr ruhiger Verlauf — keine Holi-Eskalation
+     ========================================================= */
+
+  .bg {
+    position: fixed; inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 20% 25%, #2a3d5c 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 80% 75%, #3d2a4c 0%, transparent 65%),
+      radial-gradient(ellipse 50% 60% at 50% 100%, #1a2238 0%, transparent 60%),
+      linear-gradient(180deg, #0f1424 0%, #1a1428 100%);
+    animation: bg-drift 60s ease-in-out infinite alternate;
+  }
+
+  @keyframes bg-drift {
+    0%   { transform: scale(1.0); filter: hue-rotate(0deg); }
+    100% { transform: scale(1.05); filter: hue-rotate(4deg); }
+  }
+
+  /* =========================================================
+     STAGE
+     ========================================================= */
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    grid-template-areas:
+      "brand"
+      "headline"
+      "cards"
+      "footer";
+    padding: var(--pad-y) var(--pad-x);
+    color: var(--white);
+    overflow: hidden;
+  }
+
+  /* Brand */
+  .brand {
+    grid-area: brand;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 0.78rem;
+    letter-spacing: 0.32em;
+    color: var(--white-fade);
+    text-transform: uppercase;
+  }
+
+  /* Headline */
+  .headline {
+    grid-area: headline;
+    align-self: center;
+    text-align: center;
+    padding: 24px 0 12px;
+    transition: opacity 0.8s var(--easing), transform 0.8s var(--easing);
+  }
+
+  .headline h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+    font-size: clamp(2rem, 4.4vw, 3.2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--white);
+    margin-bottom: 14px;
+  }
+
+  .headline p {
+    font-weight: 300;
+    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    color: var(--white-fade);
+    letter-spacing: -0.005em;
+  }
+
+  body.is-selecting .headline,
+  body.is-entering  .headline {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  /* Cards Grid */
+  .cards {
+    grid-area: cards;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(14px, 1.8vw, 24px);
+    align-content: center;
+    padding: clamp(20px, 3vh, 40px) 0;
+    max-width: 1500px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 1100px) {
+    .cards { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 540px) {
+    .cards { grid-template-columns: 1fr; gap: 12px; }
+  }
+
+  /* Card */
+  .card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 3 / 4.2;
+    min-height: 320px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition:
+      transform 0.55s var(--easing-out),
+      box-shadow 0.55s var(--easing-out),
+      opacity 0.55s var(--easing);
+    will-change: transform, opacity;
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      0 18px 50px rgba(0, 0, 0, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+
+  .card:hover .card-bg {
+    transform: scale(1.06);
+  }
+
+  body.is-selecting .card:not(.is-selected) {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+  }
+
+  .card.is-selected {
+    transform: scale(1.02);
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.46),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  }
+
+  /* Mood-Background pro Karte */
+  .card-bg {
+    position: absolute; inset: 0;
+    z-index: 0;
+    transition: transform 1.2s var(--easing-out);
+    will-change: transform;
+  }
+
+  /* Glas-Layer drüber für Lesbarkeit + Tiefe */
+  .card-glass {
+    position: absolute; inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.08) 0%,
+      rgba(0, 0, 0, 0.04) 35%,
+      rgba(0, 0, 0, 0.35) 100%
+    );
+    backdrop-filter: blur(0.5px);
+  }
+
+  /* Card-Inhalt */
+  .card-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    padding: clamp(22px, 2.2vw, 32px);
+    display: flex;
+    flex-direction: column;
+    color: var(--white);
+  }
+
+  .card-status {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--white-fade);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-status::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--white);
+    opacity: 0.7;
+  }
+
+  .card-status.restricted::before {
+    background: var(--white-whisper);
+  }
+
+  .card-spacer { flex: 1; }
+
+  .card-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .card-role {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--white-fade);
+    letter-spacing: 0.005em;
+    margin-bottom: 18px;
+  }
+
+  .card-moment {
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    padding-top: 14px;
+  }
+
+  .card-moment-title {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--white-soft);
+    margin-bottom: 4px;
+  }
+
+  .card-moment-text {
+    font-size: 0.85rem;
+    font-weight: 300;
+    line-height: 1.45;
+    color: var(--white-fade);
+  }
+
+  /* Mood-Visualisierungen */
+  .mood-morning-harbor {
+    background:
+      radial-gradient(ellipse 70% 60% at 30% 20%, #f5d5b8 0%, transparent 55%),
+      radial-gradient(ellipse 60% 50% at 75% 60%, #a8b5c0 0%, transparent 60%),
+      radial-gradient(ellipse 80% 70% at 50% 90%, #5a6d80 0%, transparent 65%),
+      linear-gradient(180deg, #c8d4e0 0%, #6d8090 60%, #3a4a5e 100%);
+  }
+
+  .mood-warm-room {
+    background:
+      radial-gradient(ellipse 60% 50% at 35% 25%, #f5c98a 0%, transparent 55%),
+      radial-gradient(ellipse 70% 60% at 70% 65%, #c47a3e 0%, transparent 60%),
+      radial-gradient(ellipse 80% 70% at 50% 100%, #5d2f15 0%, transparent 65%),
+      linear-gradient(180deg, #d49d6b 0%, #8a4d2a 60%, #3d1f0f 100%);
+  }
+
+  .mood-clear-desk {
+    background:
+      radial-gradient(ellipse 65% 55% at 30% 20%, #f0f4f8 0%, transparent 60%),
+      radial-gradient(ellipse 55% 50% at 75% 65%, #c5d2dc 0%, transparent 60%),
+      radial-gradient(ellipse 80% 70% at 50% 95%, #5a6d80 0%, transparent 60%),
+      linear-gradient(180deg, #e8eef2 0%, #a8b8c8 55%, #4a5566 100%);
+  }
+
+  .mood-open-door {
+    background:
+      radial-gradient(ellipse 70% 60% at 30% 20%, #ede4d3 0%, transparent 55%),
+      radial-gradient(ellipse 60% 50% at 75% 60%, #c8b89a 0%, transparent 60%),
+      radial-gradient(ellipse 80% 70% at 50% 95%, #6d5d44 0%, transparent 65%),
+      linear-gradient(180deg, #d8c9ad 0%, #8a7960 60%, #3d3525 100%);
+  }
+
+  /* Footer */
+  .footer {
+    grid-area: footer;
+    text-align: center;
+    padding-top: 24px;
+    transition: opacity 0.6s var(--easing);
+  }
+
+  body.is-selecting .footer,
+  body.is-entering .footer { opacity: 0; }
+
+  .footer-btn {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--white-fade);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 999px;
+    transition: color 0.3s var(--easing), background 0.3s var(--easing);
+  }
+
+  .footer-btn:hover {
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* =========================================================
+     OVERLAY — "Einen Moment."
+     ========================================================= */
+
+  .overlay {
+    position: fixed; inset: 0;
+    z-index: 10;
+    background: rgba(15, 20, 36, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: all 0.6s var(--easing);
+  }
+
+  .overlay.active {
+    background: rgba(15, 20, 36, 0.65);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    pointer-events: auto;
+  }
+
+  .overlay-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    color: var(--white);
+    letter-spacing: -0.015em;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s var(--easing) 0.2s, transform 0.5s var(--easing) 0.2s;
+    text-align: center;
+    padding: 0 24px;
+  }
+
+  .overlay.active .overlay-text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Pulse-Punkt unterm Overlay-Text */
+  .overlay-pulse {
+    display: block;
+    margin: 24px auto 0;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--white-fade);
+    opacity: 0;
+    animation: overlay-pulse 1.4s ease-in-out infinite;
+    transition: opacity 0.5s var(--easing) 0.6s;
+  }
+
+  .overlay.active .overlay-pulse { opacity: 1; }
+
+  @keyframes overlay-pulse {
+    0%, 100% { transform: scale(1);   opacity: 0.4; }
+    50%      { transform: scale(1.4); opacity: 0.9; }
+  }
+
+  /* =========================================================
+     WELCOME — Placeholder-Dashboard
+     ========================================================= */
+
+  .welcome {
+    position: fixed; inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--pad-y) var(--pad-x);
+    background: transparent;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s var(--easing);
+  }
+
+  .welcome.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .welcome-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--white);
+    text-align: center;
+    margin-bottom: 18px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.8s var(--easing) 0.3s, transform 0.8s var(--easing) 0.3s;
+  }
+
+  .welcome.active .welcome-name {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .welcome-sub {
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--white-fade);
+    text-align: center;
+    max-width: 32em;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.8s var(--easing) 0.8s, transform 0.8s var(--easing) 0.8s;
+  }
+
+  .welcome.active .welcome-sub { opacity: 1; transform: translateY(0); }
+
+  .welcome-actions {
+    margin-top: 40px;
+    display: flex;
+    gap: 14px;
+    opacity: 0;
+    transition: opacity 0.6s var(--easing) 1.4s;
+  }
+
+  .welcome.active .welcome-actions { opacity: 1; }
+
+  .welcome-btn {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--fg-strong);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: transform 0.3s var(--easing), background 0.3s var(--easing);
+  }
+
+  .welcome-btn:hover {
+    transform: translateY(-1px);
+    background: var(--white);
+  }
+
+  .welcome-btn-soft {
+    background: transparent;
+    color: var(--white-fade);
+    border: 1px solid var(--white-whisper);
+  }
+
+  .welcome-btn-soft:hover {
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  /* =========================================================
+     ACCESSIBILITY
+     ========================================================= */
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg { animation: none; }
+    .overlay-pulse { animation: none; }
+    .card:hover { transform: none; }
+    .card:hover .card-bg { transform: none; }
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0, 0, 0, 0); border: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"></div>
+
+<main class="stage">
+
+  <div class="brand">SHIKSHA</div>
+
+  <section class="headline">
+    <h1>Der Raum ist bereit.</h1>
+    <p>Wer tritt ein?</p>
+  </section>
+
+  <div class="cards" id="cards" role="list">
+    <!-- gerendert via JS -->
+  </div>
+
+  <div class="footer">
+    <button class="footer-btn" id="missing-btn" type="button">Jemand fehlt?</button>
+  </div>
+
+</main>
+
+<!-- Overlay während Passkey-Verifikation -->
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div>
+    <div class="overlay-text" id="overlay-text">Einen Moment.</div>
+    <span class="overlay-pulse" aria-hidden="true"></span>
+  </div>
+</div>
+
+<!-- Welcome-State -->
+<div class="welcome" id="welcome" aria-hidden="true">
+  <div class="welcome-name" id="welcome-name">Willkommen zurück.</div>
+  <div class="welcome-sub" id="welcome-sub">Hier wäre Dein SHIKSHA. Dashboard kommt im nächsten Schritt.</div>
+  <div class="welcome-actions">
+    <button class="welcome-btn" id="welcome-enter" type="button">Eintreten</button>
+    <button class="welcome-btn welcome-btn-soft" id="welcome-back-btn" type="button">Zurück zur Auswahl</button>
+  </div>
+</div>
+
+<p class="sr-only" aria-live="polite" id="sr"></p>
+
+<script type="module">
+'use strict';
+
+// ===================================================================
+// ShikshaClient (echter Auth-Flow) — lazy laden, damit Demo-Mode
+// auch ohne Backend funktioniert
+// ===================================================================
+
+import { ShikshaClient, ShikshaApiError, ShikshaAuthError }
+  from './shiksha-client.js';
+
+// ===================================================================
+// MODE-Detection via URL-Params
+// ===================================================================
+
+const params = new URLSearchParams(window.location.search);
+const DEMO_MODE  = params.has('demo');
+const SETUP_TOKEN = params.get('setup') || null;
+const NEXT_URL   = params.get('next') || './mira_app.html';
+const API_BASE   = params.get('api')  || (location.protocol === 'file:' ? 'https://api.shiksha.world' : `${location.protocol}//api.${location.host.replace(/^[^.]+\./, '')}`);
+
+const client = DEMO_MODE ? null : new ShikshaClient(API_BASE);
+
+// ===================================================================
+// DATA-MODELL — Demo-Karten
+// In LIVE-Mode wird die User-Liste vom Backend geholt (operator + edition)
+// — die Mood-Visuals bleiben aus dem Demo-Inventar, gemappt per ID.
+// ===================================================================
+
+const demoUsers = [
+    {
+      id: 'thomas',
+      displayName: 'Thomas',
+      role: 'Leitung',
+      accessLevel: 'full',
+      trustLabel: 'Gerät erkannt',
+      season: 'morning-harbor',
+      momentTitle: 'Frühes Licht',
+      momentText: 'Hafen im Morgendunst. Der Tag hat noch nichts gefordert.',
+      gradient: 'mood-morning-harbor',
+      accent: '#c8d4e0'
+    },
+    {
+      id: 'anna',
+      displayName: 'Anna',
+      role: 'Gruppe',
+      accessLevel: 'group',
+      trustLabel: 'Gerät erkannt',
+      season: 'warm-room',
+      momentTitle: 'Warmer Raum',
+      momentText: 'Holzboden, Herbstlicht. Leise Stimmen aus dem Nachbarzimmer.',
+      gradient: 'mood-warm-room',
+      accent: '#d49d6b'
+    },
+    {
+      id: 'verwaltung',
+      displayName: 'Verwaltung',
+      role: 'Administration',
+      accessLevel: 'admin',
+      trustLabel: 'Gerät erkannt',
+      season: 'clear-desk',
+      momentTitle: 'Klarer Schreibtisch',
+      momentText: 'Winterlicht durchs Fenster. Alles an seinem Platz.',
+      gradient: 'mood-clear-desk',
+      accent: '#e8eef2'
+    },
+    {
+      id: 'gast',
+      displayName: 'Gast',
+      role: 'Eingeschränkter Zugang',
+      accessLevel: 'guest',
+      trustLabel: 'Eingeschränkt',
+      season: 'open-door',
+      momentTitle: 'Offene Tür',
+      momentText: 'Helles Tageslicht im Flur. Du wirst erwartet.',
+      gradient: 'mood-open-door',
+      accent: '#d8c9ad'
+    }
+  ];
+
+  // Mood-Inventar — Mapping operator_id → Visual.
+  // Default-Fallback wenn ID nicht bekannt: rotation durchs Inventar.
+  const moodInventory = {
+    morningHarbor: { season: 'morning-harbor', momentTitle: 'Frühes Licht',  momentText: 'Hafen im Morgendunst. Der Tag hat noch nichts gefordert.', gradient: 'mood-morning-harbor' },
+    warmRoom:      { season: 'warm-room',      momentTitle: 'Warmer Raum',   momentText: 'Holzboden, Herbstlicht. Leise Stimmen aus dem Nachbarzimmer.', gradient: 'mood-warm-room' },
+    clearDesk:     { season: 'clear-desk',     momentTitle: 'Klarer Schreibtisch', momentText: 'Winterlicht durchs Fenster. Alles an seinem Platz.',   gradient: 'mood-clear-desk' },
+    openDoor:      { season: 'open-door',      momentTitle: 'Offene Tür',    momentText: 'Helles Tageslicht im Flur. Du wirst erwartet.',              gradient: 'mood-open-door' },
+  };
+
+  // Per-Operator-Mapping (kann später aus operator.metadata kommen)
+  const operatorMoodMap = {
+    'krummelus_mira': moodInventory.warmRoom,
+    'thomas':         moodInventory.morningHarbor,
+  };
+
+  let users = DEMO_MODE ? demoUsers : []; // wird in init() befüllt für LIVE-Mode
+
+  // ===================================================================
+  // ELEMENTE
+  // ===================================================================
+
+  const cardsEl   = document.getElementById('cards');
+  const overlayEl = document.getElementById('overlay');
+  const overlayText = document.getElementById('overlay-text');
+  const welcomeEl = document.getElementById('welcome');
+  const welcomeName = document.getElementById('welcome-name');
+  const welcomeSub  = document.getElementById('welcome-sub');
+  const welcomeEnter = document.getElementById('welcome-enter');
+  const welcomeBackBtn = document.getElementById('welcome-back-btn');
+  const missingBtn = document.getElementById('missing-btn');
+  const sr = document.getElementById('sr');
+
+  // ===================================================================
+  // RENDER
+  // ===================================================================
+
+  function renderPresenceCards() {
+    cardsEl.innerHTML = users.map(user => `
+      <button
+        class="card"
+        type="button"
+        role="listitem"
+        data-user-id="${user.id}"
+        aria-label="Eintreten als ${user.displayName} (${user.role})">
+
+        <div class="card-bg ${user.gradient}" aria-hidden="true"></div>
+        <div class="card-glass" aria-hidden="true"></div>
+
+        <div class="card-content">
+          <div class="card-status ${user.accessLevel === 'guest' ? 'restricted' : ''}">
+            ${user.trustLabel}
+          </div>
+          <div class="card-spacer"></div>
+          <div class="card-name">${user.displayName}</div>
+          <div class="card-role">${user.role}</div>
+          <div class="card-moment">
+            <div class="card-moment-title">${user.momentTitle}</div>
+            <div class="card-moment-text">${user.momentText}</div>
+          </div>
+        </div>
+
+      </button>
+    `).join('');
+
+    cardsEl.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => selectPresence(card.dataset.userId));
+    });
+  }
+
+  // ===================================================================
+  // SELECT + PASSKEY
+  // ===================================================================
+
+  function selectPresence(userId) {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+
+    document.body.classList.add('is-selecting');
+
+    const allCards = cardsEl.querySelectorAll('.card');
+    allCards.forEach(c => {
+      c.classList.toggle('is-selected', c.dataset.userId === userId);
+    });
+
+    if (sr) sr.textContent = `${user.displayName} ausgewählt.`;
+
+    // Overlay einblenden nach kurzer Karten-Animation
+    setTimeout(() => runPasskey(user), 450);
+  }
+
+  async function runPasskey(user) {
+    overlayText.textContent = 'Einen Moment.';
+    overlayEl.classList.add('active');
+
+    if (DEMO_MODE) {
+      // Mock-Variante — 1.2s simulieren
+      setTimeout(() => {
+        overlayText.textContent = `Willkommen zurück, ${user.displayName}.`;
+        setTimeout(() => enterShiksha(user), 1100);
+      }, 1200);
+      return;
+    }
+
+    // Echter WebAuthn-Flow via ShikshaClient
+    try {
+      let tokenData;
+      if (SETUP_TOKEN) {
+        // Erst-Setup: Registration-Flow mit Token
+        tokenData = await client.registerPasskey(user.id, SETUP_TOKEN);
+      } else {
+        // Wiederkehrender Login
+        tokenData = await client.loginWithPasskey(user.id);
+      }
+
+      overlayText.textContent = `Willkommen zurück, ${tokenData.display_name}.`;
+      setTimeout(() => enterShiksha({
+        ...user,
+        displayName: tokenData.display_name,
+        role:        tokenData.role,
+        edition:     tokenData.edition,
+      }), 1100);
+
+    } catch (err) {
+      console.warn('Passkey-Flow failed', err);
+      overlayText.textContent = 'Das hat nicht geklappt. Magst Du nochmal?';
+      setTimeout(() => {
+        overlayEl.classList.remove('active');
+        resetToCards();
+      }, 1800);
+
+      if (sr) sr.textContent = `Fehler: ${err.message || 'unbekannt'}`;
+    }
+  }
+
+  function enterShiksha(user) {
+    document.body.classList.add('is-entering');
+
+    welcomeName.textContent = `Willkommen, ${user.displayName}.`;
+
+    if (DEMO_MODE) {
+      if (user.accessLevel === 'guest') {
+        welcomeSub.textContent = 'Eingeschränkter Bereich. Du kannst Dich umschauen.';
+      } else if (user.accessLevel === 'admin') {
+        welcomeSub.textContent = 'Verwaltung. Alles an seinem Platz.';
+      } else if (user.accessLevel === 'group') {
+        welcomeSub.textContent = 'Gruppen-Sicht. Wir fangen an.';
+      } else {
+        welcomeSub.textContent = 'Hier wäre Dein SHIKSHA. Dashboard folgt.';
+      }
+    } else {
+      welcomeSub.textContent = 'Ich richte Dir den Raum ein…';
+    }
+
+    // Overlay fadet, Welcome erscheint
+    overlayEl.classList.remove('active');
+    setTimeout(() => {
+      welcomeEl.classList.add('active');
+    }, 200);
+
+    if (sr) sr.textContent = `Eingetreten als ${user.displayName}.`;
+
+    // In LIVE-Mode: direkt weiter zur Mira-App / zum Dashboard
+    if (!DEMO_MODE) {
+      setTimeout(() => {
+        window.location.href = NEXT_URL;
+      }, 2400);
+    }
+  }
+
+  // ===================================================================
+  // ZURÜCK / WIEDERHOLEN
+  // ===================================================================
+
+  function resetToCards() {
+    welcomeEl.classList.remove('active');
+    document.body.classList.remove('is-selecting', 'is-entering');
+    cardsEl.querySelectorAll('.card').forEach(c => c.classList.remove('is-selected'));
+    overlayEl.classList.remove('active');
+    overlayText.textContent = 'Einen Moment.';
+  }
+
+  welcomeBackBtn.addEventListener('click', resetToCards);
+
+  welcomeEnter.addEventListener('click', () => {
+    welcomeSub.textContent = 'Dashboard kommt — das ist die Eintrittsgeste, mehr braucht es heute nicht.';
+  });
+
+  missingBtn.addEventListener('click', () => {
+    // Platzhalter — könnte später eine Magic-Link-Eingabe öffnen
+    if (sr) sr.textContent = 'Jemand fehlt. Funktion folgt.';
+    missingBtn.textContent = 'Schreib uns kurz — Funktion folgt.';
+    setTimeout(() => {
+      missingBtn.textContent = 'Jemand fehlt?';
+    }, 2800);
+  });
+
+  // ===================================================================
+  // INIT
+  // ===================================================================
+
+  async function loadLiveUsers() {
+    // Phase 1: Hardcoded operator-IDs aus dem Seed. Späteres Refinement:
+    // /api/v1/dev/operators-Endpoint (developer-Token) oder ein öffentlicher
+    // /api/v1/operators-list-Endpoint mit visible_in_presence_switch-Flag.
+    const knownOperators = [
+      { id: 'krummelus_mira', displayName: 'Mira',   role: 'Trägerin',         accessLevel: 'operator' },
+      { id: 'thomas',         displayName: 'Thomas', role: 'Entwicklung',     accessLevel: 'admin'    },
+    ];
+
+    return knownOperators.map(op => {
+      const mood = operatorMoodMap[op.id] || moodInventory.openDoor;
+      return {
+        ...op,
+        trustLabel: SETUP_TOKEN ? 'Erst-Einrichtung' : 'Gerät erkannt',
+        ...mood,
+      };
+    });
+  }
+
+  async function init() {
+    if (DEMO_MODE) {
+      users = demoUsers;
+      renderPresenceCards();
+      return;
+    }
+
+    // LIVE-Mode: schon eingeloggt? → direkt weiter
+    if (!SETUP_TOKEN && client && client.hasValidToken()) {
+      try {
+        await client.me();
+        // Token gültig — direkt weiterleiten
+        window.location.href = NEXT_URL;
+        return;
+      } catch (err) {
+        // Token tot — Login-Flow starten
+      }
+    }
+
+    users = await loadLiveUsers();
+    renderPresenceCards();
+  }
+
+  init();
+
+  // Debug-API
+  window.shiksha = {
+    users,
+    client,
+    select: selectPresence,
+    reset:  resetToCards,
+    mode:   DEMO_MODE ? 'demo' : (SETUP_TOKEN ? 'setup' : 'login'),
+  };
+
+</script>
+
+</body>
+</html>

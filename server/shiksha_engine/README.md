@@ -186,4 +186,3 @@ Schritt 8  Mobile-Handover + Server-Push (VAPID)
 ---
 
 **v0.1.0 · Phase 1 Foundation · edition-agnostisch · Mira-UX-first**
-

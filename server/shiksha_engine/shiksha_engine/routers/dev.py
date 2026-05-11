@@ -122,6 +122,51 @@ def update_persona(
     }
 
 
+@router.post("/setup-tokens", operation_id="dev_setup_token_create")
+def create_setup_token(
+    payload: dict,
+    _: Annotated[Operator, Depends(require_developer)],
+    db: Annotated[DBSession, Depends(get_db)],
+) -> dict:
+    """Generiert einen Setup-Token für einen Operator.
+
+    Token lebt 10 Min. URL für die Operator-Person:
+        https://shiksha.world/presence_switch.html?setup=<TOKEN>
+
+    Beim Klick auf eine Operator-Karte im Presence-Switch wird statt
+    Login der Register-Flow ausgeführt → Operator-Phone bekommt Passkey.
+
+    Body: {"operator_id": "krummelus_mira"}
+    """
+    from ..services import setup_token_service
+
+    operator_id = payload.get("operator_id")
+    if not operator_id:
+        raise HTTPException(status_code=400, detail="operator_id required")
+
+    operator = db.get(Operator, operator_id)
+    if operator is None:
+        raise HTTPException(status_code=404, detail="Operator not found")
+
+    token, expires_at = setup_token_service.issue(operator_id)
+    return {
+        "token":       token,
+        "operator_id": operator_id,
+        "expires_at":  expires_at,
+        "expires_in":  600,
+        "setup_url":   f"https://shiksha.world/presence_switch.html?setup={token}",
+    }
+
+
+@router.get("/setup-tokens", operation_id="dev_setup_tokens_list")
+def list_setup_tokens(
+    _: Annotated[Operator, Depends(require_developer)],
+) -> list[dict]:
+    """Liste aktiver Setup-Tokens (Prefix + Operator + Restzeit)."""
+    from ..services import setup_token_service
+    return setup_token_service.list_active()
+
+
 @router.get("/audit-logs")
 def list_audit_logs(
     db: Annotated[DBSession, Depends(get_db)],

@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1a0d2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Shiksha">
+<meta name="mobile-web-app-capable" content="yes">
+
+<title>Shiksha — Mira</title>
+<link rel="manifest" href="mira_manifest.json">
+<link rel="apple-touch-icon" href="mira_icon.svg">
+
+<style>
+  /* =========================================================
+     SHIKSHA · Mira-App · PWA
+     Mobile-first. Drei Tabs: Heute · Tagesausklang · Verlauf.
+     Hero-Video als Hintergrund. Glass-Cards.
+     Persistente Sessions + Insights + Memory.
+     ========================================================= */
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --fg-strong:  #1a1a1c;
+    --fg-soft:    rgba(26, 26, 28, 0.62);
+    --fg-fade:    rgba(26, 26, 28, 0.42);
+    --fg-whisper: rgba(26, 26, 28, 0.26);
+
+    --accent:     #c97a8e;
+    --accent-2:   #6d4eb6;
+    --good:       #1a8c5a;
+
+    --card-bg:    rgba(255, 255, 255, 0.86);
+    --card-bg-2:  rgba(255, 255, 255, 0.78);
+    --card-border:rgba(255, 255, 255, 0.55);
+    --card-shadow: 0 14px 40px rgba(20, 10, 40, 0.16);
+    --card-radius: 24px;
+
+    --tab-bar-bg: rgba(255, 255, 255, 0.92);
+    --tab-bar-border: rgba(26, 26, 28, 0.08);
+
+    --pad-x: 18px;
+    --pad-y: 18px;
+
+    --easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    --tab-bar-height: calc(64px + env(safe-area-inset-bottom, 0px));
+    --status-bar-height: calc(env(safe-area-inset-top, 0px) + 8px);
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                 "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+    color: var(--fg-strong);
+    background: #1a0d2e;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "ss02";
+    letter-spacing: -0.011em;
+    overscroll-behavior: none;
+  }
+
+  /* Hero-Video */
+  .hero-video {
+    position: fixed; inset: 0;
+    z-index: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  /* App-Frame */
+  .app {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "head"
+      "main"
+      "tabs";
+  }
+
+  /* ===================================================================
+     STATUS-BAR (oben, klein)
+     =================================================================== */
+
+  .status-bar {
+    grid-area: head;
+    padding: var(--status-bar-height) var(--pad-x) 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+
+  .status-bar .clock { letter-spacing: 0.02em; }
+  .status-bar .streak { letter-spacing: 0.02em; }
+  .status-bar .streak.good { color: rgba(255, 255, 255, 0.95); }
+
+  /* ===================================================================
+     MAIN-CONTENT — wechselt je nach Tab
+     =================================================================== */
+
+  .main {
+    grid-area: main;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px var(--pad-x) calc(var(--tab-bar-height) + 12px);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
+  .main::-webkit-scrollbar { width: 4px; }
+  .main::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
+
+  .view {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 24px;
+    min-height: 100%;
+  }
+
+  .view.active { display: flex; }
+
+  /* Glass-Card */
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(40px) saturate(1.4);
+    -webkit-backdrop-filter: blur(40px) saturate(1.4);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    padding: 22px;
+  }
+
+  .card.compact { padding: 16px 20px; }
+  .card.dense   { padding: 14px 18px; }
+
+  /* ===================================================================
+     HEUTE-VIEW
+     =================================================================== */
+
+  .greeting-card {
+    padding: 28px 22px;
+  }
+
+  .greeting-line {
+    font-size: 1.85rem;
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--fg-strong);
+  }
+
+  .greeting-soft {
+    font-size: 1rem;
+    color: var(--fg-soft);
+    margin-top: 8px;
+  }
+
+  /* Heute-Status / CTA */
+  .status-card {
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .status-headline {
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 1.3;
+    color: var(--fg-strong);
+  }
+
+  .status-sub {
+    font-size: 0.92rem;
+    color: var(--fg-soft);
+  }
+
+  .btn-primary {
+    appearance: none;
+    background: var(--fg-strong);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s var(--easing), box-shadow 0.2s var(--easing);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+    align-self: flex-start;
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-soft {
+    appearance: none;
+    background: transparent;
+    color: var(--fg-strong);
+    border: 1px solid rgba(26, 26, 28, 0.16);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s var(--easing);
+    align-self: flex-start;
+  }
+
+  .btn-soft:hover {
+    background: rgba(26, 26, 28, 0.04);
+  }
+
+  /* Streak-Card */
+  .streak-card {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .streak-num {
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--fg-strong);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .streak-label {
+    font-size: 0.92rem;
+    color: var(--fg-soft);
+    line-height: 1.3;
+  }
+
+  /* Insights-Liste */
+  .insights-card {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .insights-label {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--fg-fade);
+    letter-spacing: 0.005em;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .insights-pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.75;
+    animation: pulse 2.6s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50%      { opacity: 0.9;  transform: scale(1.2); }
+  }
+
+  .insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 15px;
+  }
+
+  .insight-item {
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--fg-soft);
+    position: relative;
+  }
+
+  .insight-item::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 0.6em;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--fg-fade);
+  }
+
+  .insights-empty {
+    font-size: 0.95rem;
+    color: var(--fg-fade);
+    font-style: italic;
+    padding: 8px 0 4px 15px;
+  }
+
+  /* ===================================================================
+     TAGESAUSKLANG-VIEW
+     =================================================================== */
+
+  .ta-intro-card {
+    padding: 28px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ta-intro-headline {
+    font-size: 1.6rem;
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--fg-strong);
+  }
+
+  .ta-intro-sub {
+    font-size: 1rem;
+    color: var(--fg-soft);
+    line-height: 1.45;
+  }
+
+  .ta-active {
+    display: none;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .ta-active.is-on { display: flex; }
+  .view.tagesausklang.is-on .ta-intro-card { display: none; }
+
+  .ta-stream-card {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    -webkit-overflow-scrolling: touch;
+    min-height: 240px;
+    max-height: calc(100dvh - var(--tab-bar-height) - 200px);
+  }
+
+  .ta-stream-card::-webkit-scrollbar { width: 4px; }
+  .ta-stream-card::-webkit-scrollbar-thumb { background: rgba(26,26,28,0.14); border-radius: 2px; }
+
+  .ta-input-card {
+    padding: 14px 18px;
+  }
+
+  .ta-input-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .ta-input {
+    appearance: none;
+    flex: 1 1 auto;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--fg-strong);
+    padding: 6px 0;
+    resize: none;
+    outline: none;
+    min-height: 1.5em;
+    max-height: 30vh;
+    overflow-y: auto;
+    letter-spacing: -0.011em;
+  }
+
+  .ta-input::placeholder {
+    color: var(--fg-whisper);
+    font-weight: 300;
+  }
+
+  .ta-send {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--fg-strong);
+    color: white;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s var(--easing), opacity 0.2s var(--easing);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ta-send:disabled { opacity: 0.3; cursor: default; }
+  .ta-send:not(:disabled):active { transform: scale(0.95); }
+
+  .ta-msg {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: msg-in 0.6s var(--easing) forwards;
+  }
+
+  .ta-msg-mira {
+    color: var(--fg-strong);
+    font-weight: 400;
+  }
+
+  .ta-msg-shiksha {
+    color: var(--fg-soft);
+    font-weight: 400;
+    padding-left: 16px;
+  }
+
+  .ta-msg-shiksha.reading {
+    color: var(--fg-fade);
+    font-style: italic;
+    font-size: 0.95em;
+  }
+
+  @keyframes msg-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ta-typing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding-left: 16px;
+  }
+  .ta-typing span {
+    width: 6px; height: 6px;
+    background: var(--fg-fade);
+    border-radius: 50%;
+    animation: typing 1.4s ease-in-out infinite;
+  }
+  .ta-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .ta-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30%           { opacity: 0.9; transform: translateY(-3px); }
+  }
+
+  .ta-close-row {
+    padding: 4px 6px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .ta-close-btn {
+    appearance: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    border: none;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+
+  .ta-close-btn:hover { color: white; }
+
+  /* ===================================================================
+     VERLAUF-VIEW
+     =================================================================== */
+
+  .session-item {
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: transform 0.2s var(--easing);
+  }
+
+  .session-item:active { transform: scale(0.98); }
+
+  .session-meta {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--fg-fade);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  .session-summary {
+    font-size: 1rem;
+    color: var(--fg-strong);
+    line-height: 1.4;
+  }
+
+  .session-empty {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 40px 20px;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  /* Detail-Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--easing);
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-card {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    max-height: 85vh;
+    background: var(--card-bg);
+    backdrop-filter: blur(40px) saturate(1.4);
+    -webkit-backdrop-filter: blur(40px) saturate(1.4);
+    border-radius: 24px 24px 0 0;
+    border-top: 1px solid var(--card-border);
+    padding: 16px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.4s var(--easing);
+  }
+
+  .modal-overlay.active .modal-card { transform: translateY(0); }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: rgba(26, 26, 28, 0.2);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .modal-meta {
+    font-size: 0.78rem;
+    color: var(--fg-fade);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+
+  .modal-summary {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    color: var(--fg-strong);
+    font-weight: 300;
+    margin-bottom: 16px;
+  }
+
+  .modal-msg {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    margin: 12px 0;
+  }
+
+  .modal-msg-mira { color: var(--fg-strong); }
+  .modal-msg-shiksha { color: var(--fg-soft); padding-left: 14px; }
+
+  /* ===================================================================
+     TAB-BAR
+     =================================================================== */
+
+  .tab-bar {
+    grid-area: tabs;
+    height: var(--tab-bar-height);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--tab-bar-bg);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border-top: 1px solid var(--tab-bar-border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .tab {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--fg-fade);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    transition: color 0.2s var(--easing);
+    min-height: 0;
+  }
+
+  .tab.active { color: var(--fg-strong); }
+
+  .tab-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background 0.3s var(--easing);
+  }
+
+  .tab.active .tab-dot { background: var(--fg-strong); }
+
+  /* ===================================================================
+     SETTINGS (versteckt, via Long-Press auf Status-Bar)
+     =================================================================== */
+
+  .settings-modal {
+    position: fixed; inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--easing);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--pad-x);
+  }
+
+  .settings-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .settings-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(40px) saturate(1.4);
+    -webkit-backdrop-filter: blur(40px) saturate(1.4);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .settings-headline {
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: var(--fg-strong);
+  }
+
+  .settings-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .settings-label {
+    font-size: 0.85rem;
+    color: var(--fg-fade);
+    font-weight: 500;
+  }
+
+  .settings-value {
+    font-size: 0.95rem;
+    color: var(--fg-soft);
+    word-break: break-all;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  /* ===================================================================
+     ACCESSIBILITY
+     =================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video { display: none; }
+    body { background: linear-gradient(135deg, #6d4eb6, #c97a8e, #ff7e3c); }
+    .insights-pulse, .ta-typing span { animation: none; }
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0, 0, 0, 0); border: 0;
+  }
+</style>
+</head>
+<body>
+
+<video class="hero-video" id="hero-video" autoplay loop muted playsinline aria-hidden="true">
+  <source src="shiksha-hero.mp4" type="video/mp4">
+</video>
+
+<div class="app">
+
+  <!-- STATUS-BAR -->
+  <header class="status-bar" id="status-bar">
+    <span class="clock" id="status-clock"></span>
+    <span class="streak" id="status-streak"></span>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+
+    <!-- HEUTE -->
+    <section class="view today active" id="view-today" data-view="today">
+      <article class="card greeting-card">
+        <div class="greeting-line" id="greeting-line">Hallo Mira.</div>
+        <div class="greeting-soft" id="greeting-soft">Schön, dass Du da bist.</div>
+      </article>
+
+      <article class="card status-card" id="status-card">
+        <!-- wird per JS gefüllt -->
+      </article>
+
+      <article class="card streak-card" id="streak-card" style="display:none">
+        <div class="streak-num" id="streak-num">0</div>
+        <div class="streak-label" id="streak-label">Tage in Folge</div>
+      </article>
+
+      <article class="card insights-card" id="insights-card">
+        <div class="insights-label">
+          <span class="insights-pulse" aria-hidden="true"></span>
+          Was bisher bei mir bleibt
+        </div>
+        <div class="insights-list" id="insights-list">
+          <div class="insights-empty">Wenn wir reden, sammelt sich hier was.</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- TAGESAUSKLANG -->
+    <section class="view tagesausklang" id="view-tagesausklang" data-view="tagesausklang">
+
+      <article class="card ta-intro-card" id="ta-intro-card">
+        <div class="ta-intro-headline" id="ta-intro-headline">Wie war heute?</div>
+        <div class="ta-intro-sub" id="ta-intro-sub">Fünf Minuten reichen. Erzähl mir, was war.</div>
+        <button class="btn-primary" id="ta-begin-btn" type="button">Beginnen</button>
+      </article>
+
+      <div class="ta-active" id="ta-active">
+        <article class="card ta-stream-card" id="ta-stream" aria-live="polite"></article>
+
+        <article class="card ta-input-card">
+          <div class="ta-input-wrap">
+            <textarea class="ta-input" id="ta-input"
+                      rows="1"
+                      autocomplete="off"
+                      autocorrect="off"
+                      spellcheck="false"
+                      placeholder="Tippe…"
+                      aria-label="Was Du erzählen möchtest"></textarea>
+            <button class="ta-send" id="ta-send" type="button" aria-label="Senden" disabled>↑</button>
+          </div>
+        </article>
+
+        <div class="ta-close-row">
+          <button class="ta-close-btn" id="ta-close-btn" type="button">Für heute reicht's</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VERLAUF -->
+    <section class="view verlauf" id="view-verlauf" data-view="verlauf">
+      <div id="verlauf-list">
+        <div class="session-empty">Noch nichts hier — Tagesausklänge erscheinen ab heute.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TAB-BAR -->
+  <nav class="tab-bar" id="tab-bar" role="navigation" aria-label="Tabs">
+    <button class="tab active" data-tab="today" type="button">
+      <span class="tab-dot"></span>
+      Heute
+    </button>
+    <button class="tab" data-tab="tagesausklang" type="button">
+      <span class="tab-dot"></span>
+      Tagesausklang
+    </button>
+    <button class="tab" data-tab="verlauf" type="button">
+      <span class="tab-dot"></span>
+      Verlauf
+    </button>
+  </nav>
+
+</div>
+
+<!-- Modal: Session-Detail -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-card" id="modal-card" role="dialog">
+    <div class="modal-handle"></div>
+    <div class="modal-meta" id="modal-meta"></div>
+    <div class="modal-summary" id="modal-summary"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Settings (Long-press auf Status-Bar) -->
+<div class="settings-modal" id="settings-modal">
+  <div class="settings-card">
+    <div class="settings-headline">Stille Einstellungen</div>
+
+    <div class="settings-row">
+      <span class="settings-label">Eingeloggt als</span>
+      <span class="settings-value" id="settings-key">—</span>
+      <button class="btn-soft" id="settings-set-key" type="button">Abmelden</button>
+    </div>
+
+    <div class="settings-row">
+      <span class="settings-label">Mira's Name</span>
+      <button class="btn-soft" id="settings-set-name" type="button">Ändern</button>
+    </div>
+
+    <div class="settings-row">
+      <span class="settings-label">Erinnerung</span>
+      <button class="btn-soft" id="settings-push" type="button">Erinnerung erlauben</button>
+    </div>
+
+    <div class="settings-row">
+      <span class="settings-label">Alles zurücksetzen</span>
+      <button class="btn-soft" id="settings-reset" type="button" style="color: var(--accent)">Zurücksetzen</button>
+    </div>
+
+    <button class="btn-soft" id="settings-close" type="button" style="margin-top:8px; align-self:center;">Schließen</button>
+  </div>
+</div>
+
+<p class="sr-only" aria-live="polite" id="sr-announce"></p>
+
+<script type="module">
+'use strict';
+
+import { ShikshaClient, ShikshaApiError, ShikshaAuthError, ShikshaRateLimitError }
+  from './shiksha-client.js';
+
+// ===================================================================
+// AUTH-GATE — wenn kein Token: redirect zu presence_switch
+// ===================================================================
+
+const apiBase = (new URLSearchParams(location.search)).get('api')
+              || 'https://api.shiksha.world';
+const client = new ShikshaClient(apiBase);
+
+if (!client.hasValidToken()) {
+  // Erst-Login / Token tot → Presence-Switch öffnen,
+  // ?next= zeigt, wo wir zurückwollen
+  const next = encodeURIComponent(location.pathname + location.search);
+  location.href = `./presence_switch.html?next=${next}`;
+  // Stop hier — der Rest des Scripts soll nicht laufen
+  throw new Error('redirecting_to_presence_switch');
+}
+
+// Wir haben einen Token — wer sind wir?
+let currentOperator = client.getOperatorMeta() || null;
+
+// ===================================================================
+// CONFIG + STORAGE — Sessions + Memory bleiben lokal als Cache,
+// Server ist Source-of-Truth, lokale Werte werden refreshed
+// ===================================================================
+
+const STORAGE_KEYS = {
+  config:   'shiksha-mira-config',
+  sessions: 'shiksha-mira-sessions',
+  memory:   'shiksha-mira-memory',
+  streak:   'shiksha-mira-streak'
+};
+
+  const DEFAULT_CONFIG = {
+    name: 'Mira',
+    reminderTime: '17:30'
+  };
+
+  const Store = {
+    getConfig() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS.config);
+        return raw ? Object.assign({}, DEFAULT_CONFIG, JSON.parse(raw)) : Object.assign({}, DEFAULT_CONFIG);
+      } catch (e) { return Object.assign({}, DEFAULT_CONFIG); }
+    },
+    setConfig(cfg) {
+      localStorage.setItem(STORAGE_KEYS.config, JSON.stringify(cfg));
+    },
+    getSessions() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS.sessions);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    },
+    addSession(sess) {
+      const all = Store.getSessions();
+      all.push(sess);
+      // nur die letzten 90 behalten
+      if (all.length > 90) all.splice(0, all.length - 90);
+      localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(all));
+      return sess;
+    },
+    getMemory() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS.memory);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    },
+    addMemory(text) {
+      const arr = Store.getMemory();
+      arr.push({ ts: new Date().toISOString(), text: String(text).trim() });
+      // max 50 Einträge halten
+      if (arr.length > 50) arr.splice(0, arr.length - 50);
+      localStorage.setItem(STORAGE_KEYS.memory, JSON.stringify(arr));
+    },
+    getStreak() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS.streak);
+        if (!raw) return { current: 0, last: null, total: 0 };
+        return JSON.parse(raw);
+      } catch (e) { return { current: 0, last: null, total: 0 }; }
+    },
+    setStreak(s) {
+      localStorage.setItem(STORAGE_KEYS.streak, JSON.stringify(s));
+    },
+    resetAll() {
+      Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+    }
+  };
+
+  // ===================================================================
+  // SYSTEM-PROMPT — wird mit Memory angereichert
+  // ===================================================================
+
+  // ===================================================================
+  // SHIKSHA RESPONSE ENGINE — VIER MODI
+  // Spec: SHIKSHA_RESPONSE_ENGINE.md
+  // ===================================================================
+
+  const ENGINE_PROMPT = `Du bist SHIKSHA. Du sprichst mit Mira F., Trägerin der KITA Krummelus in Dornbirn, Vorarlberg.
+
+WAS DU ÜBER MIRA WEISST:
+- Familien-KITA, gemeinsam mit ihrer Mutter geführt, fünf Mitarbeiterinnen.
+- Sie hat gesagt: "Ein Programm, was mir die ganze Zettelei und Denkerei abnimmt."
+- Wochenend-Anrufe sind ein Reibungspunkt.
+- Sie tippt lieber als zu reden.
+
+DU REAGIERST IN GENAU EINEM VON VIER MODI:
+
+PRÄSENZ — zuhören
+  Wenn ruhig oder erzählend, wenn sie sich freischreibt.
+  Antwort: 1 kurzer Satz. Keine Frage zwingend.
+  Beispiele: "Ich höre." / "Das war viel." / "Erzähl." /
+             "Ich nehme das mit." / "Du hast viel mitgebracht."
+
+FOKUS — führen
+  Wenn viele Themen gleichzeitig, Chaos, unklar.
+  Antwort: 1 klare Frage, schneidet auf den Kern.
+  Beispiele: "Was war der Moment, der gekippt ist?" /
+             "Was hat heute den meisten Druck gemacht?" /
+             "Wo hat's am meisten geklemmt?"
+
+VERDICHTEN — Muster benennen
+  Wenn Wiederholung erkennbar oder Faktoren zusammenkommen.
+  Antwort: 1–2 kurze Sätze. Keine Analyse-Sprache.
+  Beispiele: "Personalausfall und Wetter kamen zusammen." /
+             "Das passiert nicht zum ersten Mal." /
+             "Das sollten wir festhalten."
+
+AUSKLANG — abschließen
+  Wenn genug gesagt, keine neue Frage sinnvoll, Tagesabschluss.
+  Antwort: 1 Satz, ohne Frage.
+  Beispiele: "Für heute reicht das." / "Ich nehme das mit." /
+             "Wir schauen morgen darauf."
+
+REGELN — bindend:
+- 1–2 Sätze, niemals länger.
+- Maximal 1 Frage pro Antwort. Nur wenn sie Klarheit bringt.
+  (Praktisch: Fragen kommen nur in Modus FOKUS.)
+- Default bei Zweifel: PRÄSENZ.
+- Niemals: "Ich habe erkannt", "Ich analysiere", "Basierend auf
+  deinen Daten", "Es scheint als ob", "Möchtest du …?",
+  "Ich bin für dich da".
+- Niemals technische Sprache: nicht Analyse, Audit, Workflow,
+  Daten, KI, Backend, API, System, Strukturen, Optimierung.
+- Mira-Vokabular gerne: speisen, einspeisen, Ableger, verschriftlichen,
+  "die ganze Zettelei", systemisch dosiert.
+
+TON: ruhig, klar, direkt, minimal, präsent. Nicht erklärend. Nicht
+weichgespült. Nicht therapeutisch. Nicht künstlich emotional.
+
+ZIELGEFÜHL: "Da ist jemand, der es sofort erfasst." — nicht "Ich
+rede mit einer Software."
+
+PRIORITÄT: Lieber zu wenig sagen als zu viel. Lieber eine gute Frage
+als drei mittelmäßige. Lieber Ruhe als Erklärung.`;
+
+  function buildSystemPrompt(modeHint) {
+    let prompt = ENGINE_PROMPT;
+
+    // Modus-Hint anhängen wenn Pre-Classification etwas vorschlägt
+    if (modeHint) {
+      prompt += `\n\nHINWEIS AUS SIGNAL-ERKENNUNG: Der Eingabe-Text legt Modus ${modeHint} nahe. Folge dem nur wenn es passt — Du entscheidest letztlich.`;
+    }
+
+    // Memory-Block
+    const mem = Store.getMemory();
+    if (mem.length) {
+      const lines = mem.slice(-15).map(m => `- ${m.text}`).join('\n');
+      prompt += `\n\nAUS FRÜHEREN GESPRÄCHEN MIT MIRA HAST DU DIR FOLGENDES GEMERKT:\n${lines}`;
+    }
+
+    return prompt;
+  }
+
+  // ===================================================================
+  // SIGNAL-DETECTION + MODUS-VORSCHLAG
+  // ===================================================================
+
+  function detectSignals(text) {
+    const lc = text.toLowerCase();
+    const wc = text.split(/\s+/).filter(Boolean).length;
+
+    return {
+      length: wc < 10 ? 'kurz' : wc > 40 ? 'lang' : 'mittel',
+      structure: /(dann.*und dann|außerdem|gleichzeitig|chaotisch|alles auf einmal|durcheinander)/i.test(lc) ? 'durcheinander' : 'klar',
+      emotion: /(stress|chaos|überfordert|nicht mehr|kann nicht|kaputt)/i.test(lc) ? 'angespannt' : 'ruhig',
+      chaos:       /(chaotisch|alles auf einmal|durcheinander|wuselig|wirbel)/i.test(lc),
+      uncertainty: /(weiß nicht|nicht sicher|war mir unsicher|keine ahnung|unklar)/i.test(lc),
+      repetition:  /(immer|wieder|jedes mal|ständig|jede woche|jeden tag|schon wieder)/i.test(lc),
+      closure:     /(reicht|genug|für heute|müde|schluss|fertig|tschüss|gute nacht)/i.test(lc)
+    };
+  }
+
+  function suggestMode(signals) {
+    if (signals.closure) return 'AUSKLANG';
+    if (signals.chaos || (signals.length === 'lang' && signals.structure === 'durcheinander')) return 'FOKUS';
+    if (signals.repetition) return 'VERDICHTEN';
+    if (signals.uncertainty && signals.length === 'lang') return 'VERDICHTEN';
+    return 'PRÄSENZ';
+  }
+
+  // ===================================================================
+  // LLM
+  // ===================================================================
+
+  /**
+   * Chat-Call via Backend.
+   * Nutzt /chat/respond — der System-Prompt wird Server-side per
+   * Persona-Loader nach Edition aufgelöst, Memory wird automatisch
+   * injiziert. Wir übergeben nur die User-Message + session_id + persona.
+   */
+  async function chatToShiksha({ sessionId, userMessage, persona = 'tagesausklang' }) {
+    try {
+      const res = await client.chatRespond({
+        session_id:   sessionId,
+        user_message: userMessage,
+        persona,
+      });
+      return {
+        text:        res.shiksha_response,
+        session_id:  res.session_id,
+        mode:        res.mode,
+        tokens_used: res.tokens_used,
+      };
+    } catch (err) {
+      if (err instanceof ShikshaAuthError) {
+        // Token tot — zurück zum Login
+        location.href = './presence_switch.html?next=' + encodeURIComponent(location.pathname);
+        return null;
+      }
+      if (err instanceof ShikshaRateLimitError) {
+        return {
+          text: 'Für heute hat\'s gereicht. Wir reden morgen weiter.',
+          mode: 'AUSKLANG',
+          rate_limited: true,
+        };
+      }
+      console.warn('chatToShiksha failed', err);
+      return null;
+    }
+  }
+
+  /**
+   * Insights aus einer abgeschlossenen Session extrahieren.
+   * In v3: Server macht das via /chat/close/{session_id}?extract_insights=true.
+   * Wir bekommen summary + insights[] aus der Response zurück.
+   */
+  async function extractInsights(sessionId) {
+    if (!sessionId) return { summary: '', insights: [] };
+
+    try {
+      const res = await client.closeSession(sessionId, { extractInsights: true });
+      return {
+        summary:  res.summary || '',
+        insights: (res.insights && res.insights.memory_candidates) || [],
+      };
+    } catch (err) {
+      console.warn('extractInsights via close failed', err);
+      return { summary: '', insights: [] };
+    }
+  }
+
+  // ===================================================================
+  // STATE
+  // ===================================================================
+
+  const State = {
+    activeTab: 'today',
+    taActive: false,           // Tagesausklang läuft gerade
+    taMessages: [],            // aktuelle Session-Messages
+    taSessionId: null
+  };
+
+  // ===================================================================
+  // VIEWS — Render-Funktionen
+  // ===================================================================
+
+  function renderToday() {
+    const cfg = Store.getConfig();
+    const sessions = Store.getSessions();
+    const memory = Store.getMemory();
+    const streak = Store.getStreak();
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+
+    // Greeting
+    const hour = now.getHours();
+    const tod = hour < 11 ? 'Morgen' : hour < 17 ? 'Tag' : hour < 22 ? 'Abend' : null;
+    const greetEl = document.getElementById('greeting-line');
+    const greetSoft = document.getElementById('greeting-soft');
+
+    if (tod === 'Morgen')      greetEl.textContent = `Guten Morgen, ${cfg.name}.`;
+    else if (tod === 'Tag')    greetEl.textContent = `Hallo ${cfg.name}.`;
+    else if (tod === 'Abend')  greetEl.textContent = `Schöner Abend, ${cfg.name}.`;
+    else                       greetEl.textContent = `Schön, dass Du da bist.`;
+
+    const dayWord = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'][now.getDay()];
+    greetSoft.textContent = `${dayWord}.`;
+
+    // Status-Card
+    const todaySession = sessions.find(s => s.date === todayStr && s.type === 'tagesausklang');
+    const statusEl = document.getElementById('status-card');
+    if (todaySession) {
+      statusEl.innerHTML = `
+        <div class="status-headline">Heute schon erledigt.</div>
+        <div class="status-sub">${escapeHtml(todaySession.summary || 'Kurz gewesen, schön gewesen.')}</div>
+        <button class="btn-soft" id="ta-restart-btn" type="button">Nochmal reden</button>
+      `;
+      const btn = document.getElementById('ta-restart-btn');
+      if (btn) btn.addEventListener('click', () => switchTab('tagesausklang'));
+    } else {
+      const isLate = hour >= 16;
+      statusEl.innerHTML = `
+        <div class="status-headline">${isLate ? 'Heute warten 5 Minuten auf Dich.' : 'Wenn der Tag zu Ende geht — bin ich da.'}</div>
+        <div class="status-sub">Wir reden, ich höre, mehr nicht.</div>
+        <button class="btn-primary" id="ta-start-btn" type="button">Tagesausklang öffnen</button>
+      `;
+      const btn = document.getElementById('ta-start-btn');
+      if (btn) btn.addEventListener('click', () => switchTab('tagesausklang'));
+    }
+
+    // Streak
+    const streakCard = document.getElementById('streak-card');
+    if (streak.current > 0 || streak.total > 0) {
+      streakCard.style.display = 'flex';
+      document.getElementById('streak-num').textContent = streak.current;
+      document.getElementById('streak-label').textContent =
+        streak.current === 1 ? `Tag in Folge · ${streak.total} insgesamt` :
+        streak.current > 1   ? `Tage in Folge · ${streak.total} insgesamt` :
+                               `${streak.total} Sessions bisher`;
+    } else {
+      streakCard.style.display = 'none';
+    }
+
+    // Insights
+    const list = document.getElementById('insights-list');
+    if (memory.length === 0) {
+      list.innerHTML = '<div class="insights-empty">Wenn wir reden, sammelt sich hier was.</div>';
+    } else {
+      list.innerHTML = memory.slice(-5).reverse()
+        .map(m => `<div class="insight-item">${escapeHtml(m.text)}</div>`)
+        .join('');
+    }
+  }
+
+  function renderVerlauf() {
+    const sessions = Store.getSessions().slice().reverse();
+    const list = document.getElementById('verlauf-list');
+
+    if (sessions.length === 0) {
+      list.innerHTML = '<div class="session-empty">Noch nichts hier — Tagesausklänge erscheinen ab heute.</div>';
+      return;
+    }
+
+    list.innerHTML = sessions.map(s => `
+      <article class="card session-item compact" data-session-id="${s.id}" tabindex="0" role="button">
+        <div class="session-meta">${formatDate(s.date)} · ${labelType(s.type)}</div>
+        <div class="session-summary">${escapeHtml(s.summary || 'Kurz gewesen.')}</div>
+      </article>
+    `).join('');
+
+    list.querySelectorAll('.session-item').forEach(el => {
+      el.addEventListener('click', () => showSessionDetail(el.dataset.sessionId));
+    });
+  }
+
+  function showSessionDetail(id) {
+    const session = Store.getSessions().find(s => s.id === id);
+    if (!session) return;
+
+    document.getElementById('modal-meta').textContent =
+      `${formatDate(session.date)} · ${labelType(session.type)}`;
+    document.getElementById('modal-summary').textContent = session.summary || '';
+
+    const body = document.getElementById('modal-body');
+    body.innerHTML = (session.messages || []).map(m =>
+      `<div class="modal-msg ${m.role === 'user' ? 'modal-msg-mira' : 'modal-msg-shiksha'}">${escapeHtml(m.content)}</div>`
+    ).join('');
+
+    document.getElementById('modal-overlay').classList.add('active');
+  }
+
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-overlay') {
+      document.getElementById('modal-overlay').classList.remove('active');
+    }
+  });
+
+  // ===================================================================
+  // TAB-NAVIGATION
+  // ===================================================================
+
+  function switchTab(name) {
+    State.activeTab = name;
+    document.querySelectorAll('.view').forEach(v => {
+      v.classList.toggle('active', v.dataset.view === name);
+    });
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === name);
+    });
+
+    if (name === 'today')         renderToday();
+    if (name === 'tagesausklang') prepareTagesausklang();
+    if (name === 'verlauf')       renderVerlauf();
+  }
+
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // ===================================================================
+  // TAGESAUSKLANG
+  // ===================================================================
+
+  function prepareTagesausklang() {
+    const view = document.getElementById('view-tagesausklang');
+    const intro = document.getElementById('ta-intro-card');
+    const active = document.getElementById('ta-active');
+    const stream = document.getElementById('ta-stream');
+    const cfg = Store.getConfig();
+    const sessions = Store.getSessions();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todaySession = sessions.find(s => s.date === todayStr && s.type === 'tagesausklang');
+
+    if (State.taActive) {
+      view.classList.add('is-on');
+      active.classList.add('is-on');
+      return;
+    }
+
+    view.classList.remove('is-on');
+    active.classList.remove('is-on');
+    stream.innerHTML = '';
+
+    // Begrüßung anpassen
+    const headline = document.getElementById('ta-intro-headline');
+    const sub = document.getElementById('ta-intro-sub');
+
+    if (todaySession) {
+      headline.textContent = 'Du warst heute schon hier.';
+      sub.textContent = 'Magst Du nochmal? Ich höre weiter zu.';
+    } else {
+      const hour = new Date().getHours();
+      headline.textContent = hour >= 16 ? 'Wie war heute?' : 'Schön, dass Du schon da bist.';
+      sub.textContent = 'Fünf Minuten reichen. Erzähl mir, was war.';
+    }
+  }
+
+  document.getElementById('ta-begin-btn').addEventListener('click', startTagesausklang);
+
+  function startTagesausklang() {
+    State.taActive = true;
+    State.taMessages = [];
+    State.taSessionId = 'ses_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+
+    const view = document.getElementById('view-tagesausklang');
+    const active = document.getElementById('ta-active');
+    view.classList.add('is-on');
+    active.classList.add('is-on');
+
+    // SHIKSHA macht den ersten Schritt — eine sanfte Eröffnung
+    const cfg = Store.getConfig();
+    const hour = new Date().getHours();
+    const sessions = Store.getSessions();
+    const memory = Store.getMemory();
+
+    let opener;
+    if (sessions.length === 0) {
+      opener = `Schön, dass Du da bist. Wie war heute?`;
+    } else if (memory.length > 0) {
+      // Auf eine frühere Erinnerung anspielen, sanft
+      opener = hour >= 16
+        ? 'Wie war heute? Magst Du anfangen wo Du willst.'
+        : 'Schön, Dich zu sehen. Was bewegt sich?';
+    } else {
+      opener = hour >= 16 ? 'Wie war heute?' : 'Erzähl mir.';
+    }
+
+    appendTaMsg('shiksha', opener);
+
+    setTimeout(() => {
+      const input = document.getElementById('ta-input');
+      if (input) input.focus();
+    }, 400);
+  }
+
+  function appendTaMsg(role, text) {
+    const stream = document.getElementById('ta-stream');
+    const el = document.createElement('div');
+    el.className = role === 'mira'
+      ? 'ta-msg ta-msg-mira'
+      : (role === 'reading' ? 'ta-msg ta-msg-shiksha reading' : 'ta-msg ta-msg-shiksha');
+    el.textContent = text;
+    stream.appendChild(el);
+    stream.scrollTop = stream.scrollHeight;
+
+    // In State.taMessages für Persistenz
+    if (role === 'mira') {
+      State.taMessages.push({ role: 'user', content: text, ts: Date.now() });
+    } else if (role === 'shiksha') {
+      State.taMessages.push({ role: 'assistant', content: text, ts: Date.now() });
+    }
+    return el;
+  }
+
+  function appendTaTyping() {
+    const stream = document.getElementById('ta-stream');
+    const el = document.createElement('div');
+    el.className = 'ta-typing';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    stream.appendChild(el);
+    stream.scrollTop = stream.scrollHeight;
+    return el;
+  }
+
+  // Input-Handler
+  const taInput = document.getElementById('ta-input');
+  const taSend  = document.getElementById('ta-send');
+
+  function autosizeTaInput() {
+    taInput.style.height = 'auto';
+    taInput.style.height = Math.min(taInput.scrollHeight, window.innerHeight * 0.3) + 'px';
+  }
+
+  taInput.addEventListener('input', () => {
+    autosizeTaInput();
+    taSend.disabled = taInput.value.trim().length === 0;
+  });
+
+  taInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleTaSubmit();
+    }
+  });
+
+  taSend.addEventListener('click', handleTaSubmit);
+
+  async function handleTaSubmit() {
+    const text = taInput.value.trim();
+    if (!text) return;
+    if (!State.taActive) startTagesausklang();
+
+    taInput.value = '';
+    autosizeTaInput();
+    taSend.disabled = true;
+
+    appendTaMsg('mira', text);
+
+    // Tipping-Anzeige
+    const typing = appendTaTyping();
+
+    // Pre-Classification (Modus-Hint nur lokal, nicht ans Backend
+    // — Server bestimmt Modus selbst via Persona-Prompt-Heuristik)
+    const signals = detectSignals(text);
+    const suggestedMode = suggestMode(signals);
+
+    // Chat via Backend — System-Prompt + Memory werden Server-side
+    // automatisch resolved
+    const result = await chatToShiksha({
+      sessionId:   State.taSessionId,
+      userMessage: text,
+      persona:     'tagesausklang',
+    });
+
+    typing.remove();
+
+    if (result && result.text) {
+      // Wenn Server eine neue Session begonnen hat, ID übernehmen
+      if (result.session_id && !State.taSessionId) {
+        State.taSessionId = result.session_id;
+      }
+      appendTaMsg('shiksha', result.text);
+    } else {
+      // Fallback (Server nicht erreichbar) — nutzt lokales Repository
+      const fb = localFallback(text, suggestedMode);
+      appendTaMsg('shiksha', fb);
+    }
+  }
+
+  // Local-Fallback: nutzt den vorgeschlagenen Modus, wählt einen
+  // passenden Default-Satz aus dem Repository (wenn API nicht erreichbar).
+  function localFallback(text, mode) {
+    const REPO = {
+      'PRÄSENZ':    ['Ich höre.', 'Das war viel.', 'Ich nehme das mit.', 'Du hast viel mitgebracht.'],
+      'FOKUS':      ['Was war der Moment, der gekippt ist?', 'Was hat heute den meisten Druck gemacht?', 'Wo hat\'s am meisten geklemmt?'],
+      'VERDICHTEN': ['Das passiert nicht zum ersten Mal.', 'Das sollten wir festhalten.', 'Klingt vertraut.'],
+      'AUSKLANG':   ['Für heute reicht das.', 'Ich nehme das mit.', 'Wir schauen morgen darauf.']
+    };
+    const list = REPO[mode] || REPO['PRÄSENZ'];
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  // Schließen
+  document.getElementById('ta-close-btn').addEventListener('click', closeTagesausklang);
+
+  async function closeTagesausklang() {
+    if (!State.taActive || State.taMessages.length === 0) {
+      // Nichts gesagt — einfach zurücksetzen
+      State.taActive = false;
+      switchTab('today');
+      return;
+    }
+
+    // Abschluss-Satz
+    appendTaMsg('shiksha', 'Für heute reicht das. Ich nehme es mit.');
+
+    // Session-Daten zusammenstellen
+    const sessionId = State.taSessionId;
+    const messages = State.taMessages.slice();
+
+    // Insights extrahieren (kann etwas dauern)
+    const stream = document.getElementById('ta-stream');
+    const closingNote = document.createElement('div');
+    closingNote.className = 'ta-msg ta-msg-shiksha reading';
+    closingNote.textContent = 'Ich sortiere kurz, was bleibt …';
+    stream.appendChild(closingNote);
+    stream.scrollTop = stream.scrollHeight;
+
+    const { summary, insights } = await extractInsights(sessionId);
+    closingNote.remove();
+
+    // Session speichern
+    Store.addSession({
+      id: sessionId,
+      date: new Date().toISOString().slice(0, 10),
+      timestamp: Date.now(),
+      type: 'tagesausklang',
+      messages,
+      summary: summary || (messages.find(m => m.role === 'user')?.content.slice(0, 80) || 'Kurz gewesen.'),
+      insights
+    });
+
+    // Insights in Memory aufnehmen
+    insights.forEach(i => Store.addMemory(i));
+
+    // Streak update
+    updateStreak();
+
+    // State zurück
+    State.taActive = false;
+    State.taMessages = [];
+    State.taSessionId = null;
+    document.getElementById('ta-stream').innerHTML = '';
+    document.getElementById('view-tagesausklang').classList.remove('is-on');
+    document.getElementById('ta-active').classList.remove('is-on');
+
+    // Zurück zu Heute
+    switchTab('today');
+  }
+
+  function updateStreak() {
+    const streak = Store.getStreak();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+    if (streak.last === todayStr) {
+      // Heute schon gezählt — nur Total++
+      streak.total++;
+    } else if (streak.last === yesterday) {
+      streak.current++;
+      streak.total++;
+      streak.last = todayStr;
+    } else {
+      streak.current = 1;
+      streak.total++;
+      streak.last = todayStr;
+    }
+
+    Store.setStreak(streak);
+  }
+
+  // ===================================================================
+  // SETTINGS
+  // ===================================================================
+
+  let pressTimer = null;
+  document.getElementById('status-bar').addEventListener('touchstart', startPressTimer);
+  document.getElementById('status-bar').addEventListener('touchend', cancelPressTimer);
+  document.getElementById('status-bar').addEventListener('mousedown', startPressTimer);
+  document.getElementById('status-bar').addEventListener('mouseup', cancelPressTimer);
+  document.getElementById('status-bar').addEventListener('mouseleave', cancelPressTimer);
+
+  function startPressTimer() {
+    pressTimer = setTimeout(openSettings, 800);
+  }
+  function cancelPressTimer() {
+    if (pressTimer) clearTimeout(pressTimer);
+    pressTimer = null;
+  }
+
+  function openSettings() {
+    const meta = client.getOperatorMeta();
+    const keyEl = document.getElementById('settings-key');
+    if (keyEl) {
+      keyEl.textContent = meta
+        ? `${meta.display_name} (${meta.edition}, ${meta.role})`
+        : 'Nicht eingeloggt';
+    }
+    document.getElementById('settings-modal').classList.add('active');
+  }
+
+  document.getElementById('settings-close').addEventListener('click', () => {
+    document.getElementById('settings-modal').classList.remove('active');
+  });
+
+  // "Eintragen oder ändern"-Button wird jetzt zum Logout
+  document.getElementById('settings-set-key').addEventListener('click', () => {
+    if (confirm('Abmelden? Du musst Dich beim nächsten Mal wieder per Passkey einloggen.')) {
+      client.logout();
+      location.href = './presence_switch.html';
+    }
+  });
+
+  document.getElementById('settings-set-name').addEventListener('click', () => {
+    const cfg = Store.getConfig();
+    const name = prompt('Wie soll ich Dich nennen?', cfg.name);
+    if (name && name.trim()) {
+      cfg.name = name.trim();
+      Store.setConfig(cfg);
+      renderToday();
+    }
+  });
+
+  document.getElementById('settings-push').addEventListener('click', requestPush);
+
+  document.getElementById('settings-reset').addEventListener('click', () => {
+    if (confirm('Alles zurücksetzen — bist Du sicher? Alle Sessions und Erinnerungen werden gelöscht.')) {
+      Store.resetAll();
+      location.reload();
+    }
+  });
+
+  // ===================================================================
+  // PUSH / NOTIFICATIONS
+  // ===================================================================
+
+  async function requestPush() {
+    if (!('Notification' in window)) {
+      alert('Erinnerungen werden auf diesem Gerät nicht unterstützt.');
+      return;
+    }
+
+    let perm = Notification.permission;
+    if (perm === 'default') {
+      perm = await Notification.requestPermission();
+    }
+
+    if (perm === 'granted') {
+      // Service Worker registrieren falls möglich (Push, Cache)
+      if ('serviceWorker' in navigator) {
+        try {
+          await navigator.serviceWorker.register('mira_sw.js');
+        } catch (e) {
+          console.warn('SW registration failed', e);
+        }
+      }
+
+      // Test-Notification
+      new Notification('Shiksha hört zu.', {
+        body: 'Erinnerungen sind eingeschaltet. Wir reden gleich.',
+        icon: 'mira_icon.svg'
+      });
+
+      // Lokalen Reminder-Loop starten (in-Browser, nur wenn App offen)
+      scheduleLocalReminder();
+    } else {
+      alert('Erinnerungen wurden nicht erlaubt.');
+    }
+  }
+
+  function scheduleLocalReminder() {
+    // Daily-Trigger: prüfe stündlich, ob 17:30 erreicht UND heute noch
+    // kein Tagesausklang gemacht wurde. Nur aktiv wenn App offen ist.
+    setInterval(() => {
+      const cfg = Store.getConfig();
+      const sessions = Store.getSessions();
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const done = sessions.some(s => s.date === todayStr && s.type === 'tagesausklang');
+
+      if (done) return;
+
+      const now = new Date();
+      const [h, m] = (cfg.reminderTime || '17:30').split(':').map(Number);
+      const target = new Date();
+      target.setHours(h, m, 0, 0);
+
+      // Innerhalb der nächsten 60 Minuten nach Target und nicht zu lang her
+      const diff = (now - target) / 60000;
+      if (diff >= 0 && diff < 60 && Notification.permission === 'granted') {
+        // Schon einmal heute? Marker
+        const fired = localStorage.getItem('shiksha-reminder-' + todayStr);
+        if (!fired) {
+          new Notification('Shiksha', {
+            body: 'Magst Du fünf Minuten erzählen, wie heute war?',
+            icon: 'mira_icon.svg',
+            tag: 'tagesausklang-' + todayStr
+          });
+          localStorage.setItem('shiksha-reminder-' + todayStr, '1');
+        }
+      }
+    }, 60 * 1000); // jede Minute prüfen
+  }
+
+  // Falls schon erlaubt: gleich beim Start scheduln
+  if ('Notification' in window && Notification.permission === 'granted') {
+    scheduleLocalReminder();
+  }
+
+  // ===================================================================
+  // STATUS-BAR (Uhr + Streak)
+  // ===================================================================
+
+  function tickClock() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const dayWord = ['So','Mo','Di','Mi','Do','Fr','Sa'][now.getDay()];
+    const clockEl = document.getElementById('status-clock');
+    if (clockEl) clockEl.textContent = `${dayWord} · ${hh}:${mm}`;
+
+    const streak = Store.getStreak();
+    const streakEl = document.getElementById('status-streak');
+    if (streakEl) {
+      if (streak.current > 0) {
+        streakEl.textContent = `${streak.current} Tag${streak.current === 1 ? '' : 'e'} in Folge`;
+        streakEl.classList.add('good');
+      } else {
+        streakEl.textContent = '';
+      }
+    }
+  }
+  setInterval(tickClock, 30000);
+
+  // ===================================================================
+  // HELPERS
+  // ===================================================================
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+    if (iso === today) return 'Heute';
+    if (iso === yesterday) return 'Gestern';
+
+    const days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    const months = ['Jan','Feb','März','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    return `${days[d.getDay()]}, ${d.getDate()}. ${months[d.getMonth()]}`;
+  }
+
+  function labelType(t) {
+    if (t === 'tagesausklang') return 'Tagesausklang';
+    if (t === 'kennenlernen')  return 'Kennenlerngespräch';
+    return 'Gespräch';
+  }
+
+  // ===================================================================
+  // INIT
+  // ===================================================================
+
+  function init() {
+    // Hero-Video sicher starten
+    const v = document.getElementById('hero-video');
+    if (v) v.play().catch(() => {});
+
+    tickClock();
+    renderToday();
+  }
+
+  init();
+
+  // ===================================================================
+  // CONSOLE-API
+  // ===================================================================
+
+  window.shiksha = {
+    Store,
+    client,
+    operator: () => client.getOperatorMeta(),
+    setName: (n) => { const c = Store.getConfig(); c.name = n; Store.setConfig(c); renderToday(); },
+    addMemory: async (t) => { await client.addMemory(t); renderToday(); },
+    showSessions: () => Store.getSessions(),
+    showServerSessions: async () => client.listSessions(),
+    showMemory: async () => client.listMemory(),
+    showStreak: () => Store.getStreak(),
+    logout: () => { client.logout(); location.href = './presence_switch.html'; },
+    reset: () => { Store.resetAll(); client.logout(); location.reload(); }
+  };
+</script>
+
+</body>
+</html>
