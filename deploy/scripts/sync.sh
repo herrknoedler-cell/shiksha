@@ -213,6 +213,14 @@ if [ $NEEDS_CHOWN -eq 1 ]; then
   echo "  ✓ chown/chmod done."
 fi
 
+# --- pip install -e (engine only) — refresh deps falls pyproject geändert ---
+if [ $NEEDS_MIGRATE -eq 1 ]; then
+  echo ""
+  echo "→ pip install -e (refresh production deps)"
+  $SSH_CMD "$SRV" "sudo -u $SERVICE_USER $DST.venv/bin/pip install -e $DST --quiet"
+  echo "  ✓ deps refreshed."
+fi
+
 # --- alembic upgrade head (engine only) -------------------------------------
 if [ $NEEDS_MIGRATE -eq 1 ]; then
   echo ""
@@ -239,7 +247,9 @@ fi
 echo ""
 echo "→ systemctl restart $SERVICE"
 $SSH_CMD "$SRV" "systemctl restart $SERVICE"
-sleep 2
+# Race-Schutz: FastAPI braucht ein paar Sekunden bis worker bereit sind.
+# 4 Sek hat sich heute für beide Targets bewährt (Plan-Lesson 11. Mai 2026).
+sleep 4
 $SSH_CMD "$SRV" "systemctl is-active $SERVICE" || {
   echo "✗ Service ist nicht active nach Restart."
   echo "  Status: $($SSH_CMD "$SRV" "systemctl status $SERVICE --no-pager -l | head -20")"
@@ -263,6 +273,28 @@ for url in "${SMOKE_URLS[@]}"; do
     FAIL_URLS+=("$url ($CODE)")
   fi
 done
+
+# Engine-Deep-Smoke: Body-Check der zentralen Public-Endpoints. Status-Code
+# allein reicht nicht — Drop-In-Probleme können 200 liefern aber leere Bodies.
+if [ "$TARGET" = "engine" ]; then
+  HEALTH_BODY=$(curl -s --max-time 10 "$DOMAIN/health" || echo "")
+  if [[ "$HEALTH_BODY" == *'"status":"ok"'* ]]; then
+    printf "  ✓ body  /health enthält status=ok\n"
+  else
+    printf "  ✗ body  /health body unerwartet: %s\n" "${HEALTH_BODY:0:80}"
+    FAIL=$((FAIL+1))
+    FAIL_URLS+=("body-check /health")
+  fi
+
+  AUTH_BODY=$(curl -s --max-time 10 -X POST "$DOMAIN/api/v1/auth/register/begin/krummelus_mira" || echo "")
+  if [[ "$AUTH_BODY" == *'krummelus_mira'* ]]; then
+    printf "  ✓ body  /auth/register/begin/krummelus_mira enthält operator-id\n"
+  else
+    printf "  ✗ body  /auth/register/begin/krummelus_mira body unerwartet: %s\n" "${AUTH_BODY:0:80}"
+    FAIL=$((FAIL+1))
+    FAIL_URLS+=("body-check /auth/register/begin")
+  fi
+fi
 
 # --- report -----------------------------------------------------------------
 echo ""
