@@ -207,9 +207,12 @@ echo "  ✓ rsync done."
 if [ $NEEDS_CHOWN -eq 1 ]; then
   echo ""
   echo "→ Normalize Owner + Perms ($SERVICE_USER:$SERVICE_USER, 755/644)"
+  # .venv vom chmod ausnehmen — chmod 644 würde sonst die Executable-Bits
+  # in .venv/bin/* (uvicorn, alembic, pip, python) löschen und der Service
+  # ist beim nächsten systemctl restart tot. Postmortem: tech-debt.md.
   $SSH_CMD "$SRV" "chown -R $SERVICE_USER:$SERVICE_USER '$DST' && \
-                   find '$DST' -type d -exec chmod 755 {} + && \
-                   find '$DST' -type f -exec chmod 644 {} +"
+                   find '$DST' -type d -not -path '*/.venv*' -exec chmod 755 {} + && \
+                   find '$DST' -type f -not -path '*/.venv*' -exec chmod 644 {} +"
   echo "  ✓ chown/chmod done."
 fi
 
