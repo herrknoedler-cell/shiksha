@@ -45,7 +45,7 @@ heim_cards:
     icon: presence
     action_url: "/anwesenheit.html"
     edition_scope: ["kita"]
-    role_scope: ["leitung", "padagoge"]
+    role_scope: ["leitung", "padagoge", "developer"]
     data_provider: kita_anwesenheit_stub
     time_priority:
       morning: 1
@@ -60,7 +60,7 @@ heim_cards:
     icon: calendar
     action_url: "/kalender.html"
     edition_scope: ["kita"]
-    role_scope: ["leitung", "padagoge"]
+    role_scope: ["leitung", "padagoge", "developer"]
     data_provider: kita_kalender_stub
     time_priority:
       morning: 2
@@ -75,7 +75,7 @@ heim_cards:
     icon: team
     action_url: "/personal.html"
     edition_scope: ["kita"]
-    role_scope: ["leitung"]
+    role_scope: ["leitung", "developer"]
     time_priority:
       morning: 2
       afternoon: 4
@@ -89,7 +89,7 @@ heim_cards:
     icon: shield
     action_url: "/pickup_check.html"
     edition_scope: ["kita"]
-    role_scope: ["padagoge", "leitung"]
+    role_scope: ["padagoge", "leitung", "developer"]
     time_priority:
       morning: 5
       afternoon: 3

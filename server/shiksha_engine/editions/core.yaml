@@ -9,7 +9,7 @@ heim_cards:
     icon: candle
     action_url: "/mira_app.html?tab=tagesausklang"
     edition_scope: ["*"]
-    role_scope: ["leitung", "padagoge", "trainer", "operator"]
+    role_scope: ["leitung", "padagoge", "trainer", "operator", "developer"]
     time_priority:
       morning: 6
       afternoon: 5
@@ -23,7 +23,7 @@ heim_cards:
     icon: history
     action_url: "/mira_app.html?tab=verlauf"
     edition_scope: ["*"]
-    role_scope: ["leitung", "padagoge", "trainer", "operator"]
+    role_scope: ["leitung", "padagoge", "trainer", "operator", "developer"]
     data_provider: verlauf_count
     visibility_rule: "count > 0"
     time_priority:
@@ -39,7 +39,7 @@ heim_cards:
     icon: bookmark
     action_url: "/mira_app.html?tab=verlauf&filter=memory_proposed"
     edition_scope: ["*"]
-    role_scope: ["leitung", "padagoge", "trainer", "operator"]
+    role_scope: ["leitung", "padagoge", "trainer", "operator", "developer"]
     data_provider: memory_proposed_count
     visibility_rule: "count > 0"
     time_priority:
