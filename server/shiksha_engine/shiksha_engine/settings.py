@@ -58,6 +58,13 @@ class Settings(BaseSettings):
     smtp_password: str = Field(default="")
     smtp_from: str = Field(default="shiksha@shiksha.world")
 
+    # ---- Bridge zur alten Welt (Phase 1.5) ----
+    # Interne URL des alten kita_compliance_routers, der via shiksha.tun.zone
+    # erreichbar ist. Im Produktionsumfeld z.B. "http://127.0.0.1:8002".
+    # Leer = Bridge ist deaktiviert (alle /api/v1/bridge/* Calls geben 503).
+    bridge_old_base_url: str = Field(default="")
+    bridge_timeout_seconds: float = Field(default=10.0)
+
     # ---- Computed ----
     @property
     def allowed_origins_list(self) -> list[str]:
