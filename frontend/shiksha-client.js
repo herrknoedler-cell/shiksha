@@ -129,6 +129,10 @@ export class ShikshaClient {
   /**
    * Passkey-Login für einen bekannten Operator.
    * Nutzt WebAuthn — Browser zeigt Face ID / Touch ID / Windows Hello.
+   *
+   * Wenn der Operator noch keinen Passkey hat (Erst-Setup-Fall),
+   * fällt der Aufruf automatisch auf registerPasskey zurück — vorausgesetzt
+   * der Backend-Check erlaubt es (keine existierenden Credentials).
    */
   async loginWithPasskey(operatorId) {
     if (!browserSupportsWebAuthn()) {
@@ -141,6 +145,19 @@ export class ShikshaClient {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ operator_id: operatorId }),
     });
+
+    // Erst-Setup-Fall: Backend sagt "No passkey registered"
+    // → automatisch zu register wechseln, ohne Token (Erst-Setup-Pfad erlaubt)
+    if (beginRes.status === 400) {
+      const body = await beginRes.json().catch(() => ({}));
+      const detail = (body.detail || '').toLowerCase();
+      if (detail.includes('no passkey') || detail.includes('register/begin')) {
+        // Auto-Fallback: erstmaliges Setup
+        return await this.registerPasskey(operatorId);
+      }
+      throw new ShikshaApiError(body.detail || 'login/begin failed', beginRes.status, body);
+    }
+
     if (!beginRes.ok) {
       const body = await beginRes.json().catch(() => ({}));
       throw new ShikshaApiError(body.detail || 'login/begin failed', beginRes.status, body);
