@@ -286,3 +286,135 @@ def test_audit_log_records_failure(db, mira, ses):
         AuditLog.action == "tool.log_observation.fail"
     ).all()
     assert len(logs) >= 1
+
+
+# ===================================================================
+# Dedup (Spec 7.3 + Schritt 4.8)
+# ===================================================================
+
+def test_log_friction_dedups_within_session(db, mira, ses):
+    """Zweiter log_friction zum gleichen Thema schreibt nichts neu."""
+    r1 = execute_tool(
+        name="log_friction",
+        args={"text": "In der Gruppe Sommer ist Personal-Knappheit, mehr als dreimal in den letzten Wochen krank.",
+              "severity": "belastend"},
+        tool_use_id="tu_a",
+        operator=mira, shiksha_session=ses, db=db,
+    )
+    db.flush()
+    r2 = execute_tool(
+        name="log_friction",
+        args={"text": "Mehr als dreimal Personal-Knappheit Gruppe Sommer Betreuerin krank.",
+              "severity": "belastend"},
+        tool_use_id="tu_b",
+        operator=mira, shiksha_session=ses, db=db,
+    )
+    db.flush()
+
+    # Beides erfolgreich (kein is_error), aber zweites mit logged=False
+    assert "is_error" not in r1
+    assert "is_error" not in r2
+    c2 = json.loads(r2["content"])
+    assert c2["logged"] is False
+    assert c2["reason"] == "duplicate_in_session"
+
+    # Nur EIN FrictionPoint in der DB
+    rows = db.query(FrictionPoint).filter_by(session_id=ses.id).all()
+    assert len(rows) == 1
+
+
+def test_log_friction_different_topic_not_deduped(db, mira, ses):
+    """Anderes Thema in derselben Session geht durch."""
+    execute_tool(
+        name="log_friction",
+        args={"text": "Personal-Knappheit Gruppe Sommer Mittwoch wiederkehrend."},
+        tool_use_id="tu_a",
+        operator=mira, shiksha_session=ses, db=db,
+    )
+    execute_tool(
+        name="log_friction",
+        args={"text": "Eltern-Kommunikation per WhatsApp Push klemmt regelmäßig."},
+        tool_use_id="tu_b",
+        operator=mira, shiksha_session=ses, db=db,
+    )
+    db.flush()
+
+    rows = db.query(FrictionPoint).filter_by(session_id=ses.id).all()
+    assert len(rows) == 2
+
+
+def test_log_observation_dedups_within_session(db, mira, ses):
+    execute_tool(
+        name="log_observation",
+        args={"text": "Lukas ist seit Montag wieder nach drei Tagen Fieber da."},
+        tool_use_id="tu_a",
+        operator=mira, shiksha_session=ses, db=db,
+    )
+    r2 = execute_tool(
+        name="log_observation",
+        args={"text": "Lukas wieder da seit Montag nach Fieber drei Tagen."},
+        tool_use_id="tu_b",
+        operator=mira, shiksha_session=ses, db=db,
+    )
+    db.flush()
+
+    c2 = json.loads(r2["content"])
+    assert c2["logged"] is False
+    assert c2["reason"] == "duplicate_in_session"
+    assert db.query(Observation).filter_by(kind="observation").count() == 1
+
+
+def test_save_day_summary_only_one_per_session(db, mira, ses):
+    """Zweiter save_day_summary-Aufruf wird abgelehnt."""
+    execute_tool(
+        name="save_day_summary",
+        args={"summary": "Heute war anstrengend zwischen Personal-Knappheit und Eltern-Kommunikation."},
+        tool_use_id="tu_a",
+        operator=mira, shiksha_session=ses, db=db,
+    )
+    r2 = execute_tool(
+        name="save_day_summary",
+        args={"summary": "Anstrengender Tag, viel mit Personal."},
+        tool_use_id="tu_b",
+        operator=mira, shiksha_session=ses, db=db,
+    )
+    db.flush()
+
+    c2 = json.loads(r2["content"])
+    assert c2["saved"] is False
+    assert c2["reason"] == "already_summarized_in_session"
+    rows = db.query(Observation).filter_by(kind="summary").all()
+    assert len(rows) == 1
+
+
+def test_dedup_does_not_match_across_sessions(db, mira):
+    """Dieselbe Reibung in zwei verschiedenen Sessions soll zwei Einträge
+    produzieren — Dedup ist session-lokal."""
+    s1 = Session(
+        id="ses_dup_1",
+        operator_id=mira.id, org_id=mira.org_id,
+        edition=mira.edition, persona="tagesausklang",
+    )
+    s2 = Session(
+        id="ses_dup_2",
+        operator_id=mira.id, org_id=mira.org_id,
+        edition=mira.edition, persona="tagesausklang",
+    )
+    db.add_all([s1, s2])
+    db.flush()
+
+    execute_tool(
+        name="log_friction",
+        args={"text": "Personal Sommer Mittwoch dreimal krank."},
+        tool_use_id="tu1",
+        operator=mira, shiksha_session=s1, db=db,
+    )
+    execute_tool(
+        name="log_friction",
+        args={"text": "Personal Sommer Mittwoch dreimal krank."},
+        tool_use_id="tu2",
+        operator=mira, shiksha_session=s2, db=db,
+    )
+    db.flush()
+
+    assert db.query(FrictionPoint).count() == 2

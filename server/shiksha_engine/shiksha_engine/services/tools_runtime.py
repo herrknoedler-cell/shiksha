@@ -20,11 +20,13 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Any, Callable
 
 from pydantic import BaseModel, Field, ValidationError
+from sqlalchemy import select
 from sqlalchemy.orm import Session as DBSession
 
 from ..db import SessionLocal
@@ -40,6 +42,86 @@ from ..models.friction import FRICTION_SEVERITIES
 from ..models.observation import OBSERVATION_KIND_SUMMARY
 
 log = logging.getLogger("shiksha.tools")
+
+
+# ===================================================================
+# Dedup-Helpers (Spec 7.3 — verhindert Re-Logging desselben Themas)
+# ===================================================================
+
+# Deutsche Stopwörter — dünn gehalten, nur die häufigsten Funktionswörter.
+# Ziel: dass "Mittwochs Personal knapp" und "Personal Mittwoch knappheit"
+# als gleiches Thema erkannt werden, aber "Lukas krank" davon abgegrenzt.
+_STOPWORDS = frozenset({
+    "der", "die", "das", "den", "dem", "des",
+    "ein", "eine", "einer", "eines", "einem", "einen",
+    "und", "oder", "aber", "doch", "auch",
+    "ist", "war", "sind", "waren", "wird", "werden", "wurde", "wurden",
+    "hat", "haben", "hatte", "hatten",
+    "kann", "können", "soll", "sollen", "muss", "müssen",
+    "in", "im", "an", "am", "auf", "aus", "bei", "mit", "nach", "von", "vom",
+    "zu", "zum", "zur", "über", "unter", "vor", "während", "durch", "für",
+    "sich", "es", "er", "sie", "wir", "ich", "du", "ihr", "ihn", "ihm",
+    "sein", "seine", "seinen", "seiner", "ihre", "ihren", "ihrer",
+    "mehr", "als", "noch", "nur", "schon", "wieder", "jetzt", "heute",
+    "dass", "wenn", "wie", "weil", "obwohl", "damit",
+    "nicht", "kein", "keine", "keinen", "keiner",
+    "etwa", "ungefähr", "viel", "viele", "alle", "jeder",
+})
+
+_JACCARD_THRESHOLD_FRICTION = 0.40
+_JACCARD_THRESHOLD_OBSERVATION = 0.45  # Beobachtungen dürfen spezifischer sein
+
+
+def _tokenize(text: str) -> set[str]:
+    """Worte extrahieren, lowercase, Stopwords raus, kurze Worte raus."""
+    words = re.findall(r"\w+", text.lower(), flags=re.UNICODE)
+    return {w for w in words if w not in _STOPWORDS and len(w) > 2}
+
+
+def _jaccard(a: set[str], b: set[str]) -> float:
+    if not a or not b:
+        return 0.0
+    return len(a & b) / len(a | b)
+
+
+def _find_similar_friction(
+    db: DBSession, session_id: str, new_text: str,
+    threshold: float = _JACCARD_THRESHOLD_FRICTION,
+) -> FrictionPoint | None:
+    """Sucht einen FrictionPoint in derselben Session mit ähnlichem Text."""
+    new_tokens = _tokenize(new_text)
+    if len(new_tokens) < 2:
+        return None
+    existing = db.execute(
+        select(FrictionPoint)
+        .where(FrictionPoint.session_id == session_id)
+        .where(FrictionPoint.deleted_at.is_(None))
+    ).scalars().all()
+    for fp in existing:
+        if _jaccard(new_tokens, _tokenize(fp.text)) >= threshold:
+            return fp
+    return None
+
+
+def _find_similar_observation(
+    db: DBSession, session_id: str, new_text: str,
+    threshold: float = _JACCARD_THRESHOLD_OBSERVATION,
+) -> Observation | None:
+    """Sucht eine Observation (kind='observation') in derselben Session
+    mit ähnlichem Text. Summary-Observations werden ignoriert."""
+    new_tokens = _tokenize(new_text)
+    if len(new_tokens) < 2:
+        return None
+    existing = db.execute(
+        select(Observation)
+        .where(Observation.session_id == session_id)
+        .where(Observation.kind == "observation")
+        .where(Observation.deleted_at.is_(None))
+    ).scalars().all()
+    for obs in existing:
+        if _jaccard(new_tokens, _tokenize(obs.text)) >= threshold:
+            return obs
+    return None
 
 
 # ===================================================================
@@ -327,6 +409,16 @@ def _handle_log_observation(
     shiksha_session: ShikshaSession,
     db: DBSession,
 ) -> dict:
+    # Dedup gegen vorhandene Observations in dieser Session
+    duplicate = _find_similar_observation(db, shiksha_session.id, args.text)
+    if duplicate is not None:
+        return {
+            "observation_id": duplicate.id,
+            "logged":         False,
+            "reason":         "duplicate_in_session",
+            "existing_text":  duplicate.text,
+        }
+
     metadata: dict = {}
     if args.category:
         metadata["category"] = args.category
@@ -353,6 +445,18 @@ def _handle_log_friction(
         raise ValueError(
             f"severity must be one of {FRICTION_SEVERITIES}, got '{args.severity}'"
         )
+
+    # Dedup: dasselbe Thema innerhalb einer Session ist DIESELBE Reibung,
+    # nicht eine neue. Wenn vorhanden, geben wir das dem Modell zurück
+    # und schreiben nicht neu.
+    duplicate = _find_similar_friction(db, shiksha_session.id, args.text)
+    if duplicate is not None:
+        return {
+            "friction_id":   duplicate.id,
+            "logged":        False,
+            "reason":        "duplicate_in_session",
+            "existing_text": duplicate.text,
+        }
 
     fp = FrictionPoint(
         session_id=shiksha_session.id,
@@ -391,6 +495,23 @@ def _handle_save_day_summary(
     shiksha_session: ShikshaSession,
     db: DBSession,
 ) -> dict:
+    # Hard-Limit: maximal eine Summary pro Session. Wenn schon eine da
+    # ist, sagen wir das dem Modell — es soll nicht nochmal versuchen.
+    existing = db.execute(
+        select(Observation)
+        .where(Observation.session_id == shiksha_session.id)
+        .where(Observation.kind == OBSERVATION_KIND_SUMMARY)
+        .where(Observation.deleted_at.is_(None))
+        .limit(1)
+    ).scalar_one_or_none()
+    if existing is not None:
+        return {
+            "summary_id":    existing.id,
+            "saved":         False,
+            "reason":        "already_summarized_in_session",
+            "existing_text": existing.text,
+        }
+
     metadata: dict = {}
     if args.mood:
         metadata["mood"] = args.mood
