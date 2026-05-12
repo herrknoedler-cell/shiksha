@@ -200,8 +200,9 @@ def evaluate_visibility(rule: str | None, data: dict) -> bool:
 
 def render_subtitle(template: str | None, data: dict) -> str | None:
     """Setzt {feld}-Platzhalter im Template mit Werten aus data ein."""
-    if not template:
+    if template is None:
         return None
+    # Empty-string-Template darf nicht auf None mappen — strikte None-Check.
     try:
         return template.format(**data)
     except (KeyError, IndexError, ValueError):
