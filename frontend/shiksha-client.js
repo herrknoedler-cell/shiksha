@@ -440,6 +440,37 @@ export class ShikshaClient {
   }
 
   // -----------------------------------------------------------------
+  // HEIM
+  // -----------------------------------------------------------------
+
+  /**
+   * Aktuelles Heim für den eingeloggten Operator. Liefert:
+   *   { greeting, role, tenant, cards: [{id, title, subtitle, icon, action_url, priority, category}] }
+   */
+  async getHeim() {
+    return this._fetch('/api/v1/heim');
+  }
+
+  /**
+   * Karten-Pool für eine Rolle (Leitungs-View). Liefert pro Karte:
+   *   { card_id, title, icon, enabled, is_overridden, custom_title, ... }
+   */
+  async getHeimConfig(role) {
+    return this._fetch(`/api/v1/heim/config?role=${encodeURIComponent(role)}`);
+  }
+
+  /**
+   * Karte für eine Rolle anpassen — Leitung-only.
+   * payload: { enabled?, custom_title?, custom_subtitle?, extra_config? }
+   */
+  async patchHeimConfig(role, cardId, payload) {
+    return this._fetch(
+      `/api/v1/heim/config/${encodeURIComponent(role)}/${encodeURIComponent(cardId)}`,
+      { method: 'PATCH', body: JSON.stringify(payload) },
+    );
+  }
+
+  // -----------------------------------------------------------------
   // META
   // -----------------------------------------------------------------
 
