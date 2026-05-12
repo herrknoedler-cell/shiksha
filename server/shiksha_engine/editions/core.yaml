@@ -1,0 +1,81 @@
+edition: core
+
+# Cross-edition Karten — gelten für alle Editions, gefiltert nur über role_scope.
+heim_cards:
+
+  - id: tagesausklang
+    title: "Tagesausklang"
+    subtitle_template: "Wenn der Tag landen darf."
+    icon: candle
+    action_url: "/mira_app.html?tab=tagesausklang"
+    edition_scope: ["*"]
+    role_scope: ["leitung", "padagoge", "trainer", "operator"]
+    time_priority:
+      morning: 6
+      afternoon: 5
+      evening: 1
+      night: 2
+    category: core
+
+  - id: verlauf
+    title: "Verlauf"
+    subtitle_template: "{count} Gespräche festgehalten"
+    icon: history
+    action_url: "/mira_app.html?tab=verlauf"
+    edition_scope: ["*"]
+    role_scope: ["leitung", "padagoge", "trainer", "operator"]
+    data_provider: verlauf_count
+    visibility_rule: "count > 0"
+    time_priority:
+      morning: 7
+      afternoon: 6
+      evening: 4
+      night: 5
+    category: core
+
+  - id: memory_proposed
+    title: "Vorschläge"
+    subtitle_template: "{count} Notizen warten auf Dich"
+    icon: bookmark
+    action_url: "/mira_app.html?tab=verlauf&filter=memory_proposed"
+    edition_scope: ["*"]
+    role_scope: ["leitung", "padagoge", "trainer", "operator"]
+    data_provider: memory_proposed_count
+    visibility_rule: "count > 0"
+    time_priority:
+      morning: 3
+      afternoon: 4
+      evening: 6
+      night: 7
+    category: core
+
+  - id: einstellungen
+    title: "Einstellungen"
+    subtitle_template: ""
+    icon: gear
+    action_url: "/mira_app.html?tab=settings"
+    edition_scope: ["*"]
+    role_scope: ["leitung", "padagoge", "trainer", "eltern", "teilnehmer", "operator", "developer"]
+    time_priority:
+      morning: 9
+      afternoon: 9
+      evening: 9
+      night: 9
+    category: admin
+
+  # Stub-Karte für Klienten-Rollen, die in Phase 1 noch keine echten Karten haben.
+  # Erscheint nur wenn sonst nichts da ist (visibility_rule wäre overkill — wir
+  # lassen sie immer sichtbar für eltern/teilnehmer, bis ihre echten Karten kommen).
+  - id: stub_klienten_demnaechst
+    title: "Demnächst hier"
+    subtitle_template: "Wir bereiten den Bereich für Dich vor."
+    icon: clock
+    action_url: "/heim.html"
+    edition_scope: ["*"]
+    role_scope: ["eltern", "teilnehmer"]
+    time_priority:
+      morning: 1
+      afternoon: 1
+      evening: 1
+      night: 1
+    category: core

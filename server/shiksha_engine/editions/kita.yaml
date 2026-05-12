@@ -32,3 +32,67 @@ reminder_default_time: "17:30"
 persona_overrides:
   kennenlernen: kennenlernen
   tagesausklang: tagesausklang
+
+# ---------------------------------------------------------------------
+# Heim-Karten — KITA-spezifisch (Cross-edition Karten kommen aus core.yaml)
+# Spec: SHIKSHA_HEIM_SPEC.md
+# ---------------------------------------------------------------------
+heim_cards:
+
+  - id: anwesenheit_today
+    title: "Anwesenheit heute"
+    subtitle_template: "{present_count}/{total_count} Kinder"
+    icon: presence
+    action_url: "/anwesenheit.html"
+    edition_scope: ["kita"]
+    role_scope: ["leitung", "padagoge"]
+    data_provider: kita_anwesenheit_stub
+    time_priority:
+      morning: 1
+      afternoon: 2
+      evening: 7
+      night: 8
+    category: core
+
+  - id: kalender_today
+    title: "Heute"
+    subtitle_template: "{event_count} Termine"
+    icon: calendar
+    action_url: "/kalender.html"
+    edition_scope: ["kita"]
+    role_scope: ["leitung", "padagoge"]
+    data_provider: kita_kalender_stub
+    time_priority:
+      morning: 2
+      afternoon: 3
+      evening: 6
+      night: 7
+    category: core
+
+  - id: personal_heute
+    title: "Personal heute"
+    subtitle_template: "Wer ist da, wer fehlt"
+    icon: team
+    action_url: "/personal.html"
+    edition_scope: ["kita"]
+    role_scope: ["leitung"]
+    time_priority:
+      morning: 2
+      afternoon: 4
+      evening: 7
+      night: 8
+    category: core
+
+  - id: abholer_pruefen
+    title: "Abholer prüfen"
+    subtitle_template: "Wenn jemand Neues kommt"
+    icon: shield
+    action_url: "/pickup_check.html"
+    edition_scope: ["kita"]
+    role_scope: ["padagoge", "leitung"]
+    time_priority:
+      morning: 5
+      afternoon: 3
+      evening: 4
+      night: 8
+    category: tools

@@ -42,8 +42,12 @@ def db(setup_database) -> Generator[Session, None, None]:
     session = TestSessionLocal()
 
     # Truncate alle Tables (in dependency order — child first)
-    tables = ["audit_logs", "friction_points", "observations", "memory_entries",
-              "messages", "sessions", "persona_prompts", "operators", "organizations"]
+    tables = [
+        "audit_logs", "friction_points", "observations", "memory_entries",
+        "messages", "sessions", "persona_prompts",
+        "rate_limit_buckets", "tenant_heim_config",
+        "operators", "organizations",
+    ]
     for t in tables:
         session.execute(text(f"TRUNCATE TABLE {schema_name()}.{t} CASCADE"))
     session.commit()
@@ -84,6 +88,66 @@ def thomas(db) -> Operator:
     op = Operator(
         id="thomas", org_id=None, edition="kita",
         display_name="Thomas", role="developer", email="thomas@shiksha.world",
+        metadata_={},
+    )
+    db.add(op)
+    db.commit()
+    return op
+
+
+@pytest.fixture
+def mira_leitung(db) -> Operator:
+    """Mira als Trägerin mit neuer Identity-Klassifikation."""
+    org = Organization(
+        id="krummelus_v2", edition="kita", name="Krummelus",
+        legal_name="Krummelus Familien-KITA", region="Vorarlberg, AT",
+        metadata_={},
+    )
+    db.add(org)
+    op = Operator(
+        id="krummelus_mira_v2",
+        org_id="krummelus_v2",
+        edition="kita",
+        display_name="Mira",
+        kind="staff",
+        role="leitung",
+        email="mira_v2@krummelus.example",
+        metadata_={},
+    )
+    db.add(op)
+    db.commit()
+    return op
+
+
+@pytest.fixture
+def pedagogin(db, mira_leitung) -> Operator:
+    """Eine Pädagogin in Krummelus, im selben Tenant wie Mira."""
+    op = Operator(
+        id="krummelus_anna",
+        org_id=mira_leitung.org_id,
+        edition="kita",
+        display_name="Anna",
+        kind="staff",
+        role="padagoge",
+        email="anna@krummelus.example",
+        metadata_={},
+    )
+    db.add(op)
+    db.commit()
+    return op
+
+
+@pytest.fixture
+def vater(db, mira_leitung) -> Operator:
+    """Ein Vater, Klient von Krummelus."""
+    op = Operator(
+        id="krummelus_vater_lukas",
+        org_id=mira_leitung.org_id,
+        edition="kita",
+        display_name="Markus",
+        kind="klient",
+        role="eltern",
+        email="markus@example.com",
         metadata_={},
     )
     db.add(op)

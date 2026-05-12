@@ -67,10 +67,51 @@ async def require_developer(
 async def require_operator_or_developer(
     operator: Annotated[Operator, Depends(get_current_operator)],
 ) -> Operator:
-    """Operator oder Developer — Observer nicht."""
-    if operator.role not in ("operator", "developer"):
+    """Operator oder Developer — Observer nicht.
+
+    Legacy-Helper: erlaubt 'operator' (legacy) + alle staff-Rollen
+    (leitung, padagoge, trainer) + developer.
+    Klient-Rollen (eltern, teilnehmer) werden hier abgewiesen — die
+    haben eigene Endpoints in Phase 2.
+    """
+    allowed_roles = ("operator", "leitung", "padagoge", "trainer", "developer")
+    if operator.role not in allowed_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Read-only access — not allowed for mutations",
+            detail="Staff role required for this endpoint",
+        )
+    return operator
+
+
+async def require_leitung_or_developer(
+    operator: Annotated[Operator, Depends(get_current_operator)],
+) -> Operator:
+    """Nur Leitung (Trägerin) und Developer — z.B. für Tenant-Konfiguration.
+
+    Legacy: 'operator' wird als Leitung interpretiert (vor Identity-Migration).
+    """
+    if operator.role not in ("operator", "leitung", "developer"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Leitung role required",
+        )
+    return operator
+
+
+async def require_authenticated(
+    operator: Annotated[Operator, Depends(get_current_operator)],
+) -> Operator:
+    """Beliebige authentifizierte Person — staff, klient oder system.
+
+    Für Endpoints, die jede eingeloggte Identity bedienen müssen:
+    /api/v1/heim, /api/v1/auth/me, /api/v1/auth/refresh.
+    Wir geben hier nur abgewiesen, wenn die Identity einen unbekannten
+    Rollen-Wert hat (sollte nicht passieren, aber defensive).
+    """
+    from .models.operator import ALL_ROLES
+    if operator.role not in ALL_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Unknown role: {operator.role}",
         )
     return operator

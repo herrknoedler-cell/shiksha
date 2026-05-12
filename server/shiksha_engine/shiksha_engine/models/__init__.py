@@ -10,6 +10,7 @@ from .organization import Organization
 from .persona import PersonaPrompt
 from .rate_limit import RateLimitBucket
 from .session import Session
+from .tenant_heim_config import TenantHeimConfig
 
 __all__ = [
     "AuditLog",
@@ -22,4 +23,5 @@ __all__ = [
     "PersonaPrompt",
     "RateLimitBucket",
     "Session",
+    "TenantHeimConfig",
 ]
