@@ -68,14 +68,28 @@ _STOPWORDS = frozenset({
     "etwa", "ungefähr", "viel", "viele", "alle", "jeder",
 })
 
-_JACCARD_THRESHOLD_FRICTION = 0.40
-_JACCARD_THRESHOLD_OBSERVATION = 0.45  # Beobachtungen dürfen spezifischer sein
+# Zwei-Linien-Dedup:
+#   1. Bigram-Match: ≥2 geteilte 2-Wort-Phrasen → starkes Themen-Signal,
+#      auch wenn Texte ansonsten anders formuliert sind.
+#   2. Jaccard auf Unigrammen: erfasst überlappende Wort-Mengen, wenn
+#      Bigram-Match nicht greift (z.B. bei sehr kurzen Texten).
+#
+# Schwellenwerte sind absichtlich tief — Re-Logging in derselben Session
+# ist fast immer das selbe Thema, auch wenn paraphrasiert.
+_JACCARD_THRESHOLD_FRICTION = 0.20
+_JACCARD_THRESHOLD_OBSERVATION = 0.25
+_MIN_SHARED_BIGRAMS = 2
 
 
-def _tokenize(text: str) -> set[str]:
-    """Worte extrahieren, lowercase, Stopwords raus, kurze Worte raus."""
+def _tokenize(text: str) -> list[str]:
+    """Worte extrahieren, lowercase, Stopwords raus, kurze Worte raus.
+    Liste statt Set — wir brauchen Reihenfolge für Bigramme."""
     words = re.findall(r"\w+", text.lower(), flags=re.UNICODE)
-    return {w for w in words if w not in _STOPWORDS and len(w) > 2}
+    return [w for w in words if w not in _STOPWORDS and len(w) > 2]
+
+
+def _bigrams(tokens: list[str]) -> set[tuple[str, str]]:
+    return set(zip(tokens, tokens[1:]))
 
 
 def _jaccard(a: set[str], b: set[str]) -> float:
@@ -84,34 +98,47 @@ def _jaccard(a: set[str], b: set[str]) -> float:
     return len(a & b) / len(a | b)
 
 
-def _find_similar_friction(
-    db: DBSession, session_id: str, new_text: str,
-    threshold: float = _JACCARD_THRESHOLD_FRICTION,
-) -> FrictionPoint | None:
-    """Sucht einen FrictionPoint in derselben Session mit ähnlichem Text."""
+def _texts_similar(
+    new_text: str, existing_text: str,
+    jaccard_threshold: float,
+) -> bool:
+    """True wenn die zwei Texte dasselbe Thema behandeln."""
     new_tokens = _tokenize(new_text)
     if len(new_tokens) < 2:
-        return None
+        return False
+    existing_tokens = _tokenize(existing_text)
+    if len(existing_tokens) < 2:
+        return False
+
+    # Linie 1: Bigram-Match
+    shared = _bigrams(new_tokens) & _bigrams(existing_tokens)
+    if len(shared) >= _MIN_SHARED_BIGRAMS:
+        return True
+
+    # Linie 2: Jaccard-Schwellenwert auf Unigrammen
+    if _jaccard(set(new_tokens), set(existing_tokens)) >= jaccard_threshold:
+        return True
+
+    return False
+
+
+def _find_similar_friction(
+    db: DBSession, session_id: str, new_text: str,
+) -> FrictionPoint | None:
     existing = db.execute(
         select(FrictionPoint)
         .where(FrictionPoint.session_id == session_id)
         .where(FrictionPoint.deleted_at.is_(None))
     ).scalars().all()
     for fp in existing:
-        if _jaccard(new_tokens, _tokenize(fp.text)) >= threshold:
+        if _texts_similar(new_text, fp.text, _JACCARD_THRESHOLD_FRICTION):
             return fp
     return None
 
 
 def _find_similar_observation(
     db: DBSession, session_id: str, new_text: str,
-    threshold: float = _JACCARD_THRESHOLD_OBSERVATION,
 ) -> Observation | None:
-    """Sucht eine Observation (kind='observation') in derselben Session
-    mit ähnlichem Text. Summary-Observations werden ignoriert."""
-    new_tokens = _tokenize(new_text)
-    if len(new_tokens) < 2:
-        return None
     existing = db.execute(
         select(Observation)
         .where(Observation.session_id == session_id)
@@ -119,9 +146,58 @@ def _find_similar_observation(
         .where(Observation.deleted_at.is_(None))
     ).scalars().all()
     for obs in existing:
-        if _jaccard(new_tokens, _tokenize(obs.text)) >= threshold:
+        if _texts_similar(new_text, obs.text, _JACCARD_THRESHOLD_OBSERVATION):
             return obs
     return None
+
+
+# ===================================================================
+# Session-State-Spiegel (gibt dem Modell direktes Feedback)
+# ===================================================================
+
+def _session_state_summary(db: DBSession, session_id: str) -> dict:
+    """Kurze Übersicht: was hat das Modell in dieser Session schon geloggt?
+
+    Wird jedem tool_result beigegeben. Das Modell sieht damit explizit, was
+    es schon kennt — und wiederholt nicht. Stärker als jede Persona-Anweisung
+    oder Ähnlichkeits-Heuristik, weil das Modell die Information direkt im
+    Kontext hat.
+
+    Texte werden auf 80 Zeichen gekürzt — reicht zum Wiedererkennen, hält
+    den Token-Verbrauch im Loop niedrig.
+    """
+    fricts = db.execute(
+        select(FrictionPoint.text)
+        .where(FrictionPoint.session_id == session_id)
+        .where(FrictionPoint.deleted_at.is_(None))
+    ).scalars().all()
+    obs = db.execute(
+        select(Observation.text)
+        .where(Observation.session_id == session_id)
+        .where(Observation.kind == "observation")
+        .where(Observation.deleted_at.is_(None))
+    ).scalars().all()
+    summaries = db.execute(
+        select(Observation.text)
+        .where(Observation.session_id == session_id)
+        .where(Observation.kind == OBSERVATION_KIND_SUMMARY)
+        .where(Observation.deleted_at.is_(None))
+    ).scalars().all()
+    mems = db.execute(
+        select(MemoryEntry.text)
+        .where(MemoryEntry.source_session_id == session_id)
+        .where(MemoryEntry.deleted_at.is_(None))
+    ).scalars().all()
+
+    def _trim(items):
+        return [t[:80] + ("…" if len(t) > 80 else "") for t in items]
+
+    return {
+        "frictions_in_session":   _trim(fricts),
+        "observations_in_session": _trim(obs),
+        "memories_proposed_in_session": _trim(mems),
+        "session_summarized":     bool(summaries),
+    }
 
 
 # ===================================================================
@@ -409,14 +485,14 @@ def _handle_log_observation(
     shiksha_session: ShikshaSession,
     db: DBSession,
 ) -> dict:
-    # Dedup gegen vorhandene Observations in dieser Session
     duplicate = _find_similar_observation(db, shiksha_session.id, args.text)
     if duplicate is not None:
         return {
-            "observation_id": duplicate.id,
-            "logged":         False,
-            "reason":         "duplicate_in_session",
-            "existing_text":  duplicate.text,
+            "observation_id":  duplicate.id,
+            "logged":          False,
+            "reason":          "duplicate_in_session",
+            "existing_text":   duplicate.text,
+            "session_state":   _session_state_summary(db, shiksha_session.id),
         }
 
     metadata: dict = {}
@@ -432,7 +508,11 @@ def _handle_log_observation(
     )
     db.add(obs)
     db.flush()
-    return {"observation_id": obs.id, "logged": True}
+    return {
+        "observation_id": obs.id,
+        "logged":         True,
+        "session_state":  _session_state_summary(db, shiksha_session.id),
+    }
 
 
 def _handle_log_friction(
@@ -446,16 +526,14 @@ def _handle_log_friction(
             f"severity must be one of {FRICTION_SEVERITIES}, got '{args.severity}'"
         )
 
-    # Dedup: dasselbe Thema innerhalb einer Session ist DIESELBE Reibung,
-    # nicht eine neue. Wenn vorhanden, geben wir das dem Modell zurück
-    # und schreiben nicht neu.
     duplicate = _find_similar_friction(db, shiksha_session.id, args.text)
     if duplicate is not None:
         return {
-            "friction_id":   duplicate.id,
-            "logged":        False,
-            "reason":        "duplicate_in_session",
-            "existing_text": duplicate.text,
+            "friction_id":    duplicate.id,
+            "logged":         False,
+            "reason":         "duplicate_in_session",
+            "existing_text":  duplicate.text,
+            "session_state":  _session_state_summary(db, shiksha_session.id),
         }
 
     fp = FrictionPoint(
@@ -468,7 +546,11 @@ def _handle_log_friction(
     )
     db.add(fp)
     db.flush()
-    return {"friction_id": fp.id, "logged": True}
+    return {
+        "friction_id":   fp.id,
+        "logged":        True,
+        "session_state": _session_state_summary(db, shiksha_session.id),
+    }
 
 
 def _handle_add_memory(
@@ -486,7 +568,11 @@ def _handle_add_memory(
     )
     db.add(mem)
     db.flush()
-    return {"memory_id": mem.id, "status": "proposed"}
+    return {
+        "memory_id":     mem.id,
+        "status":        "proposed",
+        "session_state": _session_state_summary(db, shiksha_session.id),
+    }
 
 
 def _handle_save_day_summary(
@@ -510,6 +596,7 @@ def _handle_save_day_summary(
             "saved":         False,
             "reason":        "already_summarized_in_session",
             "existing_text": existing.text,
+            "session_state": _session_state_summary(db, shiksha_session.id),
         }
 
     metadata: dict = {}
@@ -525,7 +612,11 @@ def _handle_save_day_summary(
     )
     db.add(obs)
     db.flush()
-    return {"summary_id": obs.id, "saved": True}
+    return {
+        "summary_id":    obs.id,
+        "saved":         True,
+        "session_state": _session_state_summary(db, shiksha_session.id),
+    }
 
 
 # ===================================================================
@@ -553,7 +644,14 @@ register_tool(ToolDefinition(
         "Markiere eine wiederkehrende Reibung. Nur einsetzen, wenn ein Muster "
         "sichtbar ist (Frequenz benannt oder im Memory bestätigt) — nicht beim "
         "ersten Auftauchen. Eine einzelne schlechte Mittwoch ist noch kein "
-        "Friction Point."
+        "Friction Point.\n\n"
+        "WICHTIG: PRO SESSION GENAU EINMAL PRO THEMA. Wenn das gleiche Thema "
+        "im Gespräch weiter ausgebreitet wird (mehr Details, neue Aspekte), "
+        "ist das immer noch DIESELBE Reibung — kein neuer log_friction-Call. "
+        "Der Server lehnt Wiederholungen ab; richte Dich schon vorher danach. "
+        "Wenn eine Reibung strukturell wirkt (\"diese KITA hat keine "
+        "Vertretungsregelung\", nicht nur \"heute war's knapp\"), erwäge "
+        "zusätzlich add_memory, damit Du es nächstes Mal weißt."
     ),
     input_model=LogFrictionArgs,
     handler=_handle_log_friction,
@@ -564,9 +662,22 @@ register_tool(ToolDefinition(
 register_tool(ToolDefinition(
     name="add_memory",
     description=(
-        "Lege eine Erinnerung an, die zukünftige Sessions als Kontext laden. "
-        "Sparsam — Memory ist Knappheits-Speicher, nicht Tagebuch. Drei pro "
-        "Session ist viel. Status ist 'proposed' — Operator bestätigt manuell."
+        "Lege eine bleibende Erinnerung über die Person oder ihre Welt an, "
+        "die zukünftige Sessions als Kontext laden. Status ist 'proposed' — "
+        "die Person bestätigt manuell, bevor sie aktiv wird.\n\n"
+        "TYPISCHE AUSLÖSER:\n"
+        "- Eine wiederkehrende Reibung hat strukturelle Ursachen, die Du in "
+        "  zukünftigen Sessions kennen solltest (\"diese KITA hat keine "
+        "  externe Vertretungsregelung\", \"die Trägerin trägt allein "
+        "  Personalverantwortung für fünf Mitarbeiterinnen\").\n"
+        "- Eine bleibende Tatsache über die Person, ihr Team, ihre Familie "
+        "  oder Organisation wird beiläufig erwähnt.\n"
+        "- Wenn Du schon einen log_friction zu einem strukturellen Thema "
+        "  abgesetzt hast, ist ein paralleles add_memory mit der strukturellen "
+        "  Form fast immer richtig (Friction = akute Reibung, Memory = "
+        "  bleibende Tatsache).\n\n"
+        "Sparsam, aber nicht zaghaft — drei pro Session ist viel, NULL ist "
+        "verdächtig, wenn substanzielle Themen besprochen wurden."
     ),
     input_model=AddMemoryArgs,
     handler=_handle_add_memory,

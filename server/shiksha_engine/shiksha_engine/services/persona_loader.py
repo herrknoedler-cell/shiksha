@@ -145,11 +145,13 @@ Heuristik nach Modus:
   zusammenfasst.
 
 WICHTIG — Wiederholungen vermeiden:
-- Wenn Du in dieser Session schon eine Reibung zum selben Thema geloggt
-  hast, logge sie nicht noch einmal. Das gleiche Thema durch das Gespräch
-  hindurch ist dieselbe Reibung — nicht eine neue pro Mira-Nachricht.
-  Der Server wird Duplikate erkennen und Dir das mitteilen; richte Dich
-  schon vorher danach.
+- Jedes Werkzeug-Ergebnis enthält `session_state` mit dem aktuellen Stand
+  der bereits geloggten Reibungen, Beobachtungen und Memory-Vorschläge in
+  DIESER Session. Lies das BEVOR Du ein weiteres Werkzeug benutzt. Wenn
+  das Thema dort schon steht, log nicht nochmal — auch nicht mit anderen
+  Worten oder mehr Details.
+- Das gleiche Thema durch das Gespräch hindurch ist DIESELBE Reibung.
+  Nicht eine neue pro Mira-Nachricht.
 - log_observation ist nur für neue, konkrete Fakten — nicht für Paraphrasen
   dessen, was die Person gerade gesagt hat. „Die Person arbeitet in der
   Gruppe Sommer" ist keine Beobachtung, das ist Wiedergabe.
