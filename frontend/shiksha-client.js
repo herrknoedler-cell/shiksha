@@ -31,6 +31,37 @@ import {
   browserSupportsWebAuthn,
 } from 'https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.min.js';
 
+/**
+ * Robuster Wrapper um startRegistration — versucht v10-API
+ * (`{ optionsJSON: options }`), fällt bei API-Mismatch auf v9-API
+ * (`options` direkt) zurück.
+ */
+async function _safeStartRegistration(options) {
+  try {
+    return await startRegistration({ optionsJSON: options });
+  } catch (err) {
+    const msg = err && err.message ? err.message : '';
+    if (msg.includes("'replace'") || msg.includes('undefined') || msg.includes('optionsJSON')) {
+      console.warn('startRegistration v10-API failed, trying legacy v9-API', err);
+      return await startRegistration(options);
+    }
+    throw err;
+  }
+}
+
+async function _safeStartAuthentication(options) {
+  try {
+    return await startAuthentication({ optionsJSON: options });
+  } catch (err) {
+    const msg = err && err.message ? err.message : '';
+    if (msg.includes("'replace'") || msg.includes('undefined') || msg.includes('optionsJSON')) {
+      console.warn('startAuthentication v10-API failed, trying legacy v9-API', err);
+      return await startAuthentication(options);
+    }
+    throw err;
+  }
+}
+
 const TOKEN_KEY = 'shiksha-token';
 const OPERATOR_KEY = 'shiksha-operator';
 
@@ -167,7 +198,7 @@ export class ShikshaClient {
     // 2. Browser-Ceremony
     let credential;
     try {
-      credential = await startAuthentication({ optionsJSON: options });
+      credential = await _safeStartAuthentication(options);
     } catch (err) {
       throw new ShikshaApiError(`Passkey-Authentifizierung abgebrochen: ${err.message}`, 0);
     }
@@ -221,7 +252,7 @@ export class ShikshaClient {
 
     let credential;
     try {
-      credential = await startRegistration({ optionsJSON: options });
+      credential = await _safeStartRegistration(options);
     } catch (err) {
       throw new ShikshaApiError(`Passkey-Registrierung abgebrochen: ${err.message}`, 0);
     }

@@ -1321,7 +1321,10 @@ als drei mittelmäßige. Lieber Ruhe als Erklärung.`;
   function startTagesausklang() {
     State.taActive = true;
     State.taMessages = [];
-    State.taSessionId = 'ses_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    // Session-ID wird vom Backend beim ersten /chat/respond zurückgegeben.
+    // NICHT frontend-seitig generieren — sonst kennt das Backend die ID nicht
+    // und antwortet mit 404 "Session not found".
+    State.taSessionId = null;
 
     const view = document.getElementById('view-tagesausklang');
     const active = document.getElementById('ta-active');
@@ -1436,8 +1439,9 @@ als drei mittelmäßige. Lieber Ruhe als Erklärung.`;
     typing.remove();
 
     if (result && result.text) {
-      // Wenn Server eine neue Session begonnen hat, ID übernehmen
-      if (result.session_id && !State.taSessionId) {
+      // Session-ID vom Backend übernehmen (kommt beim ersten Response).
+      // Bei Folge-Anfragen wird die gleiche ID wieder mitgeschickt.
+      if (result.session_id) {
         State.taSessionId = result.session_id;
       }
       appendTaMsg('shiksha', result.text);

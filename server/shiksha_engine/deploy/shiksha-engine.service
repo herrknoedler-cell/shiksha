@@ -16,9 +16,14 @@ EnvironmentFile=-/opt/shiksha-engine/.env
 ExecStart=/opt/shiksha-engine/.venv/bin/uvicorn shiksha_engine.main:app \
   --host 127.0.0.1 \
   --port 8001 \
-  --workers 2 \
+  --workers 1 \
   --proxy-headers \
   --forwarded-allow-ips=127.0.0.1
+# HINWEIS: --workers 1 ist erforderlich, solange der WebAuthn-Challenge-Store
+# und der Setup-Token-Store In-Memory laufen. Mit >1 Workern verliert das
+# Backend Challenges zwischen /register/begin und /register/finish
+# (Round-Robin-Dispatch trifft anderen Worker).
+# FIX-PFAD (Tech-Debt): Stores nach Redis migrieren, dann hochskalieren.
 Restart=on-failure
 RestartSec=5
 
