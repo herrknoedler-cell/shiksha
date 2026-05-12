@@ -65,12 +65,19 @@ def respond(
     db: Annotated[DBSession, Depends(get_db)],
     operator: Annotated[Operator, Depends(require_operator_or_developer)],
 ) -> ChatResponse:
-    """Sync-Endpoint — gibt die komplette Antwort als JSON."""
+    """Sync-Endpoint — gibt die komplette Antwort als JSON.
+
+    Tool-Use Multi-Turn (Schritt 4): wenn der Persona-Prompt Tools erlaubt
+    und das Modell Tools aufruft, läuft der Loop in anthropic_client.
+    Tool-Calls schreiben in dieselbe db-Session — wird hier am Ende mit
+    den Messages zusammen committet. Audit-Logs der Tool-Calls werden in
+    separater Session bereits committed (überleben Rollback).
+    """
     session = _ensure_session(
         db, session_id=payload.session_id, operator=operator, persona=payload.persona
     )
 
-    # Persona-Prompt laden
+    # Persona-Prompt inkl. Tool-Hinweis + Memory laden
     system_prompt = persona_loader.load_system_prompt(
         db, operator=operator, persona=payload.persona
     )
@@ -82,13 +89,19 @@ def respond(
     db.add(user_msg)
     db.flush()
 
-    # History laden + an Claude geben
+    # History laden + Multi-Turn-Loop fahren
     history = _build_message_history(db, session)
-    result = anthropic_client.respond_block(
-        system_prompt=system_prompt, messages=history
+    result = anthropic_client.respond_block_with_tools(
+        system_prompt=system_prompt,
+        messages=history,
+        operator=operator,
+        shiksha_session=session,
+        db=db,
     )
 
-    # Assistant-Message persistieren
+    # Assistant-Message persistieren — nur der finale Text, keine Tool-Spur.
+    # Tool-Calls leben in observations/friction_points/memory_entries und in
+    # audit_logs. Im Message-Verlauf der Session bleibt nur, was Mira sieht.
     asst_msg = Message(
         session_id=session.id,
         role="assistant",
@@ -97,7 +110,7 @@ def respond(
     )
     db.add(asst_msg)
 
-    # Tokens aufaddieren
+    # Tokens aufaddieren (Sum über alle Tool-Loop-Iterationen)
     session.tokens_used = (session.tokens_used or 0) + result.tokens_used
     db.add(session)
     db.flush()
@@ -127,8 +140,11 @@ async def stream(
         db, session_id=payload.session_id, operator=operator, persona=payload.persona
     )
 
+    # Bis Schritt 4.4: Streaming-Pfad ohne Tools. Tool-Hinweis aus dem
+    # Persona-Prompt weglassen, damit das Modell sie hier nicht versucht.
     system_prompt = persona_loader.load_system_prompt(
-        db, operator=operator, persona=payload.persona
+        db, operator=operator, persona=payload.persona,
+        include_tools_hint=False,
     )
     if system_prompt is None:
         raise HTTPException(status_code=404, detail=f"No persona prompt for '{payload.persona}'")

@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy import ForeignKey, Integer, String, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db import schema_name
@@ -11,6 +11,15 @@ from ._base import Base, now_col, schema_args
 
 if TYPE_CHECKING:
     from .operator import Operator
+
+
+# Memory-Status:
+#   active    — gilt im System-Prompt, Mira hat es bestätigt oder es kam
+#               aus dem Close-Insights-Flow (manuell kuratiert).
+#   proposed  — von einem Tool-Call inline während einer Session erzeugt.
+#               Mira muss bestätigen, bevor es in den System-Prompt wandert.
+#   dismissed — abgelehnt; bleibt für Audit, geht nicht mehr in den Prompt.
+MEMORY_STATUSES = ("active", "proposed", "dismissed")
 
 
 class MemoryEntry(Base):
@@ -33,9 +42,19 @@ class MemoryEntry(Base):
         ForeignKey(f"{schema_name()}.sessions.id", ondelete="SET NULL"),
         nullable=True,
     )
+    status:            Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default="active",
+        server_default="active",
+    )
     created_at:        Mapped[datetime] = now_col()
+    deleted_at:        Mapped[datetime|None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
 
     operator: Mapped["Operator"] = relationship(back_populates="memory_entries")
 
     def __repr__(self) -> str:
-        return f"<MemoryEntry #{self.id} {self.operator_id}: {self.text[:40]}...>"
+        return f"<MemoryEntry #{self.id} {self.operator_id} [{self.status}]: {self.text[:40]}...>"

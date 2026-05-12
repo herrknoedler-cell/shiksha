@@ -11,7 +11,9 @@ class MemoryEntryOut(BaseModel):
     edition: str
     text: str
     source_session_id: str | None
+    status: str  # active | proposed | dismissed
     created_at: datetime
+    deleted_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 
