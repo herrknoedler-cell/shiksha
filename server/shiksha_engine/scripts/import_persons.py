@@ -95,50 +95,151 @@ def _serializable(row: dict) -> dict:
             out[k] = v.isoformat()
         elif isinstance(v, (str, int, float, bool, type(None))):
             out[k] = v
+        elif isinstance(v, (list, dict)):
+            # JSONB-Spalten kommen schon als list/dict zurück
+            out[k] = v
         else:
             out[k] = str(v)
+    return out
+
+
+def split_name(name: Any) -> tuple[str, str]:
+    """
+    Single-Field 'name' aus Legacy → (given_name, family_name).
+      'Mira Fiel'                     → ('Mira', 'Fiel')
+      'Nicole Kerschbaumer-Bachmann'  → ('Nicole', 'Kerschbaumer-Bachmann')
+      'Anna Maria Müller'             → ('Anna Maria', 'Müller')   # rsplit von rechts
+      'Lio'                           → ('Lio', '')
+      None / ''                       → ('', '')
+    Edge-Cases wie 'Jan von der Heyde' → ('Jan von der', 'Heyde'); manuelle Korrektur im Modal.
+    """
+    if name is None:
+        return ("", "")
+    s = str(name).strip()
+    if not s:
+        return ("", "")
+    if " " not in s:
+        return (s, "")
+    given, family = s.rsplit(" ", 1)
+    return (given.strip(), family.strip())
+
+
+def _pick(row: dict, *keys: str) -> dict:
+    """Sammelt nicht-leere Felder aus row für die gegebenen keys (für metadata-Sub-Objekte)."""
+    out = {}
+    for k in keys:
+        v = row.get(k)
+        if v not in (None, "", [], {}):
+            if isinstance(v, (date, datetime)):
+                out[k] = v.isoformat()
+            else:
+                out[k] = v
     return out
 
 
 # ------------------------------------------------------------------- Mappers
 
 def map_child_row(row: dict) -> dict:
+    """
+    Kita-Legacy-Children → persons. 'name' ist Single-Field, wird via rsplit(" ", 1) gesplittet.
+    Strukturierte Metadata mit medical/compliance/profile/safeguarding/parents-Sektionen.
+    """
+    name_raw = first(row, "name", "vorname", "first_name", "given_name") or ""
+    given, family = split_name(name_raw)
+
+    birth_date = parse_date(first(row, "birth_date", "birthdate", "geburtsdatum", "dob"))
+    birth_year = first(row, "birth_year", "geburtsjahr")
+
+    metadata: dict[str, Any] = {}
+
+    # Medical-Cluster — Allergien/Medikamente sind beim Tagesbetrieb relevant
+    medical = _pick(row, "allergies", "medications", "medical_notes", "dietary_notes")
+    if medical:
+        metadata["medical"] = medical
+
+    # Compliance — Foto-Einverständnis ist DSGVO-relevant
+    compliance = _pick(row, "photo_consent")
+    if compliance:
+        metadata["compliance"] = compliance
+
+    # Profil — Nationalität, Muttersprache
+    profile = _pick(row, "nationality", "native_language")
+    if profile:
+        metadata["profile"] = profile
+
+    # Safeguarding — sensitiv, separat von normalen notes
+    safeguarding = _pick(row, "notes_safeguarding")
+    if safeguarding:
+        metadata["safeguarding"] = safeguarding
+
+    # Eltern + Abholberechtigte (JSONB-Arrays, oft leer in Phase 1)
+    relations = _pick(row, "parents", "pickup_authorized")
+    if relations:
+        metadata["relations"] = relations
+
+    # Birth-Year-only Marker, falls Datenschutz-Modus
+    if not birth_date and birth_year:
+        metadata["birth_year_only"] = birth_year
+
+    # Komplette Quell-Zeile als Backup
+    metadata["legacy_raw"] = _serializable(row)
+
     return {
         "kind": "kind",
         "legacy_id": str(first(row, "id", "child_id", "uuid")),
         "legacy_source": "kita_legacy_children",
-        "given_name": first(row, "vorname", "first_name", "given_name") or "",
-        "family_name": first(row, "nachname", "last_name", "family_name", "name") or "",
-        "birth_date": parse_date(first(row, "geburtsdatum", "birthdate", "birth_date", "dob")),
-        "gender": first(row, "geschlecht", "gender", "sex"),
-        "group_id": first(row, "gruppe", "group_name", "group_id", "group"),
-        "entry_date": parse_date(first(row, "eintritt", "entry_date", "entry", "start_date")),
-        "exit_date": parse_date(first(row, "austritt", "exit_date", "exit", "end_date")),
-        "notes": first(row, "notizen", "notes", "comment", "bemerkung"),
-        "address": first(row, "adresse", "address"),
-        "phone": first(row, "telefon", "phone"),
+        "given_name": given,
+        "family_name": family,
+        "birth_date": birth_date,
+        "gender": first(row, "gender", "geschlecht", "sex"),
+        "group_id": first(row, "group_name", "gruppe", "group_id", "group"),
+        "entry_date": parse_date(first(row, "entry_date", "eintritt", "entry", "start_date")),
+        "exit_date": parse_date(first(row, "exit_date", "austritt", "exit", "end_date")),
+        "notes": first(row, "notes", "notizen", "comment", "bemerkung"),
+        "address": first(row, "address", "adresse"),
+        "phone": first(row, "phone", "telefon"),
         "email": first(row, "email"),
-        "metadata_": {"legacy_raw": _serializable(row)},
+        "metadata_": metadata,
     }
 
 
 def map_staff_row(row: dict) -> dict:
+    """
+    Kita-Legacy-Staff → persons. 'name' ist Single-Field. Anstellungs-Cluster (role,
+    employment_type, weekly_hours, contract_type, qualification) landet in metadata_.employment.
+    """
+    name_raw = first(row, "name", "vorname", "first_name", "given_name") or ""
+    given, family = split_name(name_raw)
+
+    metadata: dict[str, Any] = {}
+
+    # Anstellungs-Cluster
+    employment = _pick(
+        row,
+        "role", "employment_type", "weekly_hours", "contract_type", "qualification",
+    )
+    if employment:
+        metadata["employment"] = employment
+
+    # Falls Staff später als Operator verknüpfbar — email als Match-Key vormerken
+    if row.get("email"):
+        metadata["operator_link_hint"] = {"email": row["email"]}
+
+    metadata["legacy_raw"] = _serializable(row)
+
     return {
         "kind": "staff",
         "legacy_id": str(first(row, "id", "staff_id", "uuid")),
         "legacy_source": "kita_legacy_staff",
-        "given_name": first(row, "vorname", "first_name", "given_name") or "",
-        "family_name": first(row, "nachname", "last_name", "family_name", "name") or "",
+        "given_name": given,
+        "family_name": family,
         "email": first(row, "email"),
-        "phone": first(row, "telefon", "phone"),
-        "address": first(row, "adresse", "address"),
-        "entry_date": parse_date(first(row, "eintritt", "entry_date", "entry", "start_date")),
-        "exit_date": parse_date(first(row, "austritt", "exit_date", "exit", "end_date")),
-        "notes": first(row, "notizen", "notes", "comment", "bemerkung"),
-        "metadata_": {
-            "legacy_role": first(row, "rolle", "role", "position", "funktion"),
-            "legacy_raw": _serializable(row),
-        },
+        "phone": first(row, "phone", "telefon"),
+        "address": first(row, "address", "adresse"),
+        "entry_date": parse_date(first(row, "entry_date", "eintritt", "entry", "start_date")),
+        "exit_date": parse_date(first(row, "exit_date", "austritt", "exit", "end_date")),
+        "notes": first(row, "notes", "notizen", "comment", "bemerkung"),
+        "metadata_": metadata,
     }
 
 
