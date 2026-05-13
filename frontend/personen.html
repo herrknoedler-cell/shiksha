@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="de" data-edition="kita">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>SHIKSHA · Stammdaten</title>
+
+  <!-- Pre-Render Theme-Restore — verhindert FOUC -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('shiksha-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="./shiksha-ui.v1.0.0.css">
+  <link rel="stylesheet" href="./editions-css/kita.v1.0.0.css">
+</head>
+<body>
+
+  <div class="shk-shell">
+
+    <!-- =========================================================
+         HEADER  —  Brotkrumen + Titel + Theme-Toggle + Add-Button
+         ========================================================= -->
+    <header class="shk-header">
+      <nav class="shk-breadcrumb shk-fade-in">
+        <a href="./heim.html">Heim</a>
+        <span class="shk-breadcrumb__separator">·</span>
+        <span>Stammdaten</span>
+      </nav>
+
+      <div class="shk-row shk-fade-in" style="justify-content: space-between; align-items: flex-end; gap: var(--shk-space-md);">
+        <div>
+          <h1 class="shk-heading">Stammdaten</h1>
+          <p class="shk-subtitle" id="stats-line" style="margin-top: var(--shk-space-xs);">
+            &nbsp;
+          </p>
+        </div>
+        <div class="shk-row" style="gap: var(--shk-space-sm); flex-shrink: 0;">
+          <button class="shk-theme-toggle"
+                  data-shk-theme-toggle
+                  aria-label="Theme umschalten">
+            <svg class="shk-icon shk-icon--sm">
+              <use href="./shiksha-icons.v1.0.0.svg#icon-weather-sun"/>
+            </svg>
+            <span data-shk-theme-label>Modus</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- =========================================================
+         TABS  —  Kinder | Mitarbeiter
+         ========================================================= -->
+    <div class="shk-tabs shk-fade-in" data-shk-tabs>
+      <button class="shk-tab shk-tab--active" data-shk-tab="kind">Kinder</button>
+      <button class="shk-tab" data-shk-tab="staff">Mitarbeiter</button>
+    </div>
+
+    <!-- =========================================================
+         SUCHE + AKTION
+         ========================================================= -->
+    <div class="shk-row shk-fade-in" style="margin-bottom: var(--shk-space-lg); gap: var(--shk-space-sm);">
+      <div class="shk-field" style="flex: 1;">
+        <input
+          class="shk-input"
+          type="search"
+          id="search-input"
+          placeholder="Suchen…"
+          autocomplete="off">
+      </div>
+      <button class="shk-btn shk-btn--primary" id="add-btn">
+        <svg class="shk-icon shk-icon--sm">
+          <use href="./shiksha-icons.v1.0.0.svg#icon-plus"/>
+        </svg>
+        <span id="add-btn-label">Hinzufügen</span>
+      </button>
+    </div>
+
+    <!-- =========================================================
+         LISTEN  (eine pro Tab, JS schaltet um)
+         ========================================================= -->
+    <main>
+      <section data-shk-tab-panel="kind">
+        <div class="shk-list shk-stack--tight" id="list-kind">
+          <div class="shk-loading">Einen Moment.</div>
+        </div>
+      </section>
+
+      <section data-shk-tab-panel="staff" class="shk-hidden">
+        <div class="shk-list shk-stack--tight" id="list-staff">
+          <div class="shk-loading">Einen Moment.</div>
+        </div>
+      </section>
+    </main>
+
+    <footer style="margin-top: auto; padding-top: var(--shk-space-lg); text-align: center;">
+      <span class="shk-text-tiny shk-text-faint" style="letter-spacing: var(--shk-tracking-wide);">SHIKSHA</span>
+    </footer>
+  </div>
+
+
+  <!-- =========================================================
+       MODAL  —  Detail/Edit/Create
+       ========================================================= -->
+  <div class="shk-modal-backdrop" id="person-modal">
+    <div class="shk-modal">
+      <div class="shk-modal__header">
+        <h2 class="shk-modal__title" id="modal-title">Person</h2>
+        <button class="shk-modal__close" data-shk-modal-close aria-label="Schließen">
+          <svg class="shk-icon">
+            <use href="./shiksha-icons.v1.0.0.svg#icon-close"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="shk-modal__body">
+        <form id="person-form" class="shk-stack">
+
+          <input type="hidden" id="f-id">
+          <input type="hidden" id="f-kind">
+
+          <div class="shk-row" style="gap: var(--shk-space-md);">
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-given-name">Vorname</label>
+              <input class="shk-input" type="text" id="f-given-name" required maxlength="128">
+            </div>
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-family-name">Nachname</label>
+              <input class="shk-input" type="text" id="f-family-name" maxlength="128">
+            </div>
+          </div>
+
+          <div class="shk-row" style="gap: var(--shk-space-md);">
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-birth-date">Geburtsdatum</label>
+              <input class="shk-input" type="date" id="f-birth-date">
+            </div>
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-gender">Geschlecht</label>
+              <select class="shk-select" id="f-gender">
+                <option value="">—</option>
+                <option value="w">weiblich</option>
+                <option value="m">männlich</option>
+                <option value="d">divers</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="shk-field" id="field-group-id">
+            <label class="shk-label" for="f-group-id">Gruppe</label>
+            <input class="shk-input" type="number" id="f-group-id" min="1" placeholder="z.B. 1">
+          </div>
+
+          <div class="shk-row" style="gap: var(--shk-space-md);">
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-email">E-Mail</label>
+              <input class="shk-input" type="email" id="f-email" maxlength="255">
+            </div>
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-phone">Telefon</label>
+              <input class="shk-input" type="tel" id="f-phone" maxlength="64">
+            </div>
+          </div>
+
+          <div class="shk-field">
+            <label class="shk-label" for="f-address">Adresse</label>
+            <textarea class="shk-textarea" id="f-address" rows="2"></textarea>
+          </div>
+
+          <div class="shk-field">
+            <label class="shk-label" for="f-notes">Notizen</label>
+            <textarea class="shk-textarea" id="f-notes" rows="3"></textarea>
+          </div>
+
+          <label class="shk-toggle">
+            <input type="checkbox" class="shk-toggle__input" id="f-active" checked>
+            <span class="shk-toggle__slider"></span>
+            <span class="shk-text-small">Aktiv</span>
+          </label>
+
+          <div id="form-error" class="shk-error shk-hidden"></div>
+        </form>
+      </div>
+
+      <div class="shk-modal__footer">
+        <button class="shk-btn shk-btn--danger shk-hidden" id="delete-btn">
+          <svg class="shk-icon shk-icon--sm">
+            <use href="./shiksha-icons.v1.0.0.svg#icon-trash"/>
+          </svg>
+          Löschen
+        </button>
+        <button class="shk-btn shk-btn--ghost" data-shk-modal-close>Abbrechen</button>
+        <button class="shk-btn shk-btn--primary" id="save-btn">
+          <svg class="shk-icon shk-icon--sm">
+            <use href="./shiksha-icons.v1.0.0.svg#icon-check"/>
+          </svg>
+          Speichern
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================
+       APPLICATION-SCRIPT
+       ========================================================= -->
+  <script type="module">
+    import { ShikshaClient, ShikshaAuthError } from './shiksha-client.js';
+    import {
+      initShikshaUI,
+      openModal,
+      closeModal,
+      avatarInitials,
+    } from './shiksha-ui.v1.0.0.js';
+
+    // ----------- Auth-Gate -----------
+    const client = new ShikshaClient();
+
+    if (!client.hasValidToken()) {
+      const nextParam = encodeURIComponent(location.pathname + location.search);
+      location.replace(`./presence_switch.html?next=${nextParam}`);
+    }
+
+    // ----------- Design-System initialisieren -----------
+    initShikshaUI({ context: 'personen' });
+
+    // ----------- State -----------
+    const state = {
+      currentKind: 'kind',     // aktueller Tab
+      searchQuery: '',
+      persons: { kind: [], staff: [] },
+    };
+
+    // ----------- DOM-Refs -----------
+    const $statsLine     = document.getElementById('stats-line');
+    const $listKind      = document.getElementById('list-kind');
+    const $listStaff     = document.getElementById('list-staff');
+    const $searchInput   = document.getElementById('search-input');
+    const $addBtn        = document.getElementById('add-btn');
+    const $addBtnLabel   = document.getElementById('add-btn-label');
+    const $modal         = document.getElementById('person-modal');
+    const $modalTitle    = document.getElementById('modal-title');
+    const $form          = document.getElementById('person-form');
+    const $deleteBtn     = document.getElementById('delete-btn');
+    const $saveBtn       = document.getElementById('save-btn');
+    const $formError     = document.getElementById('form-error');
+    const $fieldGroupId  = document.getElementById('field-group-id');
+
+    // ----------- Tabs -----------
+    document.querySelectorAll('[data-shk-tab]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const key = tab.dataset.shkTab;
+        document.querySelectorAll('[data-shk-tab]').forEach(t => {
+          t.classList.toggle('shk-tab--active', t.dataset.shkTab === key);
+        });
+        document.querySelectorAll('[data-shk-tab-panel]').forEach(p => {
+          p.classList.toggle('shk-hidden', p.dataset.shkTabPanel !== key);
+        });
+        state.currentKind = key;
+        updateAddButtonLabel();
+        // Gruppe-Feld zeigt sich nur für Kinder
+        $fieldGroupId.classList.toggle('shk-hidden', key !== 'kind');
+      });
+    });
+
+    function updateAddButtonLabel() {
+      $addBtnLabel.textContent =
+        state.currentKind === 'kind' ? 'Kind hinzufügen' : 'Mitarbeiter hinzufügen';
+    }
+    updateAddButtonLabel();
+
+    // ----------- Suche (live, lokal über bereits geladene Liste) -----------
+    $searchInput.addEventListener('input', (e) => {
+      state.searchQuery = e.target.value.trim().toLowerCase();
+      renderCurrentList();
+    });
+
+    // ----------- Daten laden -----------
+    async function loadStats() {
+      try {
+        const stats = await client.getPersonStats();
+        $statsLine.textContent =
+          `${stats.kind_count} Kinder · ${stats.staff_count} Mitarbeiter`;
+      } catch (err) {
+        console.warn('Stats konnten nicht geladen werden', err);
+        $statsLine.textContent = '';
+      }
+    }
+
+    async function loadPersons() {
+      try {
+        const [kinder, staff] = await Promise.all([
+          client.listPersons({ kind: 'kind', limit: 500 }),
+          client.listPersons({ kind: 'staff', limit: 200 }),
+        ]);
+        state.persons.kind  = kinder;
+        state.persons.staff = staff;
+        renderCurrentList();
+      } catch (err) {
+        if (err instanceof ShikshaAuthError) {
+          const nextParam = encodeURIComponent(location.pathname);
+          location.replace(`./presence_switch.html?next=${nextParam}`);
+          return;
+        }
+        console.warn('Personen konnten nicht geladen werden', err);
+        renderError('Personen konnten gerade nicht geladen werden.');
+      }
+    }
+
+    function filterPersons(list) {
+      if (!state.searchQuery) return list;
+      const q = state.searchQuery;
+      return list.filter(p => {
+        const full = `${p.given_name} ${p.family_name || ''}`.toLowerCase();
+        return full.includes(q);
+      });
+    }
+
+    function renderCurrentList() {
+      const kind = state.currentKind;
+      const list = filterPersons(state.persons[kind]);
+      const container = kind === 'kind' ? $listKind : $listStaff;
+      container.innerHTML = '';
+
+      if (list.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'shk-empty';
+        empty.textContent = state.searchQuery
+          ? 'Niemand passt zur Suche.'
+          : 'Noch leer. Tippe oben auf »Hinzufügen«.';
+        container.appendChild(empty);
+        return;
+      }
+
+      const frag = document.createDocumentFragment();
+      list.forEach(p => frag.appendChild(renderListItem(p)));
+      container.appendChild(frag);
+    }
+
+    function renderListItem(p) {
+      const item = document.createElement('a');
+      item.className = 'shk-list-item';
+      item.href = '#';
+      item.dataset.id = p.id;
+
+      // Avatar
+      const avatarWrap = document.createElement('div');
+      avatarWrap.className = 'shk-list-item__icon';
+      avatarWrap.style.background = 'transparent';
+      avatarWrap.style.padding = '0';
+      const fullName = `${p.given_name} ${p.family_name || ''}`.trim();
+      const av = document.createElement('span');
+      av.className = 'shk-avatar shk-avatar--small';
+      av.textContent = avatarInitials(fullName);
+      // Deterministische Pastell-Farbe aus Name
+      const hue = nameHue(fullName);
+      av.style.background = `hsl(${hue}, 55%, ${state.theme === 'light' ? 60 : 65}%)`;
+      av.style.color = '#0e0d12';
+      avatarWrap.appendChild(av);
+
+      const body = document.createElement('div');
+      body.className = 'shk-list-item__body';
+
+      const title = document.createElement('p');
+      title.className = 'shk-list-item__title';
+      title.textContent = fullName || '(ohne Namen)';
+
+      const sub = document.createElement('p');
+      sub.className = 'shk-list-item__sub';
+      const subParts = [];
+      if (p.birth_date) {
+        subParts.push(formatBirthdate(p.birth_date));
+      }
+      if (p.group_id) {
+        subParts.push(`Gruppe ${p.group_id}`);
+      }
+      if (!p.active) subParts.push('inaktiv');
+      sub.textContent = subParts.join(' · ') || ' ';
+
+      body.appendChild(title);
+      body.appendChild(sub);
+
+      item.appendChild(avatarWrap);
+      item.appendChild(body);
+
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        openEditModal(p);
+      });
+
+      return item;
+    }
+
+    function renderError(text) {
+      const container = state.currentKind === 'kind' ? $listKind : $listStaff;
+      container.innerHTML = '';
+      const err = document.createElement('div');
+      err.className = 'shk-error-block';
+      err.textContent = text;
+      container.appendChild(err);
+    }
+
+    function nameHue(name) {
+      if (!name) return 30;
+      let h = 0;
+      for (let i = 0; i < name.length; i++) {
+        h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+      }
+      return h % 360;
+    }
+
+    function formatBirthdate(iso) {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      } catch (e) {
+        return iso;
+      }
+    }
+
+
+    // =================================================================
+    // MODAL — Create / Edit / Delete
+    // =================================================================
+
+    function clearForm() {
+      $form.reset();
+      document.getElementById('f-id').value = '';
+      document.getElementById('f-kind').value = state.currentKind;
+      document.getElementById('f-active').checked = true;
+      $formError.textContent = '';
+      $formError.classList.add('shk-hidden');
+    }
+
+    function fillForm(p) {
+      document.getElementById('f-id').value          = p.id;
+      document.getElementById('f-kind').value        = p.kind;
+      document.getElementById('f-given-name').value  = p.given_name || '';
+      document.getElementById('f-family-name').value = p.family_name || '';
+      document.getElementById('f-birth-date').value  = p.birth_date || '';
+      document.getElementById('f-gender').value      = p.gender || '';
+      document.getElementById('f-group-id').value    = p.group_id || '';
+      document.getElementById('f-email').value       = p.email || '';
+      document.getElementById('f-phone').value       = p.phone || '';
+      document.getElementById('f-address').value     = p.address || '';
+      document.getElementById('f-notes').value       = p.notes || '';
+      document.getElementById('f-active').checked    = p.active !== false;
+    }
+
+    function openCreateModal() {
+      clearForm();
+      $modalTitle.textContent = state.currentKind === 'kind' ? 'Kind anlegen' : 'Mitarbeiter anlegen';
+      $deleteBtn.classList.add('shk-hidden');
+      $fieldGroupId.classList.toggle('shk-hidden', state.currentKind !== 'kind');
+      openModal($modal);
+    }
+
+    function openEditModal(p) {
+      clearForm();
+      fillForm(p);
+      $modalTitle.textContent = p.kind === 'kind' ? 'Kind bearbeiten' : 'Mitarbeiter bearbeiten';
+      $deleteBtn.classList.remove('shk-hidden');
+      $fieldGroupId.classList.toggle('shk-hidden', p.kind !== 'kind');
+      openModal($modal);
+    }
+
+    $addBtn.addEventListener('click', openCreateModal);
+
+    function gatherPayload() {
+      const id = document.getElementById('f-id').value;
+      const kind = document.getElementById('f-kind').value;
+      const given_name = document.getElementById('f-given-name').value.trim();
+      const family_name = document.getElementById('f-family-name').value.trim() || null;
+      const birth_date = document.getElementById('f-birth-date').value || null;
+      const gender = document.getElementById('f-gender').value || null;
+      const group_id_raw = document.getElementById('f-group-id').value;
+      const group_id = group_id_raw ? parseInt(group_id_raw, 10) : null;
+      const email = document.getElementById('f-email').value.trim() || null;
+      const phone = document.getElementById('f-phone').value.trim() || null;
+      const address = document.getElementById('f-address').value.trim() || null;
+      const notes = document.getElementById('f-notes').value.trim() || null;
+      const active = document.getElementById('f-active').checked;
+
+      if (!given_name) {
+        throw new Error('Vorname ist erforderlich.');
+      }
+
+      const payload = {
+        kind, given_name, family_name,
+        birth_date, gender,
+        group_id, email, phone, address, notes,
+        active,
+      };
+      return { id, payload };
+    }
+
+    $saveBtn.addEventListener('click', async () => {
+      $formError.classList.add('shk-hidden');
+      $formError.textContent = '';
+      $saveBtn.disabled = true;
+      try {
+        const { id, payload } = gatherPayload();
+        if (id) {
+          await client.patchPerson(parseInt(id, 10), payload);
+        } else {
+          await client.createPerson(payload);
+        }
+        closeModal($modal);
+        await Promise.all([loadStats(), loadPersons()]);
+      } catch (err) {
+        $formError.textContent = err.message || 'Fehler beim Speichern.';
+        $formError.classList.remove('shk-hidden');
+      } finally {
+        $saveBtn.disabled = false;
+      }
+    });
+
+    $deleteBtn.addEventListener('click', async () => {
+      const id = document.getElementById('f-id').value;
+      if (!id) return;
+      const givenName = document.getElementById('f-given-name').value;
+      const confirmed = confirm(`Soll »${givenName}« wirklich aus den Stammdaten entfernt werden?`);
+      if (!confirmed) return;
+
+      $deleteBtn.disabled = true;
+      try {
+        await client.deletePerson(parseInt(id, 10));
+        closeModal($modal);
+        await Promise.all([loadStats(), loadPersons()]);
+      } catch (err) {
+        $formError.textContent = err.message || 'Fehler beim Löschen.';
+        $formError.classList.remove('shk-hidden');
+      } finally {
+        $deleteBtn.disabled = false;
+      }
+    });
+
+    // ----------- Initial-Load -----------
+    loadStats();
+    loadPersons();
+  </script>
+</body>
+</html>

@@ -440,6 +440,56 @@ export class ShikshaClient {
   }
 
   // -----------------------------------------------------------------
+  // PERSONS — Stammdaten (Kinder, Mitarbeiter, später Teilnehmer/Gäste)
+  // -----------------------------------------------------------------
+
+  /**
+   * Liste der Personen im Tenant.
+   * Filter:
+   *   kind            'kind' | 'staff' | 'eltern' | 'teilnehmer' | 'gast' | 'trainer'
+   *   q               Volltext-Suche in given_name / family_name
+   *   active_only     Default true
+   *   include_deleted Default false
+   *   limit, offset
+   */
+  async listPersons(filters = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== '') {
+        params.append(k, v);
+      }
+    });
+    const qs = params.toString();
+    return this._fetch(`/api/v1/persons${qs ? '?' + qs : ''}`);
+  }
+
+  async getPersonStats() {
+    return this._fetch('/api/v1/persons/stats');
+  }
+
+  async getPerson(id) {
+    return this._fetch(`/api/v1/persons/${id}`);
+  }
+
+  async createPerson(payload) {
+    return this._fetch('/api/v1/persons', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async patchPerson(id, payload) {
+    return this._fetch(`/api/v1/persons/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deletePerson(id) {
+    return this._fetch(`/api/v1/persons/${id}`, { method: 'DELETE' });
+  }
+
+  // -----------------------------------------------------------------
   // HEIM
   // -----------------------------------------------------------------
 
