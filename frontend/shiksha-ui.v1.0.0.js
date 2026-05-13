@@ -540,9 +540,11 @@ export function bindThemeToggle(buttonEl, opts = {}) {
   function updateLabel() {
     const t = getTheme();
     buttonEl.dataset.shkCurrentTheme = t;
+    // Text zeigt das ZIEL des nächsten Klicks, nicht den aktuellen Stand.
+    // Im Light-Mode → "Dunkel" (Klick führt dorthin), im Dark-Mode → "Hell".
     if (buttonEl.querySelector('[data-shk-theme-label]')) {
       buttonEl.querySelector('[data-shk-theme-label]').textContent =
-        t === 'light' ? 'Heller Modus' : 'Dunkler Modus';
+        t === 'light' ? 'Dunkel' : 'Hell';
     }
   }
 

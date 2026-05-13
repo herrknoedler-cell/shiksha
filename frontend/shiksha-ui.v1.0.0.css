@@ -1051,6 +1051,8 @@ button.shk-card:active {
   cursor: pointer;
   letter-spacing: var(--shk-tracking-wide);
   transition: all var(--shk-duration-fast) var(--shk-ease-out);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .shk-theme-toggle:hover {
   color: var(--shk-text-strong);
