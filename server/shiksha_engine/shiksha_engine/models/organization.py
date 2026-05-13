@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, String
+from sqlalchemy import JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ._base import Base, now_col, schema_args
@@ -22,6 +22,9 @@ class Organization(Base):
     name:       Mapped[str]      = mapped_column(String(128), nullable=False)
     legal_name: Mapped[str|None] = mapped_column(String(255), nullable=True)
     region:     Mapped[str|None] = mapped_column(String(64),  nullable=True)
+    # Display-TZ pro Tenant — Backend speichert TIMESTAMPTZ als UTC,
+    # Frontend rendert mit Intl.DateTimeFormat(..., {timeZone}). Siehe Spec §2.5.
+    timezone:   Mapped[str]      = mapped_column(Text, nullable=False, server_default="Europe/Berlin")
     metadata_: Mapped[dict]      = mapped_column("metadata", JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = now_col()
 

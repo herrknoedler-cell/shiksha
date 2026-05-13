@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session as DBSession
 
 from ..db import get_db
 from ..deps import get_current_operator
-from ..models import Operator
+from ..models import Operator, Organization
 from ..schemas.auth import (
     AuthenticationFinishRequest,
     AuthenticationStartRequest,
@@ -113,11 +113,13 @@ def register_finish(
     db.add(operator)
     db.flush()
 
+    org = db.get(Organization, operator.org_id) if operator.org_id else None
     token = jwt_service.issue_token(
         operator_id=operator.id,
         role=operator.role,
         edition=operator.edition,
         org_id=operator.org_id,
+        org_timezone=org.timezone if org else None,
     )
 
     return TokenResponse(
@@ -181,11 +183,13 @@ def login_finish(
     db.add(operator)
     db.flush()
 
+    org = db.get(Organization, operator.org_id) if operator.org_id else None
     token = jwt_service.issue_token(
         operator_id=operator.id,
         role=operator.role,
         edition=operator.edition,
         org_id=operator.org_id,
+        org_timezone=org.timezone if org else None,
     )
 
     return TokenResponse(
@@ -200,13 +204,16 @@ def login_finish(
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(
     operator: Annotated[Operator, Depends(get_current_operator)],
+    db: Annotated[DBSession, Depends(get_db)],
 ) -> TokenResponse:
     """Neuer Token mit verlängerter Lifetime."""
+    org = db.get(Organization, operator.org_id) if operator.org_id else None
     token = jwt_service.issue_token(
         operator_id=operator.id,
         role=operator.role,
         edition=operator.edition,
         org_id=operator.org_id,
+        org_timezone=org.timezone if org else None,
     )
     return TokenResponse(
         token=token,

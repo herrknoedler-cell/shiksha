@@ -18,22 +18,29 @@ def issue_token(
     role: str,
     edition: str,
     org_id: str | None = None,
+    org_timezone: str | None = None,
     extra_claims: dict[str, Any] | None = None,
     lifetime_days: int | None = None,
 ) -> str:
-    """Issue a signed JWT for an Operator."""
+    """Issue a signed JWT for an Operator.
+
+    org_timezone wird als Claim mit-signiert, damit TZ-aware Frontends
+    (Calendar, Anwesenheit) ohne Extra-Roundtrip rendern können.
+    Default 'Europe/Berlin' für Operatoren ohne org-Anker (z.B. Developer).
+    """
     settings = get_settings()
     now = datetime.now(timezone.utc)
     exp = now + timedelta(days=lifetime_days or settings.jwt_lifetime_days)
 
     payload: dict[str, Any] = {
-        "sub":      operator_id,
-        "role":     role,
-        "edition":  edition,
-        "org_id":   org_id,
-        "iat":      int(now.timestamp()),
-        "exp":      int(exp.timestamp()),
-        "iss":      "shiksha-engine",
+        "sub":           operator_id,
+        "role":          role,
+        "edition":       edition,
+        "org_id":        org_id,
+        "org_timezone": org_timezone or "Europe/Berlin",
+        "iat":           int(now.timestamp()),
+        "exp":           int(exp.timestamp()),
+        "iss":           "shiksha-engine",
     }
     if extra_claims:
         payload.update(extra_claims)
@@ -64,4 +71,5 @@ def refresh_token(token: str) -> str:
         role=payload.get("role", "operator"),
         edition=payload.get("edition", ""),
         org_id=payload.get("org_id"),
+        org_timezone=payload.get("org_timezone"),
     )

@@ -1,6 +1,7 @@
 """SQLAlchemy Models — alle Tabellen im shiksha_core-Schema."""
 
 from .audit import AuditLog
+from .event import Event
 from .friction import FrictionPoint
 from .memory import MemoryEntry
 from .message import Message
@@ -15,6 +16,7 @@ from .tenant_heim_config import TenantHeimConfig
 
 __all__ = [
     "AuditLog",
+    "Event",
     "FrictionPoint",
     "MemoryEntry",
     "Message",

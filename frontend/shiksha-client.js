@@ -106,6 +106,28 @@ export class ShikshaClient {
     return !!this.getToken();
   }
 
+  /**
+   * Decodet das gespeicherte JWT (kein Verify — nur Payload lesen).
+   * Verifikation passiert server-side bei jedem API-Call.
+   */
+  _getTokenPayload() {
+    const t = this.getToken();
+    if (!t) return null;
+    try {
+      const parts = t.split('.');
+      if (parts.length !== 3) return null;
+      return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /** Tenant-Timezone aus JWT-Claim — für TZ-bewusste Renderings (Calendar etc.) */
+  getOrgTimezone() {
+    const p = this._getTokenPayload();
+    return p?.org_timezone || 'Europe/Berlin';
+  }
+
   // -----------------------------------------------------------------
   // HTTP HELPERS
   // -----------------------------------------------------------------

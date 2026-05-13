@@ -62,3 +62,27 @@ def test_extra_claims():
     )
     payload = verify_token(token)
     assert payload.get("setup") is True
+
+
+def test_token_carries_org_timezone():
+    """org_timezone-Claim für TZ-aware Frontends (Calendar etc.)."""
+    token = issue_token(
+        operator_id="krummelus_mira",
+        role="leitung",
+        edition="kita",
+        org_id="krummelus",
+        org_timezone="Europe/Vienna",
+    )
+    payload = verify_token(token)
+    assert payload["org_timezone"] == "Europe/Vienna"
+
+
+def test_token_default_org_timezone():
+    """Ohne explizite TZ fällt auf Europe/Berlin zurück."""
+    token = issue_token(
+        operator_id="thomas",
+        role="developer",
+        edition="kita",
+    )
+    payload = verify_token(token)
+    assert payload["org_timezone"] == "Europe/Berlin"
