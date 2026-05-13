@@ -31,7 +31,9 @@ from shiksha_engine.services.event_types import (
     normalize_metadata,
 )
 
-router = APIRouter()
+# Prefix wird in main.py via app.include_router(calendar.router, prefix="/api/v1/calendar")
+# gesetzt — Konvention im Repo (persons, heim, bridge etc. machen es genauso).
+router = APIRouter(tags=["calendar"])
 
 
 # ---------------------------------------------------------- Helpers

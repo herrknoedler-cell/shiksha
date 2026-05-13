@@ -50,6 +50,9 @@ class EventListItem(BaseModel):
 
 class EventOut(BaseModel):
     """Detail-View mit voller metadata + resolved participants."""
+    # validation_alias = INPUT-only ('metadata_' beim Lesen vom ORM-Attribut),
+    # JSON-Output bleibt 'metadata'. populate_by_name erlaubt beide Namen
+    # beim Konstruieren via Constructor.
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     id: Optional[int] = None
@@ -63,8 +66,6 @@ class EventOut(BaseModel):
     all_day: bool
     participants: list[int] = []
     participants_resolved: list[ParticipantBrief] = []
-    # Input-Alias liest von SQLAlchemy's metadata_ (Naming-Collision-Vermeidung).
-    # Output bleibt JSON-Key 'metadata' (field-name) durch populate_by_name=True.
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     operator_id: Optional[str] = None
     active: bool = True
