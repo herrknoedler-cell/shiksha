@@ -258,7 +258,9 @@ def patch_person(
             value = value.strip()
         elif field == "family_name" and value is not None:
             value = value.strip() or None
-        setattr(person, field, value)
+        # SQLAlchemy-Naming-Kollision: Python-Attribut ist metadata_, DB-Spalte metadata.
+        attr = "metadata_" if field == "metadata" else field
+        setattr(person, attr, value)
 
     person.updated_at = datetime.now(timezone.utc)
     db.add(person)

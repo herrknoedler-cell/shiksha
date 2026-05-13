@@ -86,7 +86,7 @@ def mira(db) -> Operator:
 def thomas(db) -> Operator:
     """Thomas als Developer."""
     op = Operator(
-        id="thomas", org_id=None, edition="kita",
+        id="thomas", org_id=None, edition="kita", kind="system",
         display_name="Thomas", role="developer", email="thomas@shiksha.world",
         metadata_={},
     )

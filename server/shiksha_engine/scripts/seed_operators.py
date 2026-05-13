@@ -37,6 +37,7 @@ SEED_OPERATORS = [
         id="thomas",
         org_id=None,
         edition="kita",       # Dev-Account braucht eine Default-Edition für edition-aware Tests
+        kind="system",        # Developer = kind=system → Cross-Tenant-Access via _scope_query
         display_name="Thomas",
         role="developer",
         email="thomas@shiksha.world",

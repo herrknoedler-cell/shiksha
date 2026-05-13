@@ -35,7 +35,9 @@ class PersonOut(BaseModel):
     exit_date:     date | None = None
 
     notes:         str | None = None
-    metadata:      dict = Field(default_factory=dict)
+    # SQLAlchemy belegt 'metadata' am Base — Model nutzt deshalb 'metadata_' als
+    # Python-Attribut bei DB-Spalte 'metadata'. Pydantic liest via validation_alias.
+    metadata:      dict = Field(default_factory=dict, validation_alias="metadata_")
 
     operator_id:   str | None = None
     active:        bool = True
@@ -48,7 +50,7 @@ class PersonOut(BaseModel):
     def display_name(self) -> str:
         return f"{self.given_name} {self.family_name or ''}".strip()
 
-    model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True, "populate_by_name": True}
 
 
 class PersonListItem(BaseModel):
