@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="de" data-edition="kita">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>SHIKSHA · Kalender</title>
+
+  <!-- Pre-Render Theme-Restore — verhindert FOUC -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('shiksha-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="./shiksha-ui.v1.0.0.css">
+  <link rel="stylesheet" href="./editions-css/kita.v1.0.0.css">
+
+  <!-- Calendar-spezifisches CSS, kommt in v1.0.1 ins zentrale CSS -->
+  <style>
+    /* Tag-View Grid: jede Stunde eine 60px-Zeile (Mobile-First) */
+    .shk-cal-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      grid-auto-rows: 60px;
+      gap: 0;
+      margin-top: var(--shk-space-md);
+    }
+    .shk-cal-hour-label {
+      grid-column: 1;
+      font-size: 0.75rem;
+      color: var(--shk-color-text-faint, var(--shk-color-text-soft));
+      font-variant-numeric: tabular-nums;
+      padding-top: 2px;
+      text-align: right;
+      padding-right: var(--shk-space-sm);
+    }
+    .shk-cal-hour-line {
+      grid-column: 2;
+      border-top: 1px solid var(--shk-color-border, rgba(255,255,255,0.06));
+      position: relative;
+    }
+    /* Now-Line: zeigt aktuelle Zeit */
+    .shk-cal-now-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      border-top: 1.5px solid var(--shk-color-accent, hsl(40, 60%, 65%));
+      pointer-events: none;
+      z-index: 2;
+    }
+    .shk-cal-now-line::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: -5px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--shk-color-accent, hsl(40, 60%, 65%));
+    }
+    /* Event-Karten — absolut positioniert im Grid */
+    .shk-cal-event {
+      position: absolute;
+      left: 60px;
+      right: var(--shk-space-sm);
+      background: var(--shk-color-surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--shk-radius-md, 12px);
+      border: 1px solid var(--shk-color-border, rgba(255,255,255,0.08));
+      border-left: 3px solid var(--evt-color, var(--shk-edition-primary));
+      padding: var(--shk-space-sm) var(--shk-space-md);
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .shk-cal-event:hover {
+      transform: translateY(-1px);
+      border-color: var(--evt-color, var(--shk-edition-primary));
+    }
+    .shk-cal-event[data-event-type="termin"]      { --evt-color: var(--shk-edition-primary); }
+    .shk-cal-event[data-event-type="urlaub"]      { --evt-color: var(--shk-edition-warm, hsl(28, 50%, 65%)); }
+    .shk-cal-event[data-event-type="abwesenheit"] { --evt-color: var(--shk-color-text-faint, hsl(220, 5%, 50%)); }
+    .shk-cal-event[data-event-type="kurs"]        { --evt-color: var(--shk-edition-accent, hsl(160, 40%, 55%)); }
+    .shk-cal-event[data-event-type="geburtstag"]  { --evt-color: var(--shk-edition-warm, hsl(28, 50%, 65%)); }
+
+    .shk-cal-event[data-urgency="important"] { border-left-width: 5px; }
+    .shk-cal-event[data-urgency="urgent"] {
+      outline: 2px solid var(--shk-color-danger, hsl(0, 65%, 60%));
+      animation: shk-pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes shk-pulse {
+      0%, 100% { outline-color: var(--shk-color-danger, hsl(0, 65%, 60%)); }
+      50%      { outline-color: transparent; }
+    }
+    .shk-cal-event__title {
+      font-weight: 600;
+      font-size: 0.875rem;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+    .shk-cal-event__meta {
+      font-size: 0.75rem;
+      color: var(--shk-color-text-soft);
+      font-variant-numeric: tabular-nums;
+    }
+    /* All-Day-Bereich */
+    .shk-cal-allday {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--shk-space-xs);
+      padding: var(--shk-space-sm);
+      border: 1px dashed var(--shk-color-border, rgba(255,255,255,0.08));
+      border-radius: var(--shk-radius-md, 12px);
+      min-height: 40px;
+      margin-bottom: var(--shk-space-md);
+    }
+    .shk-cal-allday__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--shk-space-xs);
+      padding: 4px var(--shk-space-sm);
+      border-radius: 999px;
+      background: var(--shk-color-surface);
+      border: 1px solid var(--shk-color-border, rgba(255,255,255,0.06));
+      border-left: 3px solid var(--evt-color, var(--shk-edition-primary));
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+    .shk-cal-allday__pill[data-event-type="urlaub"]      { --evt-color: var(--shk-edition-warm); }
+    .shk-cal-allday__pill[data-event-type="abwesenheit"] { --evt-color: var(--shk-color-text-faint); }
+    .shk-cal-allday__pill[data-event-type="geburtstag"]  { --evt-color: var(--shk-edition-warm); }
+    .shk-cal-allday__empty {
+      color: var(--shk-color-text-faint);
+      font-size: 0.8125rem;
+      font-style: italic;
+    }
+    /* Navigation */
+    .shk-cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--shk-space-sm);
+      margin-bottom: var(--shk-space-md);
+    }
+    .shk-cal-nav__date {
+      font-weight: 600;
+      font-size: 1rem;
+      text-align: center;
+      flex: 1;
+    }
+    /* Empty-State */
+    .shk-cal-empty {
+      text-align: center;
+      padding: var(--shk-space-xl) var(--shk-space-md);
+      color: var(--shk-color-text-faint);
+    }
+    .shk-cal-empty__hint {
+      font-size: 0.875rem;
+      margin-top: var(--shk-space-sm);
+    }
+    /* Person-Picker im Modal */
+    .shk-person-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--shk-space-xs);
+      padding: var(--shk-space-sm);
+      border: 1px solid var(--shk-color-border, rgba(255,255,255,0.08));
+      border-radius: var(--shk-radius-md, 12px);
+      min-height: 44px;
+    }
+    .shk-person-picker__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--shk-color-surface);
+      border: 1px solid var(--shk-color-border, rgba(255,255,255,0.06));
+      font-size: 0.8125rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .shk-person-picker__chip--selected {
+      background: var(--shk-edition-primary);
+      color: #0e0d12;
+      border-color: var(--shk-edition-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shk-shell">
+
+    <!-- HEADER -->
+    <header class="shk-header">
+      <nav class="shk-breadcrumb shk-fade-in">
+        <a href="./heim.html">Heim</a>
+        <span class="shk-breadcrumb__separator">·</span>
+        <span>Kalender</span>
+      </nav>
+
+      <div class="shk-row shk-fade-in" style="justify-content: space-between; align-items: flex-end; gap: var(--shk-space-md);">
+        <div>
+          <h1 class="shk-heading">Kalender</h1>
+          <p class="shk-subtitle" id="stats-line" style="margin-top: var(--shk-space-xs);">&nbsp;</p>
+        </div>
+        <div class="shk-row" style="gap: var(--shk-space-sm); flex-shrink: 0;">
+          <button class="shk-theme-toggle" data-shk-theme-toggle aria-label="Theme umschalten">
+            <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-weather-sun"/></svg>
+            <span data-shk-theme-label>Modus</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- VIEW-SWITCH -->
+    <div class="shk-tabs shk-fade-in" data-shk-tabs>
+      <button class="shk-tab shk-tab--active" data-shk-tab="tag">Tag</button>
+      <button class="shk-tab" data-shk-tab="woche" disabled title="Kommt in 5.5.4.5">Woche</button>
+      <button class="shk-tab" data-shk-tab="monat" disabled title="Kommt in 5.5.4.5">Monat</button>
+    </div>
+
+    <!-- DATE-NAVIGATION -->
+    <div class="shk-cal-nav shk-fade-in">
+      <button class="shk-btn shk-btn--ghost shk-btn--sm" id="nav-prev" aria-label="Vorheriger Tag">
+        <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-chevron-left"/></svg>
+      </button>
+      <button class="shk-btn shk-btn--ghost shk-btn--sm" id="nav-today">heute</button>
+      <div class="shk-cal-nav__date" id="nav-date">Heute</div>
+      <button class="shk-btn shk-btn--primary shk-btn--sm" id="add-btn">
+        <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-plus"/></svg>
+        <span>Termin</span>
+      </button>
+      <button class="shk-btn shk-btn--ghost shk-btn--sm" id="nav-next" aria-label="Nächster Tag">
+        <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-chevron-right"/></svg>
+      </button>
+    </div>
+
+    <!-- ALL-DAY-BEREICH -->
+    <div class="shk-cal-allday" id="allday-row">
+      <span class="shk-cal-allday__empty">Heute keine ganztägigen Termine</span>
+    </div>
+
+    <!-- TAG-GRID -->
+    <main>
+      <div class="shk-cal-grid" id="day-grid">
+        <!-- gefüllt von JS -->
+      </div>
+    </main>
+
+    <footer style="margin-top: auto; padding-top: var(--shk-space-lg); text-align: center;">
+      <span class="shk-text-tiny shk-text-faint" style="letter-spacing: var(--shk-tracking-wide);">SHIKSHA</span>
+    </footer>
+  </div>
+
+
+  <!-- MODAL: Create / Edit -->
+  <div class="shk-modal-backdrop" id="event-modal">
+    <div class="shk-modal">
+      <div class="shk-modal__header">
+        <h2 class="shk-modal__title" id="modal-title">Termin</h2>
+        <button class="shk-modal__close" data-shk-modal-close aria-label="Schließen">
+          <svg class="shk-icon"><use href="./shiksha-icons.v1.0.0.svg#icon-close"/></svg>
+        </button>
+      </div>
+
+      <div class="shk-modal__body">
+        <form id="event-form" class="shk-stack">
+          <input type="hidden" id="f-id">
+
+          <div class="shk-field">
+            <label class="shk-label" for="f-title">Titel</label>
+            <input class="shk-input" type="text" id="f-title" required maxlength="255">
+          </div>
+
+          <div class="shk-row" style="gap: var(--shk-space-md);">
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-event-type">Typ</label>
+              <select class="shk-select" id="f-event-type">
+                <option value="termin">Termin</option>
+                <option value="urlaub">Urlaub</option>
+                <option value="abwesenheit">Abwesenheit</option>
+                <option value="kurs">Kurs</option>
+              </select>
+            </div>
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-subtype">Was genau</label>
+              <input class="shk-input" type="text" id="f-subtype" list="subtype-list"
+                     placeholder="z.B. Elternabend" maxlength="64">
+              <datalist id="subtype-list"></datalist>
+            </div>
+          </div>
+
+          <label class="shk-toggle">
+            <input type="checkbox" class="shk-toggle__input" id="f-all-day">
+            <span class="shk-toggle__slider"></span>
+            <span class="shk-text-small">Ganztags</span>
+          </label>
+
+          <div class="shk-row" style="gap: var(--shk-space-md);">
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-start-at">Start</label>
+              <input class="shk-input" type="datetime-local" id="f-start-at" required>
+            </div>
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-end-at">Ende</label>
+              <input class="shk-input" type="datetime-local" id="f-end-at">
+            </div>
+          </div>
+
+          <div class="shk-field">
+            <label class="shk-label" for="f-location">Ort</label>
+            <input class="shk-input" type="text" id="f-location" maxlength="255">
+          </div>
+
+          <div class="shk-field">
+            <label class="shk-label">Beteiligte</label>
+            <div class="shk-person-picker" id="person-picker">
+              <span class="shk-text-small shk-text-faint">Niemand ausgewählt — antippen unten zum Hinzufügen.</span>
+            </div>
+            <details style="margin-top: var(--shk-space-xs);">
+              <summary class="shk-text-small shk-text-faint" style="cursor: pointer;">Personen wählen</summary>
+              <div class="shk-person-picker" id="person-picker-all" style="margin-top: var(--shk-space-xs); max-height: 200px; overflow-y: auto;">
+                <span class="shk-text-tiny shk-text-faint">Lade…</span>
+              </div>
+            </details>
+          </div>
+
+          <div class="shk-field">
+            <label class="shk-label" for="f-description">Beschreibung</label>
+            <textarea class="shk-textarea" id="f-description" rows="3"></textarea>
+          </div>
+
+          <div class="shk-row" style="gap: var(--shk-space-md);">
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-urgency">Dringlichkeit</label>
+              <select class="shk-select" id="f-urgency">
+                <option value="normal">Normal</option>
+                <option value="important">Wichtig</option>
+                <option value="urgent">Dringend</option>
+              </select>
+            </div>
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-repeat">Wiederholung</label>
+              <select class="shk-select" id="f-repeat">
+                <option value="none">Einmalig</option>
+                <option value="weekly:4">Wöchentlich · 4×</option>
+                <option value="weekly:12">Wöchentlich · 12×</option>
+                <option value="weekly:52">Wöchentlich · 52×</option>
+                <option value="daily:5">Täglich · 5×</option>
+                <option value="monthly:6">Monatlich · 6×</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="form-error" class="shk-error shk-hidden"></div>
+        </form>
+      </div>
+
+      <div class="shk-modal__footer">
+        <button class="shk-btn shk-btn--danger shk-hidden" id="delete-btn">
+          <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-trash"/></svg>
+          Löschen
+        </button>
+        <button class="shk-btn shk-btn--ghost" data-shk-modal-close>Abbrechen</button>
+        <button class="shk-btn shk-btn--primary" id="save-btn">
+          <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-check"/></svg>
+          Speichern
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- APPLICATION SCRIPT -->
+  <script type="module">
+    import { ShikshaClient, ShikshaAuthError } from './shiksha-client.js';
+    import { initShikshaUI, openModal, closeModal } from './shiksha-ui.v1.0.0.js';
+
+    // ----- Auth-Gate
+    const client = new ShikshaClient();
+    if (!client.hasValidToken()) {
+      const nextParam = encodeURIComponent(location.pathname + location.search);
+      location.replace(`./presence_switch.html?next=${nextParam}`);
+    }
+
+    initShikshaUI({ context: 'kalender' });
+
+    // ----- State
+    const TZ = client.getOrgTimezone();  // z.B. "Europe/Vienna"
+    const HOURS_START = 6;
+    const HOURS_END = 21;
+
+    const url = new URL(location.href);
+    const initialDateParam = url.searchParams.get('d');
+
+    const state = {
+      currentDate: initialDateParam ? new Date(initialDateParam + 'T00:00:00') : new Date(),
+      events: [],
+      persons: [],          // alle Personen für Picker
+      selectedPersonIds: new Set(),
+      editingEvent: null,
+    };
+
+    // ----- DOM
+    const $statsLine = document.getElementById('stats-line');
+    const $navDate = document.getElementById('nav-date');
+    const $navPrev = document.getElementById('nav-prev');
+    const $navNext = document.getElementById('nav-next');
+    const $navToday = document.getElementById('nav-today');
+    const $addBtn = document.getElementById('add-btn');
+    const $alldayRow = document.getElementById('allday-row');
+    const $dayGrid = document.getElementById('day-grid');
+    const $modal = document.getElementById('event-modal');
+    const $modalTitle = document.getElementById('modal-title');
+    const $form = document.getElementById('event-form');
+    const $deleteBtn = document.getElementById('delete-btn');
+    const $saveBtn = document.getElementById('save-btn');
+    const $formError = document.getElementById('form-error');
+    const $personPickerSelected = document.getElementById('person-picker');
+    const $personPickerAll = document.getElementById('person-picker-all');
+    const $subtypeList = document.getElementById('subtype-list');
+
+    // ----- Date Helpers
+    function fmtDate(d) {
+      return d.toLocaleDateString('de-DE', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+        timeZone: TZ,
+      });
+    }
+    function fmtTime(d) {
+      return d.toLocaleTimeString('de-DE', {
+        hour: '2-digit', minute: '2-digit', timeZone: TZ,
+      });
+    }
+    function isoDay(d) {
+      // YYYY-MM-DD in Tenant-TZ
+      const opts = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: TZ };
+      const parts = new Intl.DateTimeFormat('en-CA', opts).formatToParts(d);
+      const obj = Object.fromEntries(parts.map(p => [p.type, p.value]));
+      return `${obj.year}-${obj.month}-${obj.day}`;
+    }
+    function startOfDayUTC(d) {
+      const day = isoDay(d);
+      // 00:00 TZ-Zeit als UTC-Datum
+      const local = new Date(`${day}T00:00:00`);
+      // browser-local Zeit ≈ TZ-Zeit, weil setDate-Operationen unabhängig sind
+      return local;
+    }
+    function endOfDayUTC(d) {
+      const start = startOfDayUTC(d);
+      return new Date(start.getTime() + 24*60*60*1000);
+    }
+    function syncUrl() {
+      const params = new URLSearchParams(location.search);
+      params.set('view', 'tag');
+      params.set('d', isoDay(state.currentDate));
+      history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
+    }
+
+    // ----- Render
+    function renderNav() {
+      $navDate.textContent = fmtDate(state.currentDate);
+      syncUrl();
+    }
+
+    function loadSubtypes(eventType) {
+      // Phase 1: KITA-spezifische Subtype-Vorschläge hartkodiert.
+      // Phase 2: aus client.getEditionConfig().event_subtypes laden.
+      const map = {
+        termin: ['Eingewöhnung', 'Elternabend', 'Ausflug', 'Schließtag', 'Gespräch'],
+        kurs: ['Musikkreis', 'Bewegungsrunde', 'Waldgang'],
+        urlaub: [],
+        abwesenheit: ['Krankheit', 'Fortbildung'],
+      };
+      $subtypeList.innerHTML = '';
+      (map[eventType] || []).forEach(s => {
+        const o = document.createElement('option');
+        o.value = s;
+        $subtypeList.appendChild(o);
+      });
+    }
+
+    function renderGrid() {
+      $dayGrid.innerHTML = '';
+
+      // Hour-Labels
+      for (let h = HOURS_START; h < HOURS_END; h++) {
+        const lbl = document.createElement('div');
+        lbl.className = 'shk-cal-hour-label';
+        lbl.textContent = String(h).padStart(2, '0') + ':00';
+        lbl.style.gridRow = (h - HOURS_START + 1) + ' / ' + (h - HOURS_START + 2);
+        $dayGrid.appendChild(lbl);
+
+        const line = document.createElement('div');
+        line.className = 'shk-cal-hour-line';
+        line.style.gridRow = (h - HOURS_START + 1) + ' / ' + (h - HOURS_START + 2);
+        $dayGrid.appendChild(line);
+      }
+
+      // Now-Line (nur wenn heute angezeigt wird)
+      const now = new Date();
+      if (isoDay(now) === isoDay(state.currentDate)) {
+        const hourFloat = now.getHours() + now.getMinutes() / 60;
+        if (hourFloat >= HOURS_START && hourFloat < HOURS_END) {
+          const offset = (hourFloat - HOURS_START) * 60;
+          const line = document.createElement('div');
+          line.className = 'shk-cal-now-line';
+          line.style.top = offset + 'px';
+          line.style.gridRow = '1 / -1';
+          line.style.gridColumn = '2';
+          $dayGrid.appendChild(line);
+        }
+      }
+
+      // Events
+      const timedEvents = state.events.filter(e => !e.all_day);
+      const alldayEvents = state.events.filter(e => e.all_day);
+
+      timedEvents.forEach(e => {
+        const start = new Date(e.start_at);
+        const end = e.end_at ? new Date(e.end_at) : new Date(start.getTime() + 60*60*1000);
+        const hStart = start.getHours() + start.getMinutes()/60;
+        const hEnd = end.getHours() + end.getMinutes()/60;
+        if (hEnd < HOURS_START || hStart >= HOURS_END) return;
+        const top = Math.max(0, (hStart - HOURS_START) * 60);
+        const height = Math.max(28, (Math.min(HOURS_END, hEnd) - Math.max(HOURS_START, hStart)) * 60);
+
+        const card = document.createElement('div');
+        card.className = 'shk-cal-event';
+        card.dataset.eventType = e.event_type;
+        card.dataset.urgency = e.urgency || 'normal';
+        card.style.top = top + 'px';
+        card.style.height = (height - 4) + 'px';
+        card.style.gridColumn = '2';
+        card.style.gridRow = '1 / -1';
+
+        const title = document.createElement('div');
+        title.className = 'shk-cal-event__title';
+        title.textContent = e.title;
+        card.appendChild(title);
+
+        const meta = document.createElement('div');
+        meta.className = 'shk-cal-event__meta';
+        meta.textContent = `${fmtTime(start)} – ${fmtTime(end)}`;
+        card.appendChild(meta);
+
+        if (!e.synthetic) {
+          card.addEventListener('click', () => openEditModal(e));
+        }
+        $dayGrid.appendChild(card);
+      });
+
+      // All-Day-Pills
+      $alldayRow.innerHTML = '';
+      if (alldayEvents.length === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'shk-cal-allday__empty';
+        empty.textContent = state.currentDate.toDateString() === new Date().toDateString()
+          ? 'Heute keine ganztägigen Termine'
+          : 'An diesem Tag keine ganztägigen Termine';
+        $alldayRow.appendChild(empty);
+      } else {
+        alldayEvents.forEach(e => {
+          const pill = document.createElement('span');
+          pill.className = 'shk-cal-allday__pill';
+          pill.dataset.eventType = e.event_type;
+          pill.textContent = e.title;
+          if (!e.synthetic) {
+            pill.addEventListener('click', () => openEditModal(e));
+          }
+          $alldayRow.appendChild(pill);
+        });
+      }
+
+      // Stats-Zeile
+      const count = state.events.filter(e => !e.synthetic).length;
+      const synth = state.events.length - count;
+      const parts = [];
+      if (count === 0 && synth === 0) parts.push('Nichts geplant');
+      else if (count > 0) parts.push(`${count} ${count === 1 ? 'Termin' : 'Termine'}`);
+      if (synth > 0) parts.push(`${synth} Geburtstag${synth === 1 ? '' : 'e'}`);
+      $statsLine.textContent = parts.join(' · ');
+    }
+
+    // ----- Data Loading
+    async function loadDay() {
+      try {
+        const from = startOfDayUTC(state.currentDate);
+        const to = endOfDayUTC(state.currentDate);
+        const events = await client.listEvents({
+          from: from.toISOString(),
+          to: to.toISOString(),
+          include_birthdays: true,
+        });
+        state.events = events;
+        renderGrid();
+      } catch (err) {
+        if (err instanceof ShikshaAuthError) {
+          location.replace(`./presence_switch.html?next=${encodeURIComponent(location.pathname)}`);
+          return;
+        }
+        console.warn('Events konnten nicht geladen werden', err);
+        $statsLine.textContent = 'Konnte gerade nicht laden.';
+      }
+    }
+
+    async function loadPersons() {
+      try {
+        const [kinder, staff] = await Promise.all([
+          client.listPersons({ kind: 'kind', limit: 500 }),
+          client.listPersons({ kind: 'staff', limit: 200 }),
+        ]);
+        state.persons = [...kinder, ...staff].sort((a, b) =>
+          (a.given_name || '').localeCompare(b.given_name || '')
+        );
+        renderPersonPicker();
+      } catch (err) {
+        console.warn('Personen konnten nicht geladen werden', err);
+      }
+    }
+
+    function renderPersonPicker() {
+      $personPickerAll.innerHTML = '';
+      if (state.persons.length === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'shk-text-tiny shk-text-faint';
+        empty.textContent = 'Keine Personen verfügbar.';
+        $personPickerAll.appendChild(empty);
+        return;
+      }
+      state.persons.forEach(p => {
+        const chip = document.createElement('span');
+        chip.className = 'shk-person-picker__chip';
+        if (state.selectedPersonIds.has(p.id)) chip.classList.add('shk-person-picker__chip--selected');
+        chip.textContent = `${p.given_name} ${p.family_name || ''}`.trim();
+        chip.dataset.kind = p.kind;
+        chip.addEventListener('click', () => {
+          if (state.selectedPersonIds.has(p.id)) {
+            state.selectedPersonIds.delete(p.id);
+          } else {
+            state.selectedPersonIds.add(p.id);
+          }
+          renderPersonPicker();
+          renderSelectedPicker();
+        });
+        $personPickerAll.appendChild(chip);
+      });
+    }
+
+    function renderSelectedPicker() {
+      $personPickerSelected.innerHTML = '';
+      if (state.selectedPersonIds.size === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'shk-text-small shk-text-faint';
+        empty.textContent = 'Niemand ausgewählt — antippen unten zum Hinzufügen.';
+        $personPickerSelected.appendChild(empty);
+        return;
+      }
+      Array.from(state.selectedPersonIds).forEach(pid => {
+        const p = state.persons.find(x => x.id === pid);
+        if (!p) return;
+        const chip = document.createElement('span');
+        chip.className = 'shk-person-picker__chip shk-person-picker__chip--selected';
+        chip.textContent = `${p.given_name} ${p.family_name || ''}`.trim();
+        chip.addEventListener('click', () => {
+          state.selectedPersonIds.delete(pid);
+          renderPersonPicker();
+          renderSelectedPicker();
+        });
+        $personPickerSelected.appendChild(chip);
+      });
+    }
+
+    // ----- Modal
+    function clearForm() {
+      $form.reset();
+      document.getElementById('f-id').value = '';
+      document.getElementById('f-event-type').value = 'termin';
+      document.getElementById('f-urgency').value = 'normal';
+      document.getElementById('f-repeat').value = 'none';
+      state.selectedPersonIds = new Set();
+      state.editingEvent = null;
+      $formError.textContent = '';
+      $formError.classList.add('shk-hidden');
+      loadSubtypes('termin');
+      renderPersonPicker();
+      renderSelectedPicker();
+    }
+
+    function dtLocalValue(d) {
+      // YYYY-MM-DDTHH:MM für <input type="datetime-local">
+      const pad = n => String(n).padStart(2, '0');
+      const yr = d.getFullYear();
+      const mo = pad(d.getMonth() + 1);
+      const da = pad(d.getDate());
+      const hr = pad(d.getHours());
+      const mi = pad(d.getMinutes());
+      return `${yr}-${mo}-${da}T${hr}:${mi}`;
+    }
+
+    function openCreateModal() {
+      clearForm();
+      $modalTitle.textContent = 'Neuer Termin';
+      $deleteBtn.classList.add('shk-hidden');
+      // Default Start: jetzt zum nächsten viertelstündlichen Schritt
+      const now = new Date();
+      const startDefault = new Date(state.currentDate);
+      startDefault.setHours(now.getHours() + 1, 0, 0, 0);
+      document.getElementById('f-start-at').value = dtLocalValue(startDefault);
+      const endDefault = new Date(startDefault.getTime() + 60 * 60 * 1000);
+      document.getElementById('f-end-at').value = dtLocalValue(endDefault);
+      openModal($modal);
+    }
+
+    async function openEditModal(e) {
+      clearForm();
+      state.editingEvent = e;
+      $modalTitle.textContent = e.event_type === 'kurs' ? 'Kurs bearbeiten' : 'Termin bearbeiten';
+      $deleteBtn.classList.remove('shk-hidden');
+      document.getElementById('f-id').value = e.id || '';
+      document.getElementById('f-title').value = e.title;
+      document.getElementById('f-event-type').value = e.event_type;
+      document.getElementById('f-all-day').checked = !!e.all_day;
+      document.getElementById('f-start-at').value = dtLocalValue(new Date(e.start_at));
+      if (e.end_at) document.getElementById('f-end-at').value = dtLocalValue(new Date(e.end_at));
+      document.getElementById('f-location').value = e.location || '';
+      document.getElementById('f-urgency').value = e.urgency || 'normal';
+      loadSubtypes(e.event_type);
+
+      // Detail-Daten via getEvent für volle metadata
+      try {
+        if (e.id) {
+          const full = await client.getEvent(e.id);
+          document.getElementById('f-description').value = full.description || '';
+          document.getElementById('f-subtype').value = (full.metadata || {}).subtype || '';
+          state.selectedPersonIds = new Set(full.participants || []);
+          renderPersonPicker();
+          renderSelectedPicker();
+        }
+      } catch (err) {
+        console.warn('Detail konnte nicht geladen werden', err);
+      }
+      openModal($modal);
+    }
+
+    function gatherPayload() {
+      const id = document.getElementById('f-id').value;
+      const event_type = document.getElementById('f-event-type').value;
+      const title = document.getElementById('f-title').value.trim();
+      const subtype = document.getElementById('f-subtype').value.trim();
+      const all_day = document.getElementById('f-all-day').checked;
+      const start_local = document.getElementById('f-start-at').value;
+      const end_local = document.getElementById('f-end-at').value;
+      const location = document.getElementById('f-location').value.trim() || null;
+      const description = document.getElementById('f-description').value.trim() || null;
+      const urgency = document.getElementById('f-urgency').value;
+      const repeat_raw = document.getElementById('f-repeat').value;
+
+      if (!title) throw new Error('Titel ist erforderlich.');
+      if (!start_local) throw new Error('Start ist erforderlich.');
+
+      const metadata = {};
+      if (subtype) metadata.subtype = subtype;
+      if (urgency && urgency !== 'normal') metadata.urgency = urgency;
+
+      const payload = {
+        event_type,
+        title,
+        description,
+        location,
+        start_at: new Date(start_local).toISOString(),
+        end_at: end_local ? new Date(end_local).toISOString() : null,
+        all_day,
+        participants: Array.from(state.selectedPersonIds),
+        metadata,
+      };
+
+      if (!id && repeat_raw !== 'none') {
+        const [kind, count] = repeat_raw.split(':');
+        payload.repeat = { kind, count: parseInt(count, 10) };
+      }
+
+      return { id, payload };
+    }
+
+    $saveBtn.addEventListener('click', async () => {
+      $formError.classList.add('shk-hidden');
+      $saveBtn.disabled = true;
+      try {
+        const { id, payload } = gatherPayload();
+        if (id) {
+          await client.patchEvent(parseInt(id, 10), payload);
+        } else {
+          await client.createEvent(payload);
+        }
+        closeModal($modal);
+        await loadDay();
+      } catch (err) {
+        $formError.textContent = err.message || 'Fehler beim Speichern.';
+        $formError.classList.remove('shk-hidden');
+      } finally {
+        $saveBtn.disabled = false;
+      }
+    });
+
+    $deleteBtn.addEventListener('click', async () => {
+      const id = document.getElementById('f-id').value;
+      if (!id) return;
+      const title = document.getElementById('f-title').value;
+      if (!confirm(`»${title}« wirklich löschen?`)) return;
+      $deleteBtn.disabled = true;
+      try {
+        await client.deleteEvent(parseInt(id, 10));
+        closeModal($modal);
+        await loadDay();
+      } catch (err) {
+        $formError.textContent = err.message || 'Fehler beim Löschen.';
+        $formError.classList.remove('shk-hidden');
+      } finally {
+        $deleteBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('f-event-type').addEventListener('change', (e) => {
+      loadSubtypes(e.target.value);
+    });
+
+    // ----- Nav-Handlers
+    $navPrev.addEventListener('click', () => {
+      state.currentDate = new Date(state.currentDate.getTime() - 24*60*60*1000);
+      renderNav();
+      loadDay();
+    });
+    $navNext.addEventListener('click', () => {
+      state.currentDate = new Date(state.currentDate.getTime() + 24*60*60*1000);
+      renderNav();
+      loadDay();
+    });
+    $navToday.addEventListener('click', () => {
+      state.currentDate = new Date();
+      renderNav();
+      loadDay();
+    });
+    $addBtn.addEventListener('click', openCreateModal);
+
+    // ----- Initial-Load
+    renderNav();
+    loadPersons();
+    loadDay();
+  </script>
+</body>
+</html>

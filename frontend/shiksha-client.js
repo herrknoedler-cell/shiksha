@@ -512,6 +512,61 @@ export class ShikshaClient {
   }
 
   // -----------------------------------------------------------------
+  // CALENDAR
+  // -----------------------------------------------------------------
+
+  /**
+   * Liste Events im Zeitraum.
+   * @param {object} opts
+   * @param {string} [opts.from]   ISO-Datetime (UTC)
+   * @param {string} [opts.to]     ISO-Datetime (UTC)
+   * @param {string} [opts.type]   'termin' | 'urlaub' | 'abwesenheit' | 'kurs'
+   * @param {number} [opts.person_id]
+   * @param {boolean} [opts.include_birthdays=true]
+   * @param {number} [opts.limit=500]
+   */
+  async listEvents({ from, to, type, person_id, include_birthdays = true, limit = 500 } = {}) {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    if (type) params.set('type', type);
+    if (person_id != null) params.set('person_id', String(person_id));
+    params.set('include_birthdays', include_birthdays ? 'true' : 'false');
+    params.set('limit', String(limit));
+    return this._fetch(`/api/v1/calendar/events?${params.toString()}`);
+  }
+
+  async getEvent(id) {
+    return this._fetch(`/api/v1/calendar/events/${id}`);
+  }
+
+  async createEvent(payload) {
+    return this._fetch('/api/v1/calendar/events', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async patchEvent(id, payload) {
+    return this._fetch(`/api/v1/calendar/events/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteEvent(id) {
+    return this._fetch(`/api/v1/calendar/events/${id}`, { method: 'DELETE' });
+  }
+
+  async getCalendarStats() {
+    return this._fetch('/api/v1/calendar/stats');
+  }
+
+  async getTodaySummary() {
+    return this._fetch('/api/v1/calendar/today_summary');
+  }
+
+  // -----------------------------------------------------------------
   // HEIM
   // -----------------------------------------------------------------
 
