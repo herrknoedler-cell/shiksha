@@ -1,303 +1,115 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-edition="kita">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>SHIKSHA · Heim</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body {
-      margin: 0; padding: 0;
-      min-height: 100vh;
-      background: #0e0d12;
-      color: #ece8df;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      font-weight: 300;
-      -webkit-font-smoothing: antialiased;
-    }
+  <!-- Pre-Render Theme-Restore — verhindert FOUC beim Theme-Switch -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('shiksha-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
 
-    body {
-      background:
-        radial-gradient(ellipse at 20% 0%, rgba(228, 165, 102, 0.18) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 100%, rgba(180, 132, 200, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(120, 90, 60, 0.08) 0%, transparent 60%),
-        #0e0d12;
-      background-attachment: fixed;
-    }
-
-    .heim-shell {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 64px 24px 48px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ---- Header ---- */
-    .heim-header {
-      margin-bottom: 48px;
-    }
-    .heim-greeting {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-weight: 400;
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      margin: 0;
-      letter-spacing: -0.01em;
-      color: #f4ede0;
-      opacity: 0;
-      animation: fadeUp 0.8s ease-out forwards;
-    }
-    .heim-context {
-      font-size: 0.92rem;
-      color: rgba(236, 232, 223, 0.5);
-      margin-top: 12px;
-      opacity: 0;
-      animation: fadeUp 0.8s ease-out 0.2s forwards;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ---- Karten-Grid ---- */
-    .heim-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: 1fr;
-    }
-    @media (min-width: 540px) {
-      .heim-grid { grid-template-columns: 1fr 1fr; gap: 18px; }
-    }
-    @media (min-width: 900px) {
-      .heim-grid { grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-    }
-
-    /* ---- Karte ---- */
-    .heim-card {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      min-height: 104px;
-      padding: 20px 22px;
-      border-radius: 18px;
-      text-decoration: none;
-      color: inherit;
-
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.06) 0%,
-        rgba(255, 255, 255, 0.02) 100%
-      );
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-
-      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-      cursor: pointer;
-      opacity: 0;
-      animation: fadeUp 0.6s ease-out forwards;
-    }
-    .heim-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(228, 165, 102, 0.35);
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.09) 0%,
-        rgba(255, 255, 255, 0.03) 100%
-      );
-    }
-    .heim-card:active { transform: translateY(0); }
-    .heim-card:nth-child(1) { animation-delay: 0.05s; }
-    .heim-card:nth-child(2) { animation-delay: 0.12s; }
-    .heim-card:nth-child(3) { animation-delay: 0.19s; }
-    .heim-card:nth-child(4) { animation-delay: 0.26s; }
-    .heim-card:nth-child(5) { animation-delay: 0.33s; }
-    .heim-card:nth-child(6) { animation-delay: 0.40s; }
-    .heim-card:nth-child(n+7) { animation-delay: 0.46s; }
-
-    .card-icon {
-      flex-shrink: 0;
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(228, 165, 102, 0.12);
-      color: rgba(228, 165, 102, 0.85);
-    }
-    .card-icon svg {
-      width: 22px; height: 22px;
-      stroke: currentColor;
-      stroke-width: 1.6;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .card-body { flex: 1; min-width: 0; }
-    .card-title {
-      font-size: 1.08rem;
-      font-weight: 500;
-      letter-spacing: -0.005em;
-      margin: 0 0 4px;
-      color: #f4ede0;
-    }
-    .card-subtitle {
-      font-size: 0.92rem;
-      color: rgba(236, 232, 223, 0.55);
-      margin: 0;
-      line-height: 1.4;
-    }
-
-    /* Kategorie 'admin' dezenter — kleiner, gedämpft */
-    .heim-card[data-category="admin"] { opacity: 0.7; }
-    .heim-card[data-category="admin"] .card-icon {
-      background: rgba(180, 132, 200, 0.10);
-      color: rgba(180, 132, 200, 0.7);
-    }
-
-    /* ---- Lade-/Leerzustand ---- */
-    .heim-empty {
-      padding: 48px 24px;
-      text-align: center;
-      color: rgba(236, 232, 223, 0.4);
-      font-style: italic;
-    }
-    .heim-loading {
-      padding: 60px 24px;
-      text-align: center;
-      color: rgba(236, 232, 223, 0.35);
-    }
-    .heim-error {
-      padding: 40px 24px;
-      text-align: center;
-      border-radius: 14px;
-      background: rgba(220, 90, 90, 0.08);
-      border: 1px solid rgba(220, 90, 90, 0.18);
-      color: rgba(236, 232, 223, 0.7);
-    }
-
-    /* ---- Footer ---- */
-    .heim-footer {
-      margin-top: auto;
-      padding-top: 32px;
-      text-align: center;
-      font-size: 0.78rem;
-      color: rgba(236, 232, 223, 0.25);
-    }
-  </style>
+  <!-- Design-System: Basis + KITA-Edition-Overrides -->
+  <link rel="stylesheet" href="./shiksha-ui.v1.0.0.css">
+  <link rel="stylesheet" href="./editions-css/kita.v1.0.0.css">
 </head>
 <body>
-  <div class="heim-shell">
 
-    <header class="heim-header">
-      <h1 class="heim-greeting" id="greeting">&nbsp;</h1>
-      <div class="heim-context" id="context"></div>
+  <!-- ========================================================
+       Icon-Sprite — einmal referenziert, von allen Karten genutzt
+       ======================================================== -->
+  <svg style="display:none" aria-hidden="true">
+    <use href="./shiksha-icons.v1.0.0.svg#icon-default"/>
+  </svg>
+
+  <div class="shk-shell">
+
+    <!-- ========================================================
+         HEADER  —  Greeting + Theme-Toggle
+         ======================================================== -->
+    <header class="shk-header">
+      <div class="shk-row" style="justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1 class="shk-display shk-fade-in" id="greeting">&nbsp;</h1>
+          <p class="shk-subtitle shk-fade-in" id="context" style="margin-top: var(--shk-space-sm);"></p>
+        </div>
+        <button class="shk-theme-toggle shk-fade-in"
+                data-shk-theme-toggle
+                aria-label="Theme umschalten">
+          <svg class="shk-icon shk-icon--sm">
+            <use href="./shiksha-icons.v1.0.0.svg#icon-weather-sun"/>
+          </svg>
+          <span data-shk-theme-label>Modus</span>
+        </button>
+      </div>
     </header>
 
-    <main class="heim-grid" id="cards-grid">
-      <div class="heim-loading" id="loading">Einen Moment.</div>
+    <!-- ========================================================
+         KARTEN-GRID
+         ======================================================== -->
+    <main class="shk-grid" id="cards-grid">
+      <div class="shk-loading" id="loading">Einen Moment.</div>
     </main>
 
-    <footer class="heim-footer">SHIKSHA</footer>
+    <footer style="margin-top: auto; padding-top: var(--shk-space-lg); text-align: center;">
+      <span class="shk-text-tiny shk-text-faint" style="letter-spacing: var(--shk-tracking-wide);">SHIKSHA</span>
+    </footer>
   </div>
 
-  <!-- Karten-Template -->
+
+  <!-- ========================================================
+       Karten-Template — wird per JS geklont
+       ======================================================== -->
   <template id="card-template">
-    <a class="heim-card" href="#">
-      <div class="card-icon"></div>
-      <div class="card-body">
-        <h2 class="card-title"></h2>
-        <p class="card-subtitle"></p>
+    <a class="shk-card" href="#">
+      <div class="shk-card__icon">
+        <svg><use href=""/></svg>
+      </div>
+      <div class="shk-card__body">
+        <h2 class="shk-card__title"></h2>
+        <p class="shk-card__subtitle"></p>
       </div>
     </a>
   </template>
 
-  <!-- Icon-Set: SVG-Symbole als <symbol>-Defs -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
-    <defs>
 
-      <symbol id="icon-candle" viewBox="0 0 24 24">
-        <path d="M12 3 Q14 5 12 7 Q10 5 12 3"/>
-        <rect x="9" y="9" width="6" height="11" rx="1"/>
-        <line x1="9" y1="13" x2="15" y2="13"/>
-      </symbol>
-
-      <symbol id="icon-history" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="9"/>
-        <polyline points="12,7 12,12 16,14"/>
-      </symbol>
-
-      <symbol id="icon-bookmark" viewBox="0 0 24 24">
-        <path d="M6 3 L18 3 L18 21 L12 17 L6 21 Z"/>
-      </symbol>
-
-      <symbol id="icon-gear" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M12 2 L12 5 M12 19 L12 22 M5 12 L2 12 M22 12 L19 12
-                 M5.5 5.5 L7.5 7.5 M16.5 16.5 L18.5 18.5
-                 M5.5 18.5 L7.5 16.5 M16.5 7.5 L18.5 5.5"/>
-      </symbol>
-
-      <symbol id="icon-presence" viewBox="0 0 24 24">
-        <circle cx="9" cy="8" r="3"/>
-        <path d="M4 21 Q4 15 9 15 Q14 15 14 21"/>
-        <circle cx="17" cy="9" r="2.5"/>
-        <path d="M14 20 Q14 16 17 16 Q20 16 20 20"/>
-      </symbol>
-
-      <symbol id="icon-calendar" viewBox="0 0 24 24">
-        <rect x="3" y="5" width="18" height="16" rx="2"/>
-        <line x1="3" y1="10" x2="21" y2="10"/>
-        <line x1="8" y1="3" x2="8" y2="7"/>
-        <line x1="16" y1="3" x2="16" y2="7"/>
-      </symbol>
-
-      <symbol id="icon-team" viewBox="0 0 24 24">
-        <circle cx="7" cy="8" r="2.5"/>
-        <circle cx="17" cy="8" r="2.5"/>
-        <circle cx="12" cy="13" r="2.5"/>
-        <path d="M3 20 Q3 16 7 16 M21 20 Q21 16 17 16 M7 21 Q7 17 12 17 Q17 17 17 21"/>
-      </symbol>
-
-      <symbol id="icon-shield" viewBox="0 0 24 24">
-        <path d="M12 2 L20 5 L20 12 Q20 18 12 22 Q4 18 4 12 L4 5 Z"/>
-        <polyline points="9,12 11.5,14.5 15.5,10"/>
-      </symbol>
-
-      <symbol id="icon-clock" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="9"/>
-        <polyline points="12,7 12,12 15,15"/>
-      </symbol>
-
-      <symbol id="icon-default" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="3"/>
-      </symbol>
-
-    </defs>
-  </svg>
-
+  <!-- ========================================================
+       Anwendungs-Skript
+       ======================================================== -->
   <script type="module">
     import { ShikshaClient, ShikshaAuthError } from './shiksha-client.js';
+    import {
+      initShikshaUI,
+      avatarInitials,
+    } from './shiksha-ui.v1.0.0.js';
 
+    // -------------------------------------------------------------
+    // Auth-Gate — vor allem anderen
+    // -------------------------------------------------------------
     const client = new ShikshaClient();
 
-    // -------------------------------------------------------------
-    // Auth-Gate
-    // -------------------------------------------------------------
     if (!client.hasValidToken()) {
       const nextParam = encodeURIComponent(location.pathname + location.search);
       location.replace(`./presence_switch.html?next=${nextParam}`);
     }
+
+    // -------------------------------------------------------------
+    // Design-System initialisieren
+    //   - Theme aus localStorage wiederherstellen
+    //   - Theming-Engine starten (data-time/data-season/data-context)
+    //   - Auto-bind aller [data-shk-theme-toggle], Modals, Tabs
+    // -------------------------------------------------------------
+    initShikshaUI({ context: 'heim' });
 
     // -------------------------------------------------------------
     // Rendering
@@ -305,33 +117,50 @@
     const greetingEl = document.getElementById('greeting');
     const contextEl  = document.getElementById('context');
     const gridEl     = document.getElementById('cards-grid');
-    const loadingEl  = document.getElementById('loading');
     const cardTpl    = document.getElementById('card-template');
 
     const ICON_FALLBACK = 'default';
     const KNOWN_ICONS = new Set([
-      'candle', 'history', 'bookmark', 'gear',
-      'presence', 'calendar', 'team', 'shield', 'clock',
+      // Heim-Karten
+      'candle', 'bookmark', 'presence', 'team', 'shield', 'clock',
+      // Navigation
+      'home', 'calendar', 'chat', 'history', 'settings', 'gear',
+      // Aktionen
+      'plus', 'pencil', 'trash', 'check', 'share',
+      // Status
+      'info', 'warning', 'error', 'ok',
+      // Wetter
+      'weather-sun', 'weather-cloud', 'weather-rain', 'weather-snow', 'weather-fog',
+      // Personen
+      'person', 'users', 'parent-child', 'baby',
     ]);
 
-    function svgRefFor(iconName) {
+    function iconRef(iconName) {
       const name = (iconName && KNOWN_ICONS.has(iconName)) ? iconName : ICON_FALLBACK;
-      return `#icon-${name}`;
+      return `./shiksha-icons.v1.0.0.svg#icon-${name}`;
     }
 
     function renderCard(card) {
       const node = cardTpl.content.firstElementChild.cloneNode(true);
 
       node.setAttribute('href', card.action_url || '#');
-      if (card.category) node.setAttribute('data-category', card.category);
       node.setAttribute('data-id', card.id);
 
-      const iconWrap = node.querySelector('.card-icon');
-      iconWrap.innerHTML =
-        `<svg><use href="${svgRefFor(card.icon)}"></use></svg>`;
+      // Kategorie als Modifier-Klasse (admin wird dezenter dargestellt)
+      if (card.category === 'admin') {
+        node.classList.add('shk-card--admin');
+      }
+      if (card.category === 'feature') {
+        node.classList.add('shk-card--feature');
+      }
 
-      node.querySelector('.card-title').textContent = card.title || '';
-      const sub = node.querySelector('.card-subtitle');
+      // Icon einsetzen
+      const use = node.querySelector('.shk-card__icon use');
+      use.setAttribute('href', iconRef(card.icon));
+
+      // Texte
+      node.querySelector('.shk-card__title').textContent = card.title || '';
+      const sub = node.querySelector('.shk-card__subtitle');
       if (card.subtitle) {
         sub.textContent = card.subtitle;
       } else {
@@ -343,13 +172,12 @@
 
     function renderHeim(heim) {
       greetingEl.textContent = heim.greeting || '';
-      // Context-Zeile (z.B. Tenant-Anzeige) — bewusst dezent
       contextEl.textContent = '';
 
       gridEl.innerHTML = '';
       if (!heim.cards || heim.cards.length === 0) {
         const empty = document.createElement('div');
-        empty.className = 'heim-empty';
+        empty.className = 'shk-empty';
         empty.textContent = 'Hier wird Dein Zugang gleich vorbereitet.';
         gridEl.appendChild(empty);
         return;
@@ -363,7 +191,7 @@
     function renderError(text) {
       gridEl.innerHTML = '';
       const err = document.createElement('div');
-      err.className = 'heim-error';
+      err.className = 'shk-error-block';
       err.textContent = text;
       gridEl.appendChild(err);
     }

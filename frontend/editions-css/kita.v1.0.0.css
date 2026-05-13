@@ -1,0 +1,131 @@
+/* =========================================================================
+   SHIKSHA · EDITION · KITA  v1.0.0
+   Edition-spezifische Token-Overrides für KITA-Surfaces.
+
+   Spec:        SHIKSHA_DESIGN_SYSTEM.md §2 (Drei Update-Ebenen)
+   Identität:   SHIKSHA_CORE.md §8 (EDITIONS — gleiche Seele, eigenes Gesicht)
+
+   Aktivierung: <html data-edition="kita">  oder  <body data-edition="kita">
+
+   Diese Datei wird NACH shiksha-ui.v1.0.0.css geladen, sodass die
+   Token-Overrides die System-Defaults überschreiben.
+
+   ----------------------------------------------------------------
+   KITA-Charakter:  warm, honig-orange, ruhig, kinder-nah, vertraut.
+                    Bewusst kein klinisches Weiß, kein Tech-Blau.
+   ----------------------------------------------------------------
+
+   In v1.0 sind die System-Defaults bereits für KITA gestaltet — diese
+   Datei dokumentiert sie explizit und legt das Pattern für andere
+   Editionen offen. Künftige KITA-spezifische Tunings landen hier.
+   ========================================================================= */
+
+
+/* =========================================================================
+   1. EDITION-AKTIVATOR
+   Wirksam wenn das Page-Root data-edition="kita" gesetzt hat.
+   Beispiel:  <html lang="de" data-edition="kita" data-theme="dark">
+   ========================================================================= */
+
+[data-edition="kita"] {
+
+  /* ---- Akzent-Palette ----
+   * KITA bestätigt den System-Default: warmer Honig + dezenter Mauve.
+   * (Diese Zeilen sind absichtlich redundant zu Default —
+   *  sie dokumentieren KITA's Identität explizit.)
+   */
+  --shk-accent-warm:   #e4a566;
+  --shk-accent-cool:   #b484c8;
+  --shk-accent-gradient: linear-gradient(135deg,
+    #e4a566 0%,
+    #d09277 40%,
+    #b484c8 100%);
+
+  /* ---- DayClock-Sektor-Farben (KITA-Tagesablauf) ----
+   * Diese Variablen kann die DayClock-Konfiguration in kita.yaml
+   * referenzieren, wenn statt fester Farbwerte ein semantisches Token
+   * verwendet werden soll. (Optional — yaml kann auch Hex direkt setzen.)
+   */
+  --shk-dayclock-bringen:        rgba(228, 165, 102, 0.55);  /* warmer Honig */
+  --shk-dayclock-fruehdienst:    rgba(107, 155, 184, 0.50);  /* ruhiges Blau */
+  --shk-dayclock-vormittag:      rgba(180, 132, 200, 0.45);  /* sanftes Lila */
+  --shk-dayclock-mittag:         rgba(236, 232, 223, 0.20);  /* hell-still */
+  --shk-dayclock-nachmittag:     rgba(196, 162, 142, 0.45);  /* gedämpft warm */
+  --shk-dayclock-abholen:        rgba(228, 165, 102, 0.55);  /* zurück zu Honig */
+  --shk-dayclock-team:           rgba(212, 163, 86, 0.50);   /* Warnung-warm  */
+  --shk-dayclock-kueche:         rgba(127, 184, 136, 0.40);  /* sanftes Grün  */
+}
+
+
+/* =========================================================================
+   2. KITA-Bilderwelt-Hinweise (vorbereitet, in v1.0 noch nicht aktiv)
+   In künftigen Versionen können hier Hero-Bilder, Hintergrund-Bilder
+   oder Marketing-Assets KITA-spezifisch ausgewählt werden.
+   ========================================================================= */
+
+/*
+[data-edition="kita"] .shk-hero-image {
+  background-image: url("/assets/kita/hero-morgensonne.jpg");
+}
+*/
+
+
+/* =========================================================================
+   3. KITA-Tonalität bei Edge-Komponenten
+   Bewusst dezent: KITA ist warm, aber nicht überdreht.
+   ========================================================================= */
+
+/* Sehr leichter Schimmer auf Karten, der KITAs Wärme andeutet —
+   aktiviert sich nur, wenn die Karte zum Pflicht-Element wird (Hero). */
+[data-edition="kita"] .shk-card--hero {
+  background-image:
+    radial-gradient(ellipse at 20% 0%,
+      rgba(228, 165, 102, 0.08) 0%,
+      transparent 60%),
+    radial-gradient(ellipse at 100% 100%,
+      rgba(180, 132, 200, 0.06) 0%,
+      transparent 60%);
+}
+
+
+/* =========================================================================
+   4. PATTERN für andere Editionen
+   ---------------------------------------------------------------------------
+   Andere Editionen folgen demselben Schema. Beispiele:
+   ---------------------------------------------------------------------------
+
+   /* editions-css/surf.v1.0.0.css *--/
+   [data-edition="surf"] {
+     --shk-accent-warm:  #4a90c9;          // ozeanblau statt honig
+     --shk-accent-cool:  #5fb89e;          // grün-türkis
+     --shk-accent-gradient: linear-gradient(135deg, #4a90c9 0%, #5fb89e 100%);
+
+     --shk-bg-gradient-1: rgba(74, 144, 201, 0.18);
+     --shk-bg-gradient-2: rgba(95, 184, 158, 0.12);
+
+     --shk-dayclock-fruehwelle:   rgba(74, 144, 201, 0.55);
+     --shk-dayclock-vormittag:    rgba(95, 184, 158, 0.45);
+     // ...
+   }
+
+   /* editions-css/yoga.v1.0.0.css *--/
+   [data-edition="yoga"] {
+     --shk-accent-warm:  #a07a98;          // erdiges Mauve
+     --shk-accent-cool:  #8aa17e;          // moos-grün
+     // ...
+   }
+
+   /* editions-css/camping.v1.0.0.css *--/
+   [data-edition="camping"] {
+     --shk-accent-warm:  #d68d52;          // wärmer als KITA
+     --shk-accent-cool:  #6b8e54;          // tannen-grün
+     // ...
+   }
+
+   ---------------------------------------------------------------------------
+   Wichtig:
+   - Komponenten-Struktur (Klassen, Layout) ändert sich NICHT
+   - Nur Tokens werden überschrieben
+   - Edition-Files bleiben schlank — maximal 50-80 Zeilen
+   - System-CSS (shiksha-ui.v1.0.0.css) wird NIE pro Edition geforkt
+   ========================================================================= */

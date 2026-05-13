@@ -1,0 +1,1176 @@
+/* =========================================================================
+   SHIKSHA UI v1.0.0
+   Zentrales Design-System für alle Surfaces in app.shiksha.world.
+   Spec: SHIKSHA_DESIGN_SYSTEM.md
+   Identität: SHIKSHA_CORE.md (Vorrang vor jedem CSS-Wert hier)
+
+   Eine Schrift: Montserrat.
+   Zwei Themes: Dark (Default) + Light, manuell oder via prefers-color-scheme.
+   ========================================================================= */
+
+
+/* =========================================================================
+   0. SCHRIFT-IMPORT
+   ========================================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&display=swap');
+
+
+/* =========================================================================
+   1. TOKENS — Default = Dark Theme
+   ========================================================================= */
+
+:root,
+:root[data-theme="dark"] {
+  /* ---- Akzente (in beiden Themes gleich, evtl. Helligkeit angepasst) ---- */
+  --shk-accent-warm:   #e4a566;
+  --shk-accent-cool:   #b484c8;
+  --shk-accent-gradient: linear-gradient(135deg, #e4a566 0%, #c08a9e 60%, #b484c8 100%);
+
+  /* ---- Text-Hierarchie (Dark) ---- */
+  --shk-text-strong: #f4ede0;
+  --shk-text-soft:   rgba(236, 232, 223, 0.62);
+  --shk-text-faint:  rgba(236, 232, 223, 0.34);
+  --shk-text-ghost:  rgba(236, 232, 223, 0.16);
+
+  /* ---- Hintergrund (Dark) ---- */
+  --shk-bg-base:        #0e0d12;
+  --shk-bg-card:        rgba(255, 255, 255, 0.06);
+  --shk-bg-card-hover:  rgba(255, 255, 255, 0.09);
+  --shk-bg-card-active: rgba(255, 255, 255, 0.12);
+  --shk-bg-modal:       rgba(20, 18, 24, 0.92);
+
+  /* ---- Borders (Dark) ---- */
+  --shk-border-soft:    rgba(255, 255, 255, 0.08);
+  --shk-border-medium:  rgba(255, 255, 255, 0.14);
+  --shk-border-active:  rgba(228, 165, 102, 0.35);
+  --shk-border-gradient: linear-gradient(135deg,
+    rgba(228, 165, 102, 0.30) 0%,
+    rgba(180, 132, 200, 0.20) 100%);
+
+  /* ---- Hintergrund-Gradienten (sehr dezent, Theming-Engine steuert) ---- */
+  --shk-bg-gradient-1: rgba(228, 165, 102, 0.18);
+  --shk-bg-gradient-2: rgba(180, 132, 200, 0.12);
+  --shk-bg-gradient-3: rgba(120, 90, 60, 0.08);
+
+  /* ---- Statusfarben ---- */
+  --shk-status-ok:     #7fb888;
+  --shk-status-warn:   #d4a356;
+  --shk-status-belast: #c8746a;
+  --shk-status-info:   #6b9bb8;
+
+  /* ---- Glass-Mode (Blur) ---- */
+  --shk-blur-card:   20px;
+  --shk-blur-strong: 32px;
+
+  /* ---- Schatten (Dark — sehr dezent) ---- */
+  --shk-shadow-soft:  0 1px 2px rgba(0, 0, 0, 0.05);
+  --shk-shadow-card:  0 4px 16px rgba(0, 0, 0, 0.15);
+  --shk-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.22);
+  --shk-shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================================================
+   1.b LIGHT THEME — Tokens überschreiben
+   ========================================================================= */
+
+:root[data-theme="light"] {
+  /* Text-Hierarchie (Light) */
+  --shk-text-strong: #1e1a17;
+  --shk-text-soft:   rgba(30, 26, 23, 0.62);
+  --shk-text-faint:  rgba(30, 26, 23, 0.38);
+  --shk-text-ghost:  rgba(30, 26, 23, 0.18);
+
+  /* Hintergrund (Light — warm-creme, kein Klinik-Weiß) */
+  --shk-bg-base:        #f7f1e8;
+  --shk-bg-card:        rgba(255, 255, 255, 0.55);
+  --shk-bg-card-hover:  rgba(255, 255, 255, 0.70);
+  --shk-bg-card-active: rgba(255, 255, 255, 0.85);
+  --shk-bg-modal:       rgba(252, 248, 240, 0.92);
+
+  /* Borders (Light) */
+  --shk-border-soft:    rgba(30, 26, 23, 0.08);
+  --shk-border-medium:  rgba(30, 26, 23, 0.16);
+  --shk-border-active:  rgba(228, 165, 102, 0.55);
+
+  /* Gradienten (Light — sanfter, weniger Sättigung) */
+  --shk-bg-gradient-1: rgba(228, 165, 102, 0.22);
+  --shk-bg-gradient-2: rgba(180, 132, 200, 0.14);
+  --shk-bg-gradient-3: rgba(220, 180, 130, 0.10);
+
+  /* Schatten (Light — weicher) */
+  --shk-shadow-soft:  0 1px 2px rgba(40, 28, 18, 0.04);
+  --shk-shadow-card:  0 4px 16px rgba(40, 28, 18, 0.06);
+  --shk-shadow-hover: 0 8px 24px rgba(40, 28, 18, 0.10);
+  --shk-shadow-modal: 0 16px 48px rgba(40, 28, 18, 0.18);
+}
+
+
+/* =========================================================================
+   1.c System-Präferenz wenn kein explizites Theme gesetzt
+   ========================================================================= */
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --shk-text-strong: #1e1a17;
+    --shk-text-soft:   rgba(30, 26, 23, 0.62);
+    --shk-text-faint:  rgba(30, 26, 23, 0.38);
+    --shk-text-ghost:  rgba(30, 26, 23, 0.18);
+    --shk-bg-base:        #f7f1e8;
+    --shk-bg-card:        rgba(255, 255, 255, 0.55);
+    --shk-bg-card-hover:  rgba(255, 255, 255, 0.70);
+    --shk-bg-card-active: rgba(255, 255, 255, 0.85);
+    --shk-bg-modal:       rgba(252, 248, 240, 0.92);
+    --shk-border-soft:    rgba(30, 26, 23, 0.08);
+    --shk-border-medium:  rgba(30, 26, 23, 0.16);
+    --shk-border-active:  rgba(228, 165, 102, 0.55);
+    --shk-bg-gradient-1: rgba(228, 165, 102, 0.22);
+    --shk-bg-gradient-2: rgba(180, 132, 200, 0.14);
+    --shk-bg-gradient-3: rgba(220, 180, 130, 0.10);
+    --shk-shadow-soft:  0 1px 2px rgba(40, 28, 18, 0.04);
+    --shk-shadow-card:  0 4px 16px rgba(40, 28, 18, 0.06);
+    --shk-shadow-hover: 0 8px 24px rgba(40, 28, 18, 0.10);
+    --shk-shadow-modal: 0 16px 48px rgba(40, 28, 18, 0.18);
+  }
+}
+
+
+/* =========================================================================
+   2. Tokens — theme-unabhängig (Typo, Spacing, Bewegung)
+   ========================================================================= */
+
+:root {
+  /* ---- Typographie — eine Schrift, Montserrat ---- */
+  --shk-font-sans: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --shk-font-mono: ui-monospace, 'SF Mono', 'Menlo', monospace;
+
+  --shk-text-xs:      0.78rem;
+  --shk-text-sm:      0.88rem;
+  --shk-text-base:    1.00rem;
+  --shk-text-md:      1.08rem;
+  --shk-text-lg:      1.32rem;
+  --shk-text-xl:      1.80rem;
+  --shk-text-display: clamp(2rem, 5vw, 3.2rem);
+
+  --shk-weight-thin:     200;
+  --shk-weight-light:    300;
+  --shk-weight-regular:  400;
+  --shk-weight-medium:   500;
+  --shk-weight-semibold: 600;
+
+  --shk-line-tight:   1.2;
+  --shk-line-normal:  1.45;
+  --shk-line-relaxed: 1.6;
+
+  --shk-tracking-tight: -0.01em;
+  --shk-tracking-soft:  -0.005em;
+  --shk-tracking-wide:  0.04em;
+  --shk-tracking-display: 0.01em;
+
+  /* ---- Spacing ---- */
+  --shk-space-xs:  4px;
+  --shk-space-sm:  8px;
+  --shk-space-md:  16px;
+  --shk-space-lg:  24px;
+  --shk-space-xl:  40px;
+  --shk-space-2xl: 64px;
+  --shk-space-3xl: 96px;
+
+  /* ---- Radien ---- */
+  --shk-radius-soft: 12px;
+  --shk-radius-md:   18px;
+  --shk-radius-lg:   24px;
+  --shk-radius-pill: 9999px;
+
+  /* ---- Bewegung (Motion Rules aus SHIKSHA_CORE §5) ---- */
+  --shk-ease-out:    cubic-bezier(0.16, 1, 0.3, 1);     /* atmend, sanft */
+  --shk-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);    /* cinematic */
+
+  --shk-duration-fast:   0.25s;
+  --shk-duration-medium: 0.45s;
+  --shk-duration-slow:   0.9s;
+  --shk-duration-breath: 1.6s;  /* für "atmende" Akzente */
+
+  /* ---- Z-Indizes ---- */
+  --shk-z-base:     1;
+  --shk-z-elevated: 10;
+  --shk-z-modal:    100;
+  --shk-z-toast:    1000;
+}
+
+
+/* =========================================================================
+   3. THEMING-ENGINE — data-time / data-season / data-context auf <body>
+   ========================================================================= */
+
+body[data-time="morning"] {
+  --shk-bg-gradient-1: rgba(228, 165, 102, 0.22);
+  --shk-bg-gradient-2: rgba(244, 200, 140, 0.10);
+  --shk-bg-gradient-3: rgba(180, 132, 80,  0.08);
+}
+body[data-time="afternoon"] {
+  --shk-bg-gradient-1: rgba(240, 220, 170, 0.16);
+  --shk-bg-gradient-2: rgba(220, 200, 180, 0.10);
+  --shk-bg-gradient-3: rgba(170, 150, 130, 0.06);
+}
+body[data-time="evening"] {
+  --shk-bg-gradient-1: rgba(180, 132, 200, 0.18);
+  --shk-bg-gradient-2: rgba(228, 130, 140, 0.10);
+  --shk-bg-gradient-3: rgba(90,  70,  110, 0.10);
+}
+body[data-time="night"] {
+  --shk-bg-gradient-1: rgba(80,  100, 130, 0.14);
+  --shk-bg-gradient-2: rgba(60,   80, 110, 0.08);
+  --shk-bg-gradient-3: rgba(40,   50,  70, 0.10);
+}
+
+body[data-season="spring"] { --shk-season-tint: rgba(180, 220, 170, 0.05); }
+body[data-season="summer"] { --shk-season-tint: rgba(240, 200, 140, 0.05); }
+body[data-season="autumn"] { --shk-season-tint: rgba(200, 130,  90, 0.05); }
+body[data-season="winter"] { --shk-season-tint: rgba(180, 200, 220, 0.05); }
+
+body[data-context="gespraech"] {
+  --shk-accent-warm: #d8965a;
+}
+body[data-context="notfall"] {
+  --shk-accent-warm: var(--shk-status-belast);
+  --shk-border-active: rgba(200, 116, 106, 0.45);
+}
+
+
+/* =========================================================================
+   4. RESET + BASE
+   ========================================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: var(--shk-font-sans);
+  font-weight: var(--shk-weight-light);
+  font-size: var(--shk-text-base);
+  line-height: var(--shk-line-normal);
+  color: var(--shk-text-strong);
+  background: var(--shk-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background var(--shk-duration-medium) var(--shk-ease-out),
+              color var(--shk-duration-medium) var(--shk-ease-out);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 20% 0%,   var(--shk-bg-gradient-1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, var(--shk-bg-gradient-2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%,  var(--shk-bg-gradient-3) 0%, transparent 60%),
+    var(--shk-bg-base);
+  background-attachment: fixed;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--shk-accent-warm);
+  text-decoration: none;
+  transition: opacity var(--shk-duration-fast) var(--shk-ease-out);
+}
+a:hover { opacity: 0.8; }
+
+
+/* =========================================================================
+   5. LAYOUT
+   ========================================================================= */
+
+.shk-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--shk-space-2xl) var(--shk-space-lg) var(--shk-space-xl);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 540px) {
+  .shk-shell { padding: var(--shk-space-xl) var(--shk-space-md) var(--shk-space-lg); }
+}
+
+.shk-header { margin-bottom: var(--shk-space-xl); }
+.shk-section { margin-bottom: var(--shk-space-xl); }
+
+.shk-stack {
+  display: flex; flex-direction: column;
+  gap: var(--shk-space-md);
+}
+.shk-stack--tight { gap: var(--shk-space-sm); }
+.shk-stack--wide  { gap: var(--shk-space-lg); }
+
+.shk-row {
+  display: flex; flex-direction: row;
+  gap: var(--shk-space-md);
+  align-items: center;
+}
+
+.shk-grid {
+  display: grid;
+  gap: var(--shk-space-md);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 540px) { .shk-grid { grid-template-columns: 1fr 1fr; gap: var(--shk-space-lg); } }
+@media (min-width: 900px) { .shk-grid { grid-template-columns: 1fr 1fr 1fr; } }
+
+
+/* =========================================================================
+   6. TYPOGRAPHIE-KLASSEN — Montserrat in verschiedenen Weights
+   ========================================================================= */
+
+.shk-display {
+  font-family: var(--shk-font-sans);
+  font-weight: var(--shk-weight-thin);
+  font-size: var(--shk-text-display);
+  line-height: var(--shk-line-tight);
+  letter-spacing: var(--shk-tracking-display);
+  color: var(--shk-text-strong);
+  margin: 0;
+}
+
+/* Display mit Gradient — für Logo-/Hero-Momente, sparsam */
+.shk-display--gradient {
+  background: var(--shk-accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.shk-heading {
+  font-weight: var(--shk-weight-light);
+  font-size: var(--shk-text-xl);
+  line-height: var(--shk-line-tight);
+  letter-spacing: var(--shk-tracking-soft);
+  color: var(--shk-text-strong);
+  margin: 0;
+}
+
+.shk-title {
+  font-size: var(--shk-text-md);
+  font-weight: var(--shk-weight-medium);
+  letter-spacing: var(--shk-tracking-soft);
+  color: var(--shk-text-strong);
+  margin: 0;
+}
+
+.shk-subtitle {
+  font-size: var(--shk-text-sm);
+  font-weight: var(--shk-weight-light);
+  color: var(--shk-text-soft);
+  margin: 0;
+}
+
+.shk-text-soft  { color: var(--shk-text-soft); }
+.shk-text-faint { color: var(--shk-text-faint); }
+.shk-text-small { font-size: var(--shk-text-sm); }
+.shk-text-tiny  { font-size: var(--shk-text-xs); }
+
+
+/* =========================================================================
+   7. KARTEN — Glass-Mode durchgängig
+   ========================================================================= */
+
+.shk-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--shk-space-md);
+  padding: var(--shk-space-lg);
+  min-height: 104px;
+  border-radius: var(--shk-radius-md);
+  background: var(--shk-bg-card);
+  backdrop-filter: blur(var(--shk-blur-card));
+  -webkit-backdrop-filter: blur(var(--shk-blur-card));
+  border: 1px solid var(--shk-border-soft);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform    var(--shk-duration-fast) var(--shk-ease-out),
+    border-color var(--shk-duration-fast) var(--shk-ease-out),
+    background   var(--shk-duration-fast) var(--shk-ease-out),
+    box-shadow   var(--shk-duration-medium) var(--shk-ease-out);
+}
+
+a.shk-card,
+button.shk-card { cursor: pointer; }
+
+a.shk-card:hover,
+button.shk-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--shk-border-active);
+  background: var(--shk-bg-card-hover);
+  box-shadow: var(--shk-shadow-hover);
+}
+a.shk-card:active,
+button.shk-card:active {
+  transform: translateY(0);
+  background: var(--shk-bg-card-active);
+}
+
+.shk-card--compact { min-height: 72px; padding: var(--shk-space-md); }
+.shk-card--admin   { opacity: 0.7; }
+.shk-card--admin .shk-card__icon {
+  background: rgba(180, 132, 200, 0.10);
+  color: rgba(180, 132, 200, 0.7);
+}
+
+/* Feature-Karte mit Gradient-Border — für sehr wichtige Surfaces */
+.shk-card--feature {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--shk-bg-card), var(--shk-bg-card)) padding-box,
+    var(--shk-border-gradient) border-box;
+}
+
+.shk-card__icon {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  border-radius: var(--shk-radius-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(228, 165, 102, 0.12);
+  color: rgba(228, 165, 102, 0.85);
+}
+.shk-card__icon svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; stroke-width: 1.6;
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.shk-card__body { flex: 1; min-width: 0; }
+.shk-card__title {
+  font-size: var(--shk-text-md);
+  font-weight: var(--shk-weight-medium);
+  letter-spacing: var(--shk-tracking-soft);
+  color: var(--shk-text-strong);
+  margin: 0 0 var(--shk-space-xs);
+}
+.shk-card__subtitle {
+  font-size: var(--shk-text-sm);
+  font-weight: var(--shk-weight-light);
+  color: var(--shk-text-soft);
+  margin: 0;
+  line-height: var(--shk-line-normal);
+}
+
+.shk-card__meta {
+  flex-shrink: 0;
+  align-self: center;
+  color: var(--shk-text-faint);
+  font-size: var(--shk-text-sm);
+}
+
+
+/* =========================================================================
+   8. BUTTONS
+   ========================================================================= */
+
+.shk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--shk-space-sm);
+  padding: 10px 18px;
+  font-family: inherit;
+  font-size: var(--shk-text-sm);
+  font-weight: var(--shk-weight-medium);
+  letter-spacing: var(--shk-tracking-soft);
+  color: var(--shk-text-strong);
+  background: var(--shk-bg-card);
+  backdrop-filter: blur(var(--shk-blur-card));
+  -webkit-backdrop-filter: blur(var(--shk-blur-card));
+  border: 1px solid var(--shk-border-soft);
+  border-radius: var(--shk-radius-soft);
+  cursor: pointer;
+  transition:
+    background   var(--shk-duration-fast) var(--shk-ease-out),
+    border-color var(--shk-duration-fast) var(--shk-ease-out),
+    transform    var(--shk-duration-fast) var(--shk-ease-out);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.shk-btn:hover {
+  background: var(--shk-bg-card-hover);
+  border-color: var(--shk-border-medium);
+}
+.shk-btn:active { transform: translateY(1px); }
+.shk-btn:disabled,
+.shk-btn[disabled] {
+  opacity: 0.45; cursor: not-allowed;
+}
+
+.shk-btn--primary {
+  background: var(--shk-accent-warm);
+  color: #0e0d12;
+  border-color: var(--shk-accent-warm);
+}
+.shk-btn--primary:hover {
+  filter: brightness(1.08);
+}
+
+.shk-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+}
+.shk-btn--ghost:hover {
+  background: var(--shk-bg-card);
+  border-color: var(--shk-border-soft);
+}
+
+.shk-btn--danger {
+  color: var(--shk-status-belast);
+  border-color: rgba(200, 116, 106, 0.30);
+}
+.shk-btn--danger:hover {
+  background: rgba(200, 116, 106, 0.10);
+  border-color: rgba(200, 116, 106, 0.50);
+}
+
+.shk-btn--icon-only {
+  width: 40px; height: 40px; padding: 0;
+}
+.shk-btn--icon-only svg { width: 20px; height: 20px; }
+
+.shk-btn--small { padding: 6px 12px; font-size: var(--shk-text-xs); }
+.shk-btn--large { padding: 14px 28px; font-size: var(--shk-text-base); }
+
+
+/* =========================================================================
+   9. FORMULAR-ELEMENTE
+   ========================================================================= */
+
+.shk-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--shk-space-xs);
+}
+
+.shk-label {
+  font-size: var(--shk-text-sm);
+  font-weight: var(--shk-weight-medium);
+  color: var(--shk-text-soft);
+  letter-spacing: var(--shk-tracking-soft);
+}
+
+.shk-input,
+.shk-textarea,
+.shk-select {
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: var(--shk-text-base);
+  font-weight: var(--shk-weight-light);
+  color: var(--shk-text-strong);
+  background: var(--shk-bg-card);
+  border: 1px solid var(--shk-border-soft);
+  border-radius: var(--shk-radius-soft);
+  outline: none;
+  transition:
+    background   var(--shk-duration-fast) var(--shk-ease-out),
+    border-color var(--shk-duration-fast) var(--shk-ease-out);
+  width: 100%;
+}
+
+.shk-input::placeholder,
+.shk-textarea::placeholder { color: var(--shk-text-faint); }
+
+.shk-input:focus,
+.shk-textarea:focus,
+.shk-select:focus {
+  border-color: var(--shk-border-active);
+  background: var(--shk-bg-card-hover);
+}
+
+.shk-textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: var(--shk-line-normal);
+}
+
+.shk-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.shk-help  { font-size: var(--shk-text-xs); color: var(--shk-text-faint); }
+.shk-error { font-size: var(--shk-text-xs); color: var(--shk-status-belast); }
+
+/* Toggle (Switch) */
+.shk-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--shk-space-sm);
+  cursor: pointer;
+  user-select: none;
+}
+.shk-toggle__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.shk-toggle__slider {
+  position: relative;
+  width: 44px; height: 24px;
+  background: var(--shk-bg-card);
+  border: 1px solid var(--shk-border-medium);
+  border-radius: var(--shk-radius-pill);
+  transition: background var(--shk-duration-fast) var(--shk-ease-out);
+}
+.shk-toggle__slider::before {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: var(--shk-text-soft);
+  border-radius: 50%;
+  transition: transform var(--shk-duration-fast) var(--shk-ease-out),
+              background var(--shk-duration-fast) var(--shk-ease-out);
+}
+.shk-toggle__input:checked + .shk-toggle__slider {
+  background: var(--shk-accent-warm);
+  border-color: var(--shk-accent-warm);
+}
+.shk-toggle__input:checked + .shk-toggle__slider::before {
+  transform: translateX(20px);
+  background: var(--shk-bg-base);
+}
+
+/* Chip */
+.shk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--shk-space-xs);
+  padding: 4px 12px;
+  font-size: var(--shk-text-xs);
+  font-weight: var(--shk-weight-medium);
+  color: var(--shk-text-soft);
+  background: var(--shk-bg-card);
+  border: 1px solid var(--shk-border-soft);
+  border-radius: var(--shk-radius-pill);
+  letter-spacing: var(--shk-tracking-wide);
+  text-transform: uppercase;
+}
+.shk-chip--active {
+  color: #0e0d12;
+  background: var(--shk-accent-warm);
+  border-color: var(--shk-accent-warm);
+}
+
+
+/* =========================================================================
+   10. NAVIGATION — Tabs + Breadcrumb
+   ========================================================================= */
+
+.shk-tabs {
+  display: flex;
+  gap: var(--shk-space-xs);
+  border-bottom: 1px solid var(--shk-border-soft);
+  margin-bottom: var(--shk-space-lg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.shk-tab {
+  padding: 10px 18px;
+  font-family: inherit;
+  font-size: var(--shk-text-sm);
+  font-weight: var(--shk-weight-medium);
+  color: var(--shk-text-soft);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color var(--shk-duration-fast) var(--shk-ease-out),
+              border-color var(--shk-duration-fast) var(--shk-ease-out);
+  white-space: nowrap;
+}
+.shk-tab:hover { color: var(--shk-text-strong); }
+.shk-tab--active {
+  color: var(--shk-text-strong);
+  border-bottom-color: var(--shk-accent-warm);
+}
+
+.shk-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--shk-space-xs);
+  font-size: var(--shk-text-sm);
+  color: var(--shk-text-faint);
+  margin-bottom: var(--shk-space-md);
+}
+.shk-breadcrumb a { color: var(--shk-text-soft); }
+.shk-breadcrumb__separator { color: var(--shk-text-ghost); }
+
+
+/* =========================================================================
+   11. LISTEN
+   ========================================================================= */
+
+.shk-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--shk-space-xs);
+}
+
+.shk-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--shk-space-md);
+  padding: var(--shk-space-md);
+  background: var(--shk-bg-card);
+  backdrop-filter: blur(var(--shk-blur-card));
+  -webkit-backdrop-filter: blur(var(--shk-blur-card));
+  border: 1px solid var(--shk-border-soft);
+  border-radius: var(--shk-radius-soft);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background var(--shk-duration-fast) var(--shk-ease-out),
+    border-color var(--shk-duration-fast) var(--shk-ease-out);
+}
+.shk-list-item:hover {
+  background: var(--shk-bg-card-hover);
+  border-color: var(--shk-border-medium);
+}
+.shk-list-item--non-interactive { cursor: default; }
+.shk-list-item--non-interactive:hover {
+  background: var(--shk-bg-card);
+  border-color: var(--shk-border-soft);
+}
+
+.shk-list-item__icon {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--shk-radius-soft);
+  background: rgba(228, 165, 102, 0.10);
+  color: rgba(228, 165, 102, 0.80);
+}
+.shk-list-item__icon svg {
+  width: 18px; height: 18px;
+  stroke: currentColor; stroke-width: 1.6;
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.shk-list-item__body { flex: 1; min-width: 0; }
+.shk-list-item__title {
+  font-size: var(--shk-text-base);
+  font-weight: var(--shk-weight-regular);
+  color: var(--shk-text-strong);
+  margin: 0;
+}
+.shk-list-item__sub {
+  font-size: var(--shk-text-xs);
+  color: var(--shk-text-soft);
+  margin: 2px 0 0;
+}
+
+.shk-list-item__meta {
+  flex-shrink: 0;
+  font-size: var(--shk-text-sm);
+  color: var(--shk-text-faint);
+}
+
+
+/* =========================================================================
+   12. MODAL + TOAST
+   ========================================================================= */
+
+.shk-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: var(--shk-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--shk-space-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--shk-duration-medium) var(--shk-ease-out);
+}
+:root[data-theme="light"] .shk-modal-backdrop {
+  background: rgba(40, 28, 18, 0.22);
+}
+
+.shk-modal-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.shk-modal {
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--shk-bg-modal);
+  backdrop-filter: blur(var(--shk-blur-strong));
+  -webkit-backdrop-filter: blur(var(--shk-blur-strong));
+  border: 1px solid var(--shk-border-medium);
+  border-radius: var(--shk-radius-lg);
+  box-shadow: var(--shk-shadow-modal);
+  padding: var(--shk-space-xl);
+  transform: translateY(12px);
+  transition: transform var(--shk-duration-medium) var(--shk-ease-out);
+}
+.shk-modal-backdrop.is-open .shk-modal {
+  transform: translateY(0);
+}
+
+.shk-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--shk-space-lg);
+}
+.shk-modal__title {
+  font-size: var(--shk-text-lg);
+  font-weight: var(--shk-weight-light);
+  letter-spacing: var(--shk-tracking-soft);
+  margin: 0;
+}
+.shk-modal__close {
+  background: transparent;
+  border: none;
+  color: var(--shk-text-soft);
+  cursor: pointer;
+  padding: var(--shk-space-xs);
+  border-radius: var(--shk-radius-soft);
+  transition: color var(--shk-duration-fast) var(--shk-ease-out);
+}
+.shk-modal__close:hover { color: var(--shk-text-strong); }
+
+.shk-modal__body { margin-bottom: var(--shk-space-lg); }
+.shk-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--shk-space-sm);
+}
+
+.shk-modal--sheet {
+  max-width: none;
+  width: 100%;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  border-radius: var(--shk-radius-lg) var(--shk-radius-lg) 0 0;
+  transform: translateY(100%);
+  max-height: 75vh;
+}
+.shk-modal-backdrop.is-open .shk-modal--sheet {
+  transform: translateY(0);
+}
+
+/* Toast */
+.shk-toast-stack {
+  position: fixed;
+  bottom: var(--shk-space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--shk-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--shk-space-sm);
+  pointer-events: none;
+}
+.shk-toast {
+  padding: 10px 18px;
+  font-size: var(--shk-text-sm);
+  background: var(--shk-bg-modal);
+  backdrop-filter: blur(var(--shk-blur-strong));
+  -webkit-backdrop-filter: blur(var(--shk-blur-strong));
+  border: 1px solid var(--shk-border-medium);
+  border-radius: var(--shk-radius-pill);
+  box-shadow: var(--shk-shadow-card);
+  pointer-events: auto;
+  animation: shk-toast-in var(--shk-duration-medium) var(--shk-ease-out);
+}
+@keyframes shk-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* =========================================================================
+   13. STATUS-INDIKATOREN
+   ========================================================================= */
+
+.shk-status {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--shk-text-faint);
+}
+.shk-status--ok     { background: var(--shk-status-ok); }
+.shk-status--warn   { background: var(--shk-status-warn); }
+.shk-status--belast { background: var(--shk-status-belast); }
+.shk-status--info   { background: var(--shk-status-info); }
+
+.shk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--shk-space-xs);
+  padding: 2px 10px;
+  font-size: var(--shk-text-xs);
+  font-weight: var(--shk-weight-medium);
+  color: #0e0d12;
+  background: var(--shk-accent-warm);
+  border-radius: var(--shk-radius-pill);
+  letter-spacing: var(--shk-tracking-wide);
+}
+.shk-badge--neutral {
+  color: var(--shk-text-soft);
+  background: var(--shk-bg-card);
+  border: 1px solid var(--shk-border-soft);
+}
+
+.shk-progress {
+  height: 4px;
+  background: var(--shk-bg-card);
+  border-radius: var(--shk-radius-pill);
+  overflow: hidden;
+}
+.shk-progress__bar {
+  height: 100%;
+  background: var(--shk-accent-warm);
+  border-radius: var(--shk-radius-pill);
+  transition: width var(--shk-duration-medium) var(--shk-ease-out);
+}
+
+
+/* =========================================================================
+   14. SPEZIAL-KOMPONENTEN
+   ========================================================================= */
+
+/* ---- Avatar (Initialen-Kreis) ---- */
+.shk-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--shk-text-sm);
+  font-weight: var(--shk-weight-medium);
+  color: #0e0d12;
+  background: var(--shk-accent-warm);
+  letter-spacing: var(--shk-tracking-soft);
+  flex-shrink: 0;
+}
+.shk-avatar--small { width: 28px; height: 28px; font-size: var(--shk-text-xs); }
+.shk-avatar--large { width: 64px; height: 64px; font-size: var(--shk-text-md); }
+
+
+/* ---- DayClock — SVG-Container ---- */
+.shk-dayclock {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+}
+.shk-dayclock--halfcircle { aspect-ratio: 2 / 1; }
+
+.shk-dayclock__face {
+  fill: var(--shk-bg-card);
+  stroke: var(--shk-border-soft);
+  stroke-width: 1;
+}
+.shk-dayclock__sector {
+  opacity: 0.62;
+  transition: opacity var(--shk-duration-fast) var(--shk-ease-out);
+  cursor: pointer;
+}
+.shk-dayclock__sector:hover { opacity: 0.9; }
+.shk-dayclock__sector-label {
+  fill: var(--shk-text-soft);
+  font-size: 0.7rem;
+  font-family: var(--shk-font-sans);
+  font-weight: var(--shk-weight-medium);
+  pointer-events: none;
+}
+.shk-dayclock__hand {
+  stroke: var(--shk-text-strong);
+  stroke-linecap: round;
+  fill: none;
+}
+.shk-dayclock__hand--hour   { stroke-width: 3; }
+.shk-dayclock__hand--minute { stroke-width: 2; opacity: 0.7; }
+.shk-dayclock__center { fill: var(--shk-accent-warm); }
+.shk-dayclock__hour-mark {
+  stroke: var(--shk-text-faint);
+  stroke-width: 1;
+}
+.shk-dayclock__hour-label {
+  fill: var(--shk-text-soft);
+  font-size: 0.75rem;
+  font-family: var(--shk-font-sans);
+  font-weight: var(--shk-weight-medium);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+
+/* =========================================================================
+   15. THEME-SWITCH-BUTTON (für Settings/Heim-Header)
+   ========================================================================= */
+
+.shk-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--shk-space-sm);
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: var(--shk-text-xs);
+  font-weight: var(--shk-weight-medium);
+  color: var(--shk-text-soft);
+  background: var(--shk-bg-card);
+  border: 1px solid var(--shk-border-soft);
+  border-radius: var(--shk-radius-pill);
+  cursor: pointer;
+  letter-spacing: var(--shk-tracking-wide);
+  transition: all var(--shk-duration-fast) var(--shk-ease-out);
+}
+.shk-theme-toggle:hover {
+  color: var(--shk-text-strong);
+  border-color: var(--shk-border-medium);
+}
+
+
+/* =========================================================================
+   16. UTILITIES
+   ========================================================================= */
+
+.shk-hidden { display: none !important; }
+.shk-visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.shk-spacer-xs { height: var(--shk-space-xs); }
+.shk-spacer-sm { height: var(--shk-space-sm); }
+.shk-spacer-md { height: var(--shk-space-md); }
+.shk-spacer-lg { height: var(--shk-space-lg); }
+.shk-spacer-xl { height: var(--shk-space-xl); }
+
+.shk-divider {
+  height: 1px;
+  background: var(--shk-border-soft);
+  margin: var(--shk-space-md) 0;
+  border: 0;
+}
+
+.shk-fade-in {
+  animation: shk-fade-up var(--shk-duration-medium) var(--shk-ease-out);
+}
+@keyframes shk-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* "Atmender" Akzent — sehr seltener Einsatz, für besondere Momente */
+.shk-breathe {
+  animation: shk-breathe var(--shk-duration-breath) var(--shk-ease-in-out) infinite alternate;
+}
+@keyframes shk-breathe {
+  from { opacity: 0.7; }
+  to   { opacity: 1.0; }
+}
+
+
+/* =========================================================================
+   17. LADE-, LEER-, FEHLER-ZUSTÄNDE
+   ========================================================================= */
+
+.shk-loading {
+  padding: var(--shk-space-xl) var(--shk-space-md);
+  text-align: center;
+  color: var(--shk-text-faint);
+  font-style: italic;
+  font-weight: var(--shk-weight-light);
+}
+
+.shk-empty {
+  padding: var(--shk-space-xl) var(--shk-space-md);
+  text-align: center;
+  color: var(--shk-text-faint);
+  font-weight: var(--shk-weight-light);
+}
+
+.shk-error-block {
+  padding: var(--shk-space-lg);
+  text-align: center;
+  border-radius: var(--shk-radius-md);
+  background: rgba(200, 116, 106, 0.08);
+  border: 1px solid rgba(200, 116, 106, 0.18);
+  color: var(--shk-text-soft);
+}
+
+
+/* =========================================================================
+   18. ICON-DEFAULTS
+   ========================================================================= */
+
+.shk-icon {
+  width: 20px; height: 20px;
+  stroke: currentColor; stroke-width: 1.6;
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.shk-icon--sm { width: 16px; height: 16px; }
+.shk-icon--lg { width: 28px; height: 28px; }
+.shk-icon--xl { width: 40px; height: 40px; }
+
+
+/* =========================================================================
+   19. RESPONSIVE HELPERS
+   ========================================================================= */
+
+@media (max-width: 539px) {
+  .shk-hide-on-mobile { display: none !important; }
+}
+@media (min-width: 540px) and (max-width: 899px) {
+  .shk-hide-on-tablet { display: none !important; }
+}
+@media (min-width: 900px) {
+  .shk-hide-on-desktop { display: none !important; }
+}
+
+
+/* =========================================================================
+   20. REDUCED MOTION  (SHIKSHA respektiert OS-Settings)
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
