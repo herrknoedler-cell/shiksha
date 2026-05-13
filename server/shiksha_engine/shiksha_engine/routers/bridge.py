@@ -36,9 +36,11 @@ router = APIRouter()
 # Whitelist erlaubter Path-Prefixes (Spec §5.2).
 # Diese Prefixes referenzieren Endpoints der alten Welt, die wir
 # pro-Modul-Port aus dieser Liste streichen werden.
+#
+# Bereits portiert (NICHT mehr in der Whitelist):
+#   /kita/children  → shiksha_core.persons (kind=kind),  Schritt 5.5.3
+#   /kita/staff     → shiksha_core.persons (kind=staff), Schritt 5.5.3
 ALLOWED_PREFIXES = (
-    "/kita/children",
-    "/kita/staff",
     "/kita/calendar",
     "/kita/anwesenheit",
     "/kita/identity",

@@ -73,7 +73,7 @@ heim_cards:
     title: "Personal heute"
     subtitle_template: "Wer ist da, wer fehlt"
     icon: team
-    action_url: "/personal.html"
+    action_url: "/personen.html?tab=staff"
     edition_scope: ["kita"]
     role_scope: ["leitung", "developer"]
     time_priority:
@@ -82,6 +82,20 @@ heim_cards:
       evening: 7
       night: 8
     category: core
+
+  - id: stammdaten
+    title: "Stammdaten"
+    subtitle_template: "Kinder und Mitarbeiter pflegen"
+    icon: book
+    action_url: "/personen.html"
+    edition_scope: ["kita"]
+    role_scope: ["leitung", "developer"]
+    time_priority:
+      morning: 8
+      afternoon: 8
+      evening: 8
+      night: 9
+    category: admin
 
   - id: abholer_pruefen
     title: "Abholer prüfen"
