@@ -35,6 +35,7 @@ def create_app() -> FastAPI:
             {"name": "tools",    "description": "Tools — Function-Call-Endpoints (log_observation, log_friction, …)"},
             {"name": "heim",     "description": "Heim — Karten-Liste pro Operator-Rolle + Tenant-Konfiguration"},
             {"name": "bridge",   "description": "Bridge — Auth-Proxy zur alten Welt (Phase-1.5-Übergang)"},
+            {"name": "persons",  "description": "Persons — Stammdaten (Kinder, Mitarbeiter, später Teilnehmer/Gäste)"},
             {"name": "dev",      "description": "Developer-Only — Stats, Persona-Editor, Operator-Liste, Audit-Logs"},
             {"name": "meta",     "description": "Meta — Health, Root"},
         ],
@@ -57,7 +58,7 @@ def create_app() -> FastAPI:
     app.add_middleware(RateLimitMiddleware)
 
     # ---- Router ----
-    from .routers import auth, bridge, chat, dev, heim, memory, sessions, tools  # noqa: E402
+    from .routers import auth, bridge, chat, dev, heim, memory, persons, sessions, tools  # noqa: E402
 
     app.include_router(auth.router,     prefix="/api/v1/auth",     tags=["auth"])
     app.include_router(chat.router,     prefix="/api/v1/chat",     tags=["chat"])
@@ -66,6 +67,7 @@ def create_app() -> FastAPI:
     app.include_router(tools.router,    prefix="/api/v1/tools",    tags=["tools"])
     app.include_router(heim.router,     prefix="/api/v1/heim",     tags=["heim"])
     app.include_router(bridge.router,   prefix="/api/v1/bridge",   tags=["bridge"])
+    app.include_router(persons.router,  prefix="/api/v1/persons",  tags=["persons"])
     app.include_router(dev.router,      prefix="/api/v1/dev",      tags=["dev"])
 
     # ---- Health-Check ----
