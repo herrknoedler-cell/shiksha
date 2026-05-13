@@ -188,6 +188,15 @@
 
           <div id="form-error" class="shk-error shk-hidden"></div>
         </form>
+
+        <!-- =========================================================
+             DETAIL-BLOCKS  —  Read-only Sektionen aus metadata
+             Erscheinen nur, wenn Daten vorhanden sind (lazy via getPerson)
+             ========================================================= -->
+        <div id="detail-blocks" class="shk-stack shk-hidden"
+             style="margin-top: var(--shk-space-lg);
+                    padding-top: var(--shk-space-md);
+                    border-top: 1px solid var(--shk-color-border, rgba(255,255,255,0.08));"></div>
       </div>
 
       <div class="shk-modal__footer">
@@ -233,11 +242,23 @@
     initShikshaUI({ context: 'personen' });
 
     // ----------- State -----------
+    // Initial-Tab aus ?tab=staff lesen (Verlinkung von Heim-Karte "Personal heute")
+    const urlParams = new URLSearchParams(location.search);
+    const initialTab = urlParams.get('tab') === 'staff' ? 'staff' : 'kind';
+
     const state = {
-      currentKind: 'kind',     // aktueller Tab
+      currentKind: initialTab,
       searchQuery: '',
       persons: { kind: [], staff: [] },
     };
+
+    // Tabs entsprechend der URL initialisieren
+    document.querySelectorAll('[data-shk-tab]').forEach(t => {
+      t.classList.toggle('shk-tab--active', t.dataset.shkTab === initialTab);
+    });
+    document.querySelectorAll('[data-shk-tab-panel]').forEach(p => {
+      p.classList.toggle('shk-hidden', p.dataset.shkTabPanel !== initialTab);
+    });
 
     // ----------- DOM-Refs -----------
     const $statsLine     = document.getElementById('stats-line');
@@ -438,6 +459,146 @@
       document.getElementById('f-active').checked = true;
       $formError.textContent = '';
       $formError.classList.add('shk-hidden');
+      clearDetailBlocks();
+    }
+
+    // -----------------------------------------------------------------
+    // DETAIL-BLOCKS — Read-only Sektionen aus metadata_ (Medical/Profile/…)
+    // -----------------------------------------------------------------
+    const $detailBlocks = document.getElementById('detail-blocks');
+
+    function clearDetailBlocks() {
+      $detailBlocks.innerHTML = '';
+      $detailBlocks.classList.add('shk-hidden');
+    }
+
+    function formatValue(v) {
+      if (v === true)  return 'ja';
+      if (v === false) return 'nein';
+      if (v === null || v === undefined || v === '') return '—';
+      if (Array.isArray(v)) {
+        if (v.length === 0) return '—';
+        return v.map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(', ');
+      }
+      if (typeof v === 'object') return JSON.stringify(v);
+      return String(v);
+    }
+
+    function renderDetailBlocks(p) {
+      clearDetailBlocks();
+      const md = p.metadata || p.metadata_ || {};
+
+      const addBlock = (title, items) => {
+        const filled = items.filter(([_, v]) => v !== null && v !== undefined && v !== '');
+        if (filled.length === 0) return;
+
+        const section = document.createElement('section');
+        section.style.marginBottom = 'var(--shk-space-md)';
+
+        const h = document.createElement('h4');
+        h.textContent = title;
+        h.style.fontSize = '0.75rem';
+        h.style.fontWeight = '600';
+        h.style.letterSpacing = '0.08em';
+        h.style.textTransform = 'uppercase';
+        h.style.color = 'var(--shk-color-text-faint, var(--shk-color-text-soft))';
+        h.style.marginBottom = 'var(--shk-space-xs)';
+        section.appendChild(h);
+
+        filled.forEach(([label, value]) => {
+          const row = document.createElement('p');
+          row.style.margin = 'var(--shk-space-xs) 0';
+          row.style.fontSize = '0.875rem';
+          row.style.lineHeight = '1.4';
+
+          const labelEl = document.createElement('span');
+          labelEl.textContent = label + ': ';
+          labelEl.style.color = 'var(--shk-color-text-soft)';
+          row.appendChild(labelEl);
+
+          const valEl = document.createElement('span');
+          valEl.textContent = formatValue(value);
+          valEl.style.color = 'var(--shk-color-text)';
+          row.appendChild(valEl);
+
+          section.appendChild(row);
+        });
+
+        $detailBlocks.appendChild(section);
+      };
+
+      // Medical-Cluster
+      if (md.medical) {
+        addBlock('Medizinisch', [
+          ['Allergien',     md.medical.allergies],
+          ['Medikamente',   md.medical.medications],
+          ['Med. Notizen',  md.medical.medical_notes],
+          ['Ernährung',     md.medical.dietary_notes],
+        ]);
+      }
+
+      // Compliance
+      if (md.compliance) {
+        addBlock('Einverständnis', [
+          ['Foto-Erlaubnis', md.compliance.photo_consent],
+        ]);
+      }
+
+      // Profile
+      if (md.profile) {
+        addBlock('Profil', [
+          ['Nationalität',   md.profile.nationality],
+          ['Muttersprache',  md.profile.native_language],
+        ]);
+      }
+
+      // Safeguarding — diskret
+      if (md.safeguarding && md.safeguarding.notes_safeguarding) {
+        addBlock('Safeguarding', [
+          ['Notiz', md.safeguarding.notes_safeguarding],
+        ]);
+      }
+
+      // Geburtsjahr-only (Datenschutz)
+      if (md.birth_year_only) {
+        addBlock('Geburt', [
+          ['Geburtsjahr', md.birth_year_only],
+        ]);
+      }
+
+      // Anstellung (Staff)
+      if (md.employment) {
+        addBlock('Anstellung', [
+          ['Rolle',           md.employment.role],
+          ['Anstellungsart',  md.employment.employment_type],
+          ['Wochenstunden',   md.employment.weekly_hours],
+          ['Vertragsart',     md.employment.contract_type],
+          ['Qualifikation',   md.employment.qualification],
+        ]);
+      }
+
+      // Beziehungen (Kinder)
+      if (md.relations) {
+        const items = [];
+        if (Array.isArray(md.relations.parents) && md.relations.parents.length > 0) {
+          items.push(['Eltern', md.relations.parents]);
+        }
+        if (Array.isArray(md.relations.pickup_authorized) && md.relations.pickup_authorized.length > 0) {
+          items.push(['Abholberechtigt', md.relations.pickup_authorized]);
+        }
+        if (items.length > 0) addBlock('Beziehungen', items);
+      }
+
+      // Operator-Link-Hint (Staff → später automatisch verlinkt)
+      if (md.operator_link_hint && md.operator_link_hint.email) {
+        addBlock('Verknüpfung', [
+          ['Login-E-Mail', md.operator_link_hint.email],
+        ]);
+      }
+
+      if ($detailBlocks.children.length > 0) {
+        $detailBlocks.classList.remove('shk-hidden');
+      }
     }
 
     function fillForm(p) {
@@ -463,13 +624,22 @@
       openModal($modal);
     }
 
-    function openEditModal(p) {
+    async function openEditModal(p) {
       clearForm();
-      fillForm(p);
+      fillForm(p);  // Form mit Listen-Daten (basics)
       $modalTitle.textContent = p.kind === 'kind' ? 'Kind bearbeiten' : 'Mitarbeiter bearbeiten';
       $deleteBtn.classList.remove('shk-hidden');
       $fieldGroupId.classList.toggle('shk-hidden', p.kind !== 'kind');
       openModal($modal);
+
+      // Lazy: volle Detail-Daten (inkl. metadata) nachladen
+      try {
+        const full = await client.getPerson(p.id);
+        fillForm(full);            // Form mit vollen Feldern (address/email/phone)
+        renderDetailBlocks(full);  // Metadata-Sektionen
+      } catch (err) {
+        console.warn('Detail konnte nicht geladen werden', err);
+      }
     }
 
     $addBtn.addEventListener('click', openCreateModal);
