@@ -19,7 +19,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from shiksha_engine.db import Base
+from shiksha_engine.db import Base, schema_name
+from ._base import schema_args
 
 
 # ---------------------------------------------------------- Type-Konstanten
@@ -63,14 +64,14 @@ class Event(Base):
     __tablename__ = "events"
     __table_args__ = (
         UniqueConstraint("legacy_id", "legacy_source", name="uq_events_legacy"),
-        {"schema": "shiksha_core"},
+        schema_args(),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     tenant_org_id: Mapped[str] = mapped_column(
         Text,
-        ForeignKey("shiksha_core.organizations.id", ondelete="CASCADE"),
+        ForeignKey(f"{schema_name()}.organizations.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -107,7 +108,7 @@ class Event(Base):
     # Audit
     operator_id: Mapped[str | None] = mapped_column(
         Text,
-        ForeignKey("shiksha_core.operators.id", ondelete="SET NULL"),
+        ForeignKey(f"{schema_name()}.operators.id", ondelete="SET NULL"),
         nullable=True,
     )
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
