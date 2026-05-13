@@ -346,8 +346,9 @@ def import_source(
             stats["inserted"] += 1
             label = "INSERT"
             if not dry_run:
+                # id wird vom DB-autoincrement gesetzt — Person.id ist Integer,
+                # nicht UUID (Migration 0007 + Model person.py).
                 person = Person(
-                    id=uuid4(),
                     tenant_org_id=tenant,
                     operator_id=operator_id,
                     active=True,
