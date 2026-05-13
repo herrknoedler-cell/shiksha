@@ -142,9 +142,11 @@ def test_filter_by_from_to(client, mira_token):
         start_at=(now + timedelta(hours=1)).isoformat(),
     )
 
+    # isoformat() liefert '+00:00' — in URL wird '+' zu ' '. Z-Suffix vermeidet das.
+    from_iso = now.isoformat().replace("+00:00", "Z")
+    to_iso = (now + timedelta(days=1)).isoformat().replace("+00:00", "Z")
     r = client.get(
-        f"/api/v1/calendar/events?from={now.isoformat()}&to={(now + timedelta(days=1)).isoformat()}"
-        "&include_birthdays=false",
+        f"/api/v1/calendar/events?from={from_iso}&to={to_iso}&include_birthdays=false",
         headers={"Authorization": f"Bearer {mira_token}"},
     )
     assert r.status_code == 200
@@ -306,9 +308,10 @@ def test_virtual_birthdays_merged(client, mira_token, krummelus_with_birthdays):
     from_ = now.replace(month=1, day=1)
     to = now.replace(year=now.year + 1, month=1, day=1)
 
+    from_iso = from_.isoformat().replace("+00:00", "Z")
+    to_iso = to.isoformat().replace("+00:00", "Z")
     r = client.get(
-        f"/api/v1/calendar/events?from={from_.isoformat()}&to={to.isoformat()}"
-        f"&include_birthdays=true",
+        f"/api/v1/calendar/events?from={from_iso}&to={to_iso}&include_birthdays=true",
         headers={"Authorization": f"Bearer {mira_token}"},
     )
     assert r.status_code == 200

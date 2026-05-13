@@ -50,7 +50,7 @@ class EventListItem(BaseModel):
 
 class EventOut(BaseModel):
     """Detail-View mit voller metadata + resolved participants."""
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     id: Optional[int] = None
     tenant_org_id: str
@@ -63,7 +63,9 @@ class EventOut(BaseModel):
     all_day: bool
     participants: list[int] = []
     participants_resolved: list[ParticipantBrief] = []
-    metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    # Input-Alias liest von SQLAlchemy's metadata_ (Naming-Collision-Vermeidung).
+    # Output bleibt JSON-Key 'metadata' (field-name) durch populate_by_name=True.
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     operator_id: Optional[str] = None
     active: bool = True
     created_at: Optional[datetime] = None

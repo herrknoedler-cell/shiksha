@@ -305,7 +305,6 @@ def krummelus_with_birthdays(db_session, calendar_mira):
         tenant_org_id=calendar_mira.org_id, kind="kind",
         given_name="Geburtstagskind", family_name="Test",
         birth_date=target, active=True, operator_id=calendar_mira.id,
-        legacy_id="bday-test", legacy_source="test",
         created_at=datetime.now(), updated_at=datetime.now(),
     )
     db_session.add(p)
