@@ -4,8 +4,6 @@
 
 Die Liste wird beim Onboarding eines neuen Build-Schritts kurz quergelesen — wenn ein Punkt akut wird, kommt er in den Build-Plan.
 
-Historisches Audit-Trail (RESOLVED-Einträge mit Commit-Hash) lebt weiter in [`tech-debt.md`](tech-debt.md). Diese Datei hier ist die lebendige Open-Items-Liste mit T-IDs.
-
 ---
 
 ## T-001 — Pytest leakt in `shiksha_core` (Test-Isolation kaputt)
@@ -123,6 +121,21 @@ Historisches Audit-Trail (RESOLVED-Einträge mit Commit-Hash) lebt weiter in [`t
 **Konkrete Lösung:**
 1. Konvention dokumentieren in `SHIKSHA_REPO_MAP.md` (kommt aus T-002): "Neue Tabellen verwenden `metadata_` als Spaltenname direkt."
 2. Migration für Bestand: einmaliger Sweep, der für `persons`, `memories`, etc. die Spalten umbenennt und das Alias entfernt — gepaart mit Model-Updates.
+
+---
+
+## T-008 — Attendance Read-Side-Merge-Cache (Performance)
+
+**Was:** `GET /api/v1/attendance/day` macht einen Read-Side-Merge zwischen `attendance_records` (manuell/Import) und Calendar-Events (Urlaub/Abwesenheit). Für Krummelus-Maßstab (23 Persons, wenige Events) ist das unkritisch. Bei N>100 Persons + viele Events wird's O(events × avg_participants_pro_event) — überschaubar, aber pro Day-View ein DB-Roundtrip mit Calendar-Query.
+
+**Warum bisher offen:** Krummelus-Pilot reicht aktuell. Premature optimization sonst.
+
+**Wann fällig:** Beim zweiten Tenant mit > 80 Persons (oder wenn `GET /day` > 500ms im p95 läuft).
+
+**Konkrete Lösung:**
+1. Tag-Cache mit TTL=60s in `services/attendance_cache.py` — Key: `(tenant_org_id, date, role-Signatur)`
+2. Cache-Invalidate bei POST/PATCH/DELETE auf `/records` oder `/events` (Calendar-Brücke)
+3. Optional Redis statt In-Memory wenn Multi-Worker (siehe auch WebAuthn-Challenge-Store-Notiz aus Schritt 5.5.1)
 
 ---
 
