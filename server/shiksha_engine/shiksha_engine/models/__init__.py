@@ -1,5 +1,6 @@
 """SQLAlchemy Models — alle Tabellen im shiksha_core-Schema."""
 
+from .attendance import AttendanceRecord, AttendanceSettings
 from .audit import AuditLog
 from .event import Event
 from .friction import FrictionPoint
@@ -15,6 +16,8 @@ from .session import Session
 from .tenant_heim_config import TenantHeimConfig
 
 __all__ = [
+    "AttendanceRecord",
+    "AttendanceSettings",
     "AuditLog",
     "Event",
     "FrictionPoint",

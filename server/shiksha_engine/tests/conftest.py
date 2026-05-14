@@ -46,6 +46,7 @@ def db(setup_database) -> Generator[Session, None, None]:
         "audit_logs", "friction_points", "observations", "memory_entries",
         "messages", "sessions", "persona_prompts",
         "rate_limit_buckets", "tenant_heim_config",
+        "attendance_records", "attendance_settings",
         "events", "persons",
         "operators", "organizations",
     ]
