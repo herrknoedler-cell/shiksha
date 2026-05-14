@@ -180,7 +180,12 @@ def compute_ratio_status(
         kid_records, persons_by_id, settings.staff_ratio, day
     )
 
-    if staff_peak >= required + 1:
+    if required == 0:
+        # Keine Kinder anwesend → Personalschlüssel trivial erfüllt
+        status = "green"
+        label = "grün ✓"
+        explanation = None
+    elif staff_peak >= required + 1:
         status = "green"
         label = "grün ✓"
         explanation = None
