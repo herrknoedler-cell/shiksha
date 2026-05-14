@@ -54,19 +54,48 @@ heim_cards:
       night: 8
     category: core
 
-  - id: kalender_today
+  - id: heute
     title: "Heute"
-    subtitle_template: "{event_count} Termine"
-    icon: calendar
-    action_url: "/kalender.html"
+    subtitle_template: "{event_count_today} Termine · {staff_count_today} im Haus"
+    icon: sun
+    action_url: "/kalender.html?view=tag"
     edition_scope: ["kita"]
     role_scope: ["leitung", "padagoge", "developer"]
-    data_provider: kita_kalender_stub
+    data_provider: calendar_summary
     time_priority:
-      morning: 2
-      afternoon: 3
+      morning: 1
+      afternoon: 2
       evening: 6
+      night: 8
+    category: core
+
+  - id: diese_woche
+    title: "Diese Woche"
+    subtitle_template: "{event_count_week} Termine"
+    icon: calendar-week
+    action_url: "/kalender.html?view=woche"
+    edition_scope: ["kita"]
+    role_scope: ["leitung", "padagoge", "developer"]
+    data_provider: calendar_summary
+    time_priority:
+      morning: 3
+      afternoon: 4
+      evening: 5
       night: 7
+    category: core
+
+  - id: kalender
+    title: "Kalender"
+    subtitle_template: ""
+    icon: calendar
+    action_url: "/kalender.html?view=monat"
+    edition_scope: ["kita"]
+    role_scope: ["leitung", "padagoge", "eltern", "developer"]
+    time_priority:
+      morning: 7
+      afternoon: 7
+      evening: 7
+      night: 9
     category: core
 
   - id: personal_heute

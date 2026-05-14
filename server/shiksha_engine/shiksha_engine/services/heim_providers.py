@@ -126,11 +126,46 @@ def _kita_anwesenheit_stub(operator: Operator, db: DBSession) -> dict:
 
 @register_provider("kita_kalender_stub")
 def _kita_kalender_stub(operator: Operator, db: DBSession) -> dict:
-    """Stub für Kalender. Liefert Mock-Daten."""
+    """Stub für Kalender. Liefert Mock-Daten.
+
+    Nicht mehr in kita.yaml referenziert seit 5.5.4.6.a — die Karte 'heute'
+    nutzt jetzt calendar_summary. Stub-Funktion bleibt für Rückwärts-Kompat
+    falls jemand sie via API direkt aufruft.
+    """
     return {
         "event_count":    0,
         "first_event_at": None,
         "visible":        True,
+    }
+
+
+# ===================================================================
+# Calendar-Provider (5.5.4.6.a)
+# ===================================================================
+
+@register_provider("calendar_summary")
+def _calendar_summary(operator: Operator, db: DBSession) -> dict:
+    """Provider für Heim-Karten 'Heute', 'Diese Woche', 'Kalender'.
+
+    Tenant wird aus operator.org_id abgeleitet (wie bei allen Providern).
+    Liefert drei Counter, die im kita.yaml-Template eingesetzt werden:
+      event_count_today  — Anzahl Events heute
+      staff_count_today  — Staff ohne Urlaub/Abwesenheit heute
+      event_count_week   — Anzahl Events im Mo-So-Fenster
+    """
+    from shiksha_engine.services.calendar_query import (
+        compute_event_stats,
+        compute_today_summary,
+    )
+    if not operator.org_id:
+        return {"event_count_today": 0, "staff_count_today": 0, "event_count_week": 0, "visible": False}
+    today = compute_today_summary(db, operator.org_id, operator)
+    stats = compute_event_stats(db, operator.org_id, operator)
+    return {
+        "event_count_today": today["event_count_today"],
+        "staff_count_today": today["staff_count_today"],
+        "event_count_week":  stats["this_week"],
+        "visible":           True,
     }
 
 
