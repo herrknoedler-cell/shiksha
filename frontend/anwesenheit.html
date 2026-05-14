@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="de" data-edition="kita">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>SHIKSHA · Anwesenheit</title>
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('shiksha-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="./shiksha-ui.v1.0.0.css">
+  <link rel="stylesheet" href="./editions-css/kita.v1.0.0.css">
+
+  <style>
+    /* ============ ANWESENHEIT-VIEW ============ */
+    .shk-att-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--shk-space-sm);
+      align-items: baseline;
+      font-size: 0.9375rem;
+    }
+    .shk-att-stats__count { font-weight: 600; }
+    .shk-att-ratio {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px var(--shk-space-sm);
+      border-radius: 999px;
+      font-size: 0.8125rem;
+      border: 1px solid var(--shk-color-border, rgba(255,255,255,0.08));
+    }
+    .shk-att-ratio[data-status="green"] {
+      color: var(--shk-color-accent-strong, hsl(140, 50%, 45%));
+      border-color: currentColor;
+    }
+    .shk-att-ratio[data-status="yellow"] {
+      color: var(--shk-edition-warm, hsl(40, 70%, 55%));
+      border-color: currentColor;
+    }
+    .shk-att-ratio[data-status="red"] {
+      color: var(--shk-color-danger, hsl(0, 65%, 60%));
+      border-color: currentColor;
+      animation: shk-att-pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes shk-att-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .shk-att-section {
+      margin-top: var(--shk-space-lg);
+    }
+    .shk-att-section__title {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--shk-color-text-faint);
+      margin-bottom: var(--shk-space-sm);
+      padding-left: var(--shk-space-xs);
+    }
+
+    .shk-att-row {
+      display: flex;
+      align-items: center;
+      gap: var(--shk-space-md);
+      padding: var(--shk-space-sm) var(--shk-space-md);
+      background: var(--shk-color-surface);
+      border-radius: var(--shk-radius-md, 12px);
+      border: 1px solid var(--shk-color-border, rgba(255,255,255,0.08));
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .shk-att-row + .shk-att-row { margin-top: 6px; }
+    .shk-att-row:hover {
+      border-color: var(--shk-color-text-soft);
+    }
+
+    .shk-att-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.8125rem;
+      color: #0e0d12;
+      flex-shrink: 0;
+      transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+    /* Saturation-Toggle: nicht-anwesende Avatare sind gedimmt */
+    .shk-att-row[data-present="false"] .shk-att-avatar {
+      filter: saturate(0.25);
+      opacity: 0.55;
+    }
+    .shk-att-row[data-present="false"] .shk-att-row__name {
+      color: var(--shk-color-text-soft);
+    }
+
+    .shk-att-row__body {
+      flex: 1;
+      min-width: 0;
+    }
+    .shk-att-row__name {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      line-height: 1.25;
+    }
+    .shk-att-row__sub {
+      font-size: 0.75rem;
+      color: var(--shk-color-text-soft);
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+
+    .shk-att-row__status {
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .shk-att-row__status[data-status="anwesend"] {
+      background: var(--shk-edition-accent, hsl(160, 40%, 55%));
+      color: #0e0d12;
+    }
+    .shk-att-row__status[data-status="krank"] {
+      background: var(--shk-color-danger-soft, hsl(0, 50%, 80%));
+      color: var(--shk-color-danger, hsl(0, 60%, 40%));
+    }
+    .shk-att-row__status[data-status="urlaub"] {
+      background: var(--shk-edition-warm, hsl(28, 50%, 75%));
+      color: #5a4a35;
+    }
+    .shk-att-row__status[data-status="abwesend"],
+    .shk-att-row__status[data-status="unbekannt"] {
+      background: transparent;
+      color: var(--shk-color-text-faint);
+      border: 1px dashed var(--shk-color-border);
+    }
+    .shk-att-row__status[data-status="fortbildung"] {
+      background: var(--shk-color-info-soft, hsl(220, 50%, 85%));
+      color: var(--shk-color-info, hsl(220, 50%, 45%));
+    }
+    .shk-att-row__status[data-status="gast"] {
+      background: var(--shk-color-violet-soft, hsl(280, 40%, 80%));
+      color: var(--shk-color-violet, hsl(280, 40%, 45%));
+    }
+
+    /* Status-Modal: Segmented-Control */
+    .shk-att-status-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid var(--shk-color-border, rgba(255,255,255,0.08));
+      border-radius: var(--shk-radius-md, 12px);
+    }
+    .shk-att-status-option {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s ease;
+      background: transparent;
+      color: var(--shk-color-text);
+      border: none;
+    }
+    .shk-att-status-option:hover {
+      background: var(--shk-color-surface-hover, rgba(255,255,255,0.04));
+    }
+    .shk-att-status-option--active {
+      background: var(--shk-edition-primary);
+      color: #0e0d12;
+      font-weight: 600;
+    }
+
+    .shk-att-cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--shk-space-sm);
+      margin-bottom: var(--shk-space-md);
+    }
+    .shk-att-cal-nav__date {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      text-align: center;
+      flex: 1;
+    }
+
+    .shk-att-empty {
+      text-align: center;
+      padding: var(--shk-space-xl) var(--shk-space-md);
+      color: var(--shk-color-text-faint);
+      font-size: 0.875rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shk-shell">
+
+    <header class="shk-header">
+      <nav class="shk-breadcrumb shk-fade-in">
+        <a href="./heim.html">Heim</a>
+        <span class="shk-breadcrumb__separator">·</span>
+        <span>Anwesenheit</span>
+      </nav>
+
+      <div class="shk-row shk-fade-in" style="justify-content: space-between; align-items: flex-end; gap: var(--shk-space-md);">
+        <div>
+          <h1 class="shk-heading">Anwesend</h1>
+          <p class="shk-subtitle shk-att-stats" id="stats-line" style="margin-top: var(--shk-space-xs);">
+            &nbsp;
+          </p>
+        </div>
+        <div class="shk-row" style="gap: var(--shk-space-sm); flex-shrink: 0;">
+          <button class="shk-theme-toggle" data-shk-theme-toggle aria-label="Theme umschalten">
+            <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-weather-sun"/></svg>
+            <span data-shk-theme-label>Modus</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="shk-tabs shk-fade-in" data-shk-tabs>
+      <button class="shk-tab shk-tab--active" data-shk-tab="heute">Heute</button>
+      <button class="shk-tab" data-shk-tab="uebersicht" disabled title="Kommt in 5.5.5.5">Übersicht</button>
+      <button class="shk-tab" data-shk-tab="korrekturen" disabled title="Kommt in 5.5.5.5">Korrekturen</button>
+    </div>
+
+    <div class="shk-att-cal-nav shk-fade-in">
+      <button class="shk-btn shk-btn--ghost shk-btn--sm" id="nav-prev" aria-label="Vorheriger Tag">
+        <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-chevron-left"/></svg>
+      </button>
+      <button class="shk-btn shk-btn--ghost shk-btn--sm" id="nav-today">heute</button>
+      <div class="shk-att-cal-nav__date" id="nav-date">Heute</div>
+      <button class="shk-btn shk-btn--ghost shk-btn--sm" id="nav-next" aria-label="Nächster Tag">
+        <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-chevron-right"/></svg>
+      </button>
+    </div>
+
+    <main>
+      <section data-shk-tab-panel="heute">
+        <div class="shk-att-section">
+          <div class="shk-att-section__title">Kinder</div>
+          <div id="kids-list">
+            <div class="shk-loading">Einen Moment.</div>
+          </div>
+        </div>
+        <div class="shk-att-section">
+          <div class="shk-att-section__title">Mitarbeiter</div>
+          <div id="staff-list">
+            <div class="shk-loading">Einen Moment.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer style="margin-top: auto; padding-top: var(--shk-space-lg); text-align: center;">
+      <span class="shk-text-tiny shk-text-faint" style="letter-spacing: var(--shk-tracking-wide);">SHIKSHA</span>
+    </footer>
+  </div>
+
+
+  <!-- MODAL: Status setzen -->
+  <div class="shk-modal-backdrop" id="status-modal">
+    <div class="shk-modal">
+      <div class="shk-modal__header">
+        <h2 class="shk-modal__title" id="modal-title">Person</h2>
+        <button class="shk-modal__close" data-shk-modal-close aria-label="Schließen">
+          <svg class="shk-icon"><use href="./shiksha-icons.v1.0.0.svg#icon-close"/></svg>
+        </button>
+      </div>
+
+      <div class="shk-modal__body">
+        <form id="status-form" class="shk-stack">
+          <input type="hidden" id="f-person-id">
+          <input type="hidden" id="f-record-id">
+          <input type="hidden" id="f-virtual">
+          <input type="hidden" id="f-source-event-id">
+
+          <div class="shk-field">
+            <label class="shk-label">Status</label>
+            <div class="shk-att-status-options" id="status-options">
+              <!-- gefüllt von JS -->
+            </div>
+          </div>
+
+          <div class="shk-row" style="gap: var(--shk-space-md);">
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-check-in">Check-In</label>
+              <input class="shk-input" type="time" id="f-check-in">
+            </div>
+            <div class="shk-field" style="flex: 1;">
+              <label class="shk-label" for="f-check-out">Check-Out</label>
+              <input class="shk-input" type="time" id="f-check-out">
+            </div>
+          </div>
+
+          <div class="shk-field" id="field-group">
+            <label class="shk-label" for="f-group">Gruppe</label>
+            <input class="shk-input" type="number" id="f-group" min="1" placeholder="z.B. 1">
+          </div>
+
+          <div class="shk-field">
+            <label class="shk-label" for="f-notes">Notiz</label>
+            <textarea class="shk-textarea" id="f-notes" rows="2"></textarea>
+          </div>
+
+          <div id="form-error" class="shk-error shk-hidden"></div>
+        </form>
+      </div>
+
+      <div class="shk-modal__footer">
+        <button class="shk-btn shk-btn--danger shk-hidden" id="delete-btn">
+          <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-trash"/></svg>
+          Löschen
+        </button>
+        <button class="shk-btn shk-btn--ghost" data-shk-modal-close>Abbrechen</button>
+        <button class="shk-btn shk-btn--primary" id="save-btn">
+          <svg class="shk-icon shk-icon--sm"><use href="./shiksha-icons.v1.0.0.svg#icon-check"/></svg>
+          Speichern
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <script type="module">
+    import { ShikshaClient, ShikshaAuthError } from './shiksha-client.js';
+    import { initShikshaUI, openModal, closeModal, avatarInitials } from './shiksha-ui.v1.0.0.js';
+
+    const client = new ShikshaClient();
+    if (!client.hasValidToken()) {
+      const nextParam = encodeURIComponent(location.pathname + location.search);
+      location.replace(`./presence_switch.html?next=${nextParam}`);
+    }
+
+    initShikshaUI({ context: 'anwesenheit' });
+
+    const TZ = client.getOrgTimezone();
+    const STATUS_OPTIONS = [
+      ['anwesend', 'Anwesend'],
+      ['krank', 'Krank'],
+      ['urlaub', 'Urlaub'],
+      ['abwesend', 'Abwesend'],
+      ['fortbildung', 'Fortbildung'],
+      ['gast', 'Gast'],
+    ];
+    const PRESENT_STATUS = new Set(['anwesend', 'gast']);
+
+    const url = new URL(location.href);
+    const initialDateParam = url.searchParams.get('d');
+
+    const state = {
+      currentDate: initialDateParam ? new Date(initialDateParam + 'T00:00:00') : new Date(),
+      dayData: null,
+      currentPerson: null,    // im Modal
+      currentRecord: null,    // im Modal
+      currentStatus: 'anwesend',
+    };
+
+    // ----- DOM
+    const $statsLine = document.getElementById('stats-line');
+    const $navDate = document.getElementById('nav-date');
+    const $navPrev = document.getElementById('nav-prev');
+    const $navNext = document.getElementById('nav-next');
+    const $navToday = document.getElementById('nav-today');
+    const $kidsList = document.getElementById('kids-list');
+    const $staffList = document.getElementById('staff-list');
+    const $modal = document.getElementById('status-modal');
+    const $modalTitle = document.getElementById('modal-title');
+    const $form = document.getElementById('status-form');
+    const $deleteBtn = document.getElementById('delete-btn');
+    const $saveBtn = document.getElementById('save-btn');
+    const $formError = document.getElementById('form-error');
+    const $statusOptions = document.getElementById('status-options');
+    const $fieldGroup = document.getElementById('field-group');
+
+    // ----- Date Helpers
+    function isoDay(d) {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        year: 'numeric', month: '2-digit', day: '2-digit', timeZone: TZ,
+      }).formatToParts(d);
+      const o = Object.fromEntries(parts.map(p => [p.type, p.value]));
+      return `${o.year}-${o.month}-${o.day}`;
+    }
+    function fmtTime(d) {
+      return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: TZ });
+    }
+    function fmtDateLong(d) {
+      return d.toLocaleDateString('de-DE', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: TZ,
+      });
+    }
+    function addDays(d, n) {
+      return new Date(d.getTime() + n * 24 * 60 * 60 * 1000);
+    }
+    function syncUrl() {
+      const params = new URLSearchParams();
+      params.set('d', isoDay(state.currentDate));
+      history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
+    }
+
+    // ----- Avatar-Helper (deterministische Pastell-Farbe wie in personen.html)
+    function nameHue(name) {
+      if (!name) return 30;
+      let h = 0;
+      for (let i = 0; i < name.length; i++) {
+        h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+      }
+      return h % 360;
+    }
+
+    // ----- Combine date + time-string + TZ → ISO-Datetime
+    function combineDateTime(timeStr) {
+      if (!timeStr) return null;
+      const day = isoDay(state.currentDate);
+      const local = new Date(`${day}T${timeStr}:00`);
+      return local.toISOString();
+    }
+    function extractTime(isoStr) {
+      if (!isoStr) return '';
+      const d = new Date(isoStr);
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    // ----- Nav-Header
+    function renderNav() {
+      $navDate.textContent = fmtDateLong(state.currentDate);
+      syncUrl();
+    }
+
+    // ----- Stats-Line + Ratio
+    function renderStats() {
+      const lc = state.dayData?.live_counts;
+      if (!lc) {
+        $statsLine.innerHTML = '&nbsp;';
+        return;
+      }
+      $statsLine.innerHTML = '';
+
+      const parts = [];
+      const kidsSpan = document.createElement('span');
+      kidsSpan.innerHTML = `<span class="shk-att-stats__count">${lc.kids_present_count}</span> Kinder`;
+      parts.push(kidsSpan);
+
+      const staffSpan = document.createElement('span');
+      staffSpan.innerHTML = `· <span class="shk-att-stats__count">${lc.staff_present_count}</span> Päd.`;
+      parts.push(staffSpan);
+
+      parts.forEach(p => $statsLine.appendChild(p));
+
+      const ratio = document.createElement('span');
+      ratio.className = 'shk-att-ratio';
+      ratio.dataset.status = lc.ratio_status;
+      ratio.textContent = lc.ratio_status_label;
+      if (lc.ratio_explanation) ratio.title = lc.ratio_explanation;
+      $statsLine.appendChild(ratio);
+    }
+
+    // ----- Render-Sections
+    function renderSections() {
+      $kidsList.innerHTML = '';
+      $staffList.innerHTML = '';
+
+      if (!state.dayData) return;
+
+      const records = state.dayData.records;
+      // Sortieren: anwesend zuerst, dann nach Name
+      const sorted = [...records].sort((a, b) => {
+        const aPres = PRESENT_STATUS.has(a.status) ? 0 : 1;
+        const bPres = PRESENT_STATUS.has(b.status) ? 0 : 1;
+        if (aPres !== bPres) return aPres - bPres;
+        const aName = a.person_brief?.given_name || '';
+        const bName = b.person_brief?.given_name || '';
+        return aName.localeCompare(bName);
+      });
+
+      const kids = sorted.filter(r => r.person_brief?.kind === 'kind');
+      const staff = sorted.filter(r => r.person_brief?.kind === 'staff');
+
+      renderListInto($kidsList, kids, 'kind');
+      renderListInto($staffList, staff, 'staff');
+    }
+
+    function renderListInto(container, records, kind) {
+      container.innerHTML = '';
+      if (records.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'shk-att-empty';
+        empty.textContent = kind === 'kind'
+          ? 'Heute keine Kinder eingetragen.'
+          : 'Heute keine Mitarbeiter eingetragen.';
+        container.appendChild(empty);
+        return;
+      }
+      records.forEach(r => container.appendChild(renderRow(r)));
+    }
+
+    function renderRow(record) {
+      const row = document.createElement('div');
+      row.className = 'shk-att-row';
+      row.dataset.present = PRESENT_STATUS.has(record.status) ? 'true' : 'false';
+
+      const person = record.person_brief;
+      const fullName = person ? `${person.given_name} ${person.family_name || ''}`.trim() : '(unbekannt)';
+      const hue = nameHue(fullName);
+
+      const avatar = document.createElement('div');
+      avatar.className = 'shk-att-avatar';
+      avatar.style.background = `hsl(${hue}, 55%, 65%)`;
+      avatar.textContent = avatarInitials(fullName);
+
+      const body = document.createElement('div');
+      body.className = 'shk-att-row__body';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'shk-att-row__name';
+      nameEl.textContent = fullName;
+      body.appendChild(nameEl);
+
+      const subParts = [];
+      if (record.check_in_at) {
+        subParts.push(`an ${fmtTime(new Date(record.check_in_at))}`);
+      }
+      if (record.check_out_at) {
+        subParts.push(`weg ${fmtTime(new Date(record.check_out_at))}`);
+      }
+      if (record.group_id) subParts.push(`Gr. ${record.group_id}`);
+      if (record.virtual) subParts.push('aus Kalender');
+      if (subParts.length > 0) {
+        const sub = document.createElement('div');
+        sub.className = 'shk-att-row__sub';
+        sub.textContent = subParts.join(' · ');
+        body.appendChild(sub);
+      }
+
+      const statusEl = document.createElement('span');
+      statusEl.className = 'shk-att-row__status';
+      statusEl.dataset.status = record.status;
+      statusEl.textContent = labelForStatus(record.status);
+
+      row.appendChild(avatar);
+      row.appendChild(body);
+      row.appendChild(statusEl);
+
+      row.addEventListener('click', () => openModalForRecord(record));
+      return row;
+    }
+
+    function labelForStatus(s) {
+      const opt = STATUS_OPTIONS.find(([key]) => key === s);
+      return opt ? opt[1] : s;
+    }
+
+    // ----- Modal
+    function openModalForRecord(record) {
+      state.currentRecord = record;
+      state.currentPerson = record.person_brief || { id: record.person_id };
+      state.currentStatus = record.status;
+
+      const fullName = record.person_brief
+        ? `${record.person_brief.given_name} ${record.person_brief.family_name || ''}`.trim()
+        : `Person #${record.person_id}`;
+      $modalTitle.textContent = `${fullName} · ${fmtDateLong(state.currentDate)}`;
+
+      document.getElementById('f-person-id').value = record.person_id;
+      document.getElementById('f-record-id').value = record.id || '';
+      document.getElementById('f-virtual').value = record.virtual ? '1' : '';
+      document.getElementById('f-source-event-id').value = record.source_event_id || '';
+      document.getElementById('f-check-in').value = extractTime(record.check_in_at);
+      document.getElementById('f-check-out').value = extractTime(record.check_out_at);
+      document.getElementById('f-group').value = record.group_id || '';
+      document.getElementById('f-notes').value = record.notes || '';
+
+      // Gruppe nur für Kinder
+      $fieldGroup.classList.toggle('shk-hidden', record.person_brief?.kind !== 'kind');
+
+      // Delete-Button nur für echte (nicht-virtuelle) Records
+      $deleteBtn.classList.toggle('shk-hidden', !record.id || record.virtual);
+
+      renderStatusOptions();
+      $formError.classList.add('shk-hidden');
+      openModal($modal);
+    }
+
+    function renderStatusOptions() {
+      $statusOptions.innerHTML = '';
+      STATUS_OPTIONS.forEach(([key, label]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'shk-att-status-option';
+        if (key === state.currentStatus) btn.classList.add('shk-att-status-option--active');
+        btn.textContent = label;
+        btn.addEventListener('click', () => {
+          state.currentStatus = key;
+          renderStatusOptions();
+        });
+        $statusOptions.appendChild(btn);
+      });
+    }
+
+    // ----- Save (Virtual-Promotion via POST oder echter PATCH)
+    $saveBtn.addEventListener('click', async () => {
+      $formError.classList.add('shk-hidden');
+      $saveBtn.disabled = true;
+      try {
+        const recordId = document.getElementById('f-record-id').value;
+        const isVirtual = document.getElementById('f-virtual').value === '1';
+        const sourceEventIdRaw = document.getElementById('f-source-event-id').value;
+
+        const payload = {
+          status: state.currentStatus,
+          check_in_at: combineDateTime(document.getElementById('f-check-in').value),
+          check_out_at: combineDateTime(document.getElementById('f-check-out').value),
+          group_id: parseInt(document.getElementById('f-group').value, 10) || null,
+          notes: document.getElementById('f-notes').value.trim() || null,
+        };
+
+        if (!recordId || isVirtual) {
+          // Neuer Record (entweder echter Add oder Virtual-Record-Promotion)
+          payload.person_id = parseInt(document.getElementById('f-person-id').value, 10);
+          payload.date = isoDay(state.currentDate);
+          if (sourceEventIdRaw) {
+            payload.source_event_id = parseInt(sourceEventIdRaw, 10);
+          }
+          await client.createAttendance(payload);
+        } else {
+          await client.patchAttendance(parseInt(recordId, 10), payload);
+        }
+
+        closeModal($modal);
+        await loadDay();
+      } catch (err) {
+        $formError.textContent = err.message || 'Fehler beim Speichern.';
+        $formError.classList.remove('shk-hidden');
+      } finally {
+        $saveBtn.disabled = false;
+      }
+    });
+
+    $deleteBtn.addEventListener('click', async () => {
+      const recordId = document.getElementById('f-record-id').value;
+      if (!recordId) return;
+      const name = $modalTitle.textContent.split('·')[0].trim();
+      if (!confirm(`Anwesenheits-Eintrag für »${name}« wirklich löschen?`)) return;
+      $deleteBtn.disabled = true;
+      try {
+        await client.deleteAttendance(parseInt(recordId, 10));
+        closeModal($modal);
+        await loadDay();
+      } catch (err) {
+        $formError.textContent = err.message || 'Fehler beim Löschen.';
+        $formError.classList.remove('shk-hidden');
+      } finally {
+        $deleteBtn.disabled = false;
+      }
+    });
+
+    // ----- Default-Rows für Personen ohne Record (alle persons aus persons-API auch zeigen)
+    let allPersonsCache = null;
+    async function loadAllPersons() {
+      if (allPersonsCache) return allPersonsCache;
+      const [kids, staff] = await Promise.all([
+        client.listPersons({ kind: 'kind', limit: 500 }),
+        client.listPersons({ kind: 'staff', limit: 200 }),
+      ]);
+      allPersonsCache = [...kids, ...staff];
+      return allPersonsCache;
+    }
+
+    function buildSyntheticRecords(allPersons, existingRecords) {
+      const seenIds = new Set(existingRecords.map(r => r.person_id));
+      return allPersons
+        .filter(p => !seenIds.has(p.id))
+        .map(p => ({
+          id: null,
+          person_id: p.id,
+          person_brief: {
+            id: p.id, given_name: p.given_name, family_name: p.family_name,
+            kind: p.kind, group_id: p.group_id,
+          },
+          date: isoDay(state.currentDate),
+          status: 'unbekannt',
+          check_in_at: null,
+          check_out_at: null,
+          group_id: p.group_id,
+          notes: null,
+          virtual: false,         // nicht aus Calendar — einfach noch nicht angelegt
+          source: 'manual',
+        }));
+    }
+
+    // ----- Loading
+    async function loadDay() {
+      try {
+        const [day, allPersons] = await Promise.all([
+          client.getAttendanceDay(isoDay(state.currentDate)),
+          loadAllPersons(),
+        ]);
+        // Merge: echte Records + virtuelle (aus Calendar) + Default-Zeilen für alle anderen Personen
+        const synthetic = buildSyntheticRecords(allPersons, day.records);
+        state.dayData = {
+          ...day,
+          records: [...day.records, ...synthetic],
+        };
+        renderStats();
+        renderSections();
+      } catch (err) {
+        if (err instanceof ShikshaAuthError) {
+          location.replace(`./presence_switch.html?next=${encodeURIComponent(location.pathname)}`);
+          return;
+        }
+        console.warn('Anwesenheit konnte nicht geladen werden', err);
+        $statsLine.textContent = 'Konnte gerade nicht laden.';
+      }
+    }
+
+    // ----- Nav
+    $navPrev.addEventListener('click', () => {
+      state.currentDate = addDays(state.currentDate, -1);
+      renderNav();
+      loadDay();
+    });
+    $navNext.addEventListener('click', () => {
+      state.currentDate = addDays(state.currentDate, 1);
+      renderNav();
+      loadDay();
+    });
+    $navToday.addEventListener('click', () => {
+      state.currentDate = new Date();
+      renderNav();
+      loadDay();
+    });
+
+    // ----- Init
+    renderNav();
+    loadDay();
+  </script>
+</body>
+</html>

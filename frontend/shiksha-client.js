@@ -567,6 +567,65 @@ export class ShikshaClient {
   }
 
   // -----------------------------------------------------------------
+  // ATTENDANCE
+  // -----------------------------------------------------------------
+
+  async getAttendanceDay(date) {
+    return this._fetch(`/api/v1/attendance/day?date=${date}`);
+  }
+
+  async getAttendanceOverview({ from, to } = {}) {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    return this._fetch(`/api/v1/attendance/overview?${params.toString()}`);
+  }
+
+  async getAttendancePersonHistory(person_id, { from, to } = {}) {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    return this._fetch(`/api/v1/attendance/person/${person_id}?${params.toString()}`);
+  }
+
+  async createAttendance(payload) {
+    return this._fetch('/api/v1/attendance/records', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async patchAttendance(id, payload) {
+    return this._fetch(`/api/v1/attendance/records/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteAttendance(id) {
+    return this._fetch(`/api/v1/attendance/records/${id}`, { method: 'DELETE' });
+  }
+
+  async getAttendanceSettings() {
+    return this._fetch('/api/v1/attendance/settings');
+  }
+
+  async patchAttendanceSettings(payload) {
+    return this._fetch('/api/v1/attendance/settings', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getAttendanceLiveCounts() {
+    return this._fetch('/api/v1/attendance/live_counts');
+  }
+
+  async getAttendanceWeekSummary() {
+    return this._fetch('/api/v1/attendance/week_summary');
+  }
+
+  // -----------------------------------------------------------------
   // HEIM
   // -----------------------------------------------------------------
 
