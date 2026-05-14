@@ -39,18 +39,48 @@ persona_overrides:
 # ---------------------------------------------------------------------
 heim_cards:
 
-  - id: anwesenheit_today
-    title: "Anwesenheit heute"
-    subtitle_template: "{present_count}/{total_count} Kinder"
+  - id: wer_ist_da
+    title: "Wer ist da"
+    subtitle_template: "{kids_present_count} Kinder · {staff_present_count} Päd."
     icon: presence
     action_url: "/anwesenheit.html"
     edition_scope: ["kita"]
     role_scope: ["leitung", "padagoge", "developer"]
-    data_provider: kita_anwesenheit_stub
+    data_provider: attendance_summary
     time_priority:
       morning: 1
       afternoon: 2
       evening: 7
+      night: 8
+    category: core
+
+  - id: personalschluessel
+    title: "Personalschlüssel"
+    subtitle_template: "{ratio_status_label}"
+    icon: shield
+    action_url: "/anwesenheit.html"
+    edition_scope: ["kita"]
+    role_scope: ["leitung", "developer"]
+    data_provider: attendance_summary
+    time_priority:
+      morning: 2
+      afternoon: 3
+      evening: 8
+      night: 9
+    category: core
+
+  - id: anwesenheit_woche
+    title: "Anwesenheit Woche"
+    subtitle_template: "Ø {avg_present_count} Kinder/Tag"
+    icon: history
+    action_url: "/anwesenheit.html"
+    edition_scope: ["kita"]
+    role_scope: ["leitung", "padagoge", "developer"]
+    data_provider: attendance_week
+    time_priority:
+      morning: 5
+      afternoon: 5
+      evening: 6
       night: 8
     category: core
 

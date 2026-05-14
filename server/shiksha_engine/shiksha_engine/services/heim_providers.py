@@ -170,6 +170,48 @@ def _calendar_summary(operator: Operator, db: DBSession) -> dict:
 
 
 # ===================================================================
+# Attendance-Provider (5.5.5.6.a)
+# ===================================================================
+
+@register_provider("attendance_summary")
+def _attendance_summary(operator: Operator, db: DBSession) -> dict:
+    """Provider für Heim-Karten 'Wer ist da' und 'Personalschlüssel'.
+
+    Tenant aus operator.org_id. Ruft load_day intern für heute auf und
+    extrahiert live_counts (Sweepline-Ergebnis: kids/staff present + ratio).
+    """
+    from datetime import datetime, timezone
+    from shiksha_engine.services.attendance_query import load_day
+    if not operator.org_id:
+        return {"visible": False}
+    today = datetime.now(tz=timezone.utc).date()
+    data = load_day(db, operator.org_id, today, operator)
+    lc = data["live_counts"]
+    return {
+        "kids_present_count":  lc["kids_present_count"],
+        "staff_present_count": lc["staff_present_count"],
+        "ratio_status":        lc["ratio_status"],
+        "ratio_status_label":  lc["ratio_status_label"],
+        "ratio_explanation":   lc["ratio_explanation"] or "",
+        "visible":             True,
+    }
+
+
+@register_provider("attendance_week")
+def _attendance_week(operator: Operator, db: DBSession) -> dict:
+    """Provider für 'Anwesenheit Woche'-Karte — 7-Tage-Schnitt."""
+    from shiksha_engine.services.attendance_query import compute_week_summary
+    if not operator.org_id:
+        return {"visible": False}
+    res = compute_week_summary(db, operator.org_id)
+    return {
+        "avg_present_count": res["avg_present_count"],
+        "days_observed":     res["days_observed"],
+        "visible":           True,
+    }
+
+
+# ===================================================================
 # Visibility-Rule-Auswerter
 # ===================================================================
 
