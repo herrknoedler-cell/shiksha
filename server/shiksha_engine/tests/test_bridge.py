@@ -104,7 +104,7 @@ def bridge_configured(monkeypatch):
 # ===================================================================
 
 def test_bridge_unauthorized_returns_401(client, bridge_configured):
-    res = client.get("/api/v1/bridge/kita/anwesenheit")
+    res = client.get("/api/v1/bridge/kita/identity")
     assert res.status_code == 401
 
 
@@ -121,12 +121,23 @@ def test_bridge_unknown_path_returns_404(client, bridge_configured, mira_leitung
     assert "Whitelist" in res.json()["detail"] or "whitelist" in res.json()["detail"].lower()
 
 
+def test_bridge_anwesenheit_now_rejects(client, bridge_configured, mira_leitung):
+    """Nach Whitelist-Trim 5.5.5.6.b liefert kita/anwesenheit 404 — alle
+    Daten leben jetzt in shiksha_core.attendance_records, Zugang via
+    /api/v1/attendance/*."""
+    res = client.get(
+        "/api/v1/bridge/kita/anwesenheit",
+        headers=_auth_for(mira_leitung),
+    )
+    assert res.status_code == 404
+
+
 def test_bridge_allowed_path_proxies(client, bridge_configured, mira_leitung):
     mock = _BridgeMock()
     mock.set_response(200, b'{"count":18}')
     with mock.patch_async_client():
         res = client.get(
-            "/api/v1/bridge/kita/anwesenheit",
+            "/api/v1/bridge/kita/identity",
             headers=_auth_for(mira_leitung),
         )
     assert res.status_code == 200
@@ -142,7 +153,7 @@ def test_bridge_without_config_returns_503(client, mira_leitung, monkeypatch):
     monkeypatch.setattr(get_settings(), "bridge_old_base_url", "")
 
     res = client.get(
-        "/api/v1/bridge/kita/anwesenheit",
+        "/api/v1/bridge/kita/identity",
         headers=_auth_for(mira_leitung),
     )
     assert res.status_code == 503
@@ -157,7 +168,7 @@ def test_bridge_forwards_query_params(client, bridge_configured, mira_leitung):
     mock.set_response(200, b'{"ok":true}')
     with mock.patch_async_client():
         client.get(
-            "/api/v1/bridge/kita/anwesenheit?group_id=2&active=true",
+            "/api/v1/bridge/kita/identity?group_id=2&active=true",
             headers=_auth_for(mira_leitung),
         )
     assert mock.last_request is not None
@@ -171,7 +182,7 @@ def test_bridge_strips_authorization_header(client, bridge_configured, mira_leit
     mock.set_response(200, b"{}")
     with mock.patch_async_client():
         client.get(
-            "/api/v1/bridge/kita/anwesenheit",
+            "/api/v1/bridge/kita/identity",
             headers=_auth_for(mira_leitung),
         )
     assert mock.last_request is not None
@@ -183,7 +194,7 @@ def test_bridge_forwards_method_and_body(client, bridge_configured, mira_leitung
     mock.set_response(201, b'{"id":42}')
     with mock.patch_async_client():
         res = client.post(
-            "/api/v1/bridge/kita/anwesenheit",
+            "/api/v1/bridge/kita/identity",
             headers=_auth_for(mira_leitung),
             json={"name": "Neue Person"},
         )
@@ -198,7 +209,7 @@ def test_bridge_returns_upstream_status_code(client, bridge_configured, mira_lei
     mock.set_response(404, b'{"error":"not found"}')
     with mock.patch_async_client():
         res = client.get(
-            "/api/v1/bridge/kita/anwesenheit/999",
+            "/api/v1/bridge/kita/identity/999",
             headers=_auth_for(mira_leitung),
         )
     assert res.status_code == 404
@@ -213,7 +224,7 @@ def test_bridge_timeout_returns_504(client, bridge_configured, mira_leitung):
     mock.set_raises(httpx.TimeoutException("simulated timeout"))
     with mock.patch_async_client():
         res = client.get(
-            "/api/v1/bridge/kita/anwesenheit",
+            "/api/v1/bridge/kita/identity",
             headers=_auth_for(mira_leitung),
         )
     assert res.status_code == 504
@@ -224,7 +235,7 @@ def test_bridge_connection_error_returns_502(client, bridge_configured, mira_lei
     mock.set_raises(httpx.ConnectError("simulated connection refused"))
     with mock.patch_async_client():
         res = client.get(
-            "/api/v1/bridge/kita/anwesenheit",
+            "/api/v1/bridge/kita/identity",
             headers=_auth_for(mira_leitung),
         )
     assert res.status_code == 502
@@ -239,7 +250,7 @@ def test_bridge_writes_audit_on_success(db, client, bridge_configured, mira_leit
     mock.set_response(200, b"{}")
     with mock.patch_async_client():
         client.get(
-            "/api/v1/bridge/kita/anwesenheit",
+            "/api/v1/bridge/kita/identity",
             headers=_auth_for(mira_leitung),
         )
     db.expire_all()
@@ -249,7 +260,7 @@ def test_bridge_writes_audit_on_success(db, client, bridge_configured, mira_leit
     assert len(logs) >= 1
     log = logs[-1]
     assert log.actor_id == mira_leitung.id
-    assert log.target_id == "/kita/anwesenheit"
+    assert log.target_id == "/kita/identity"
 
 
 def test_bridge_writes_audit_on_whitelist_reject(db, client, bridge_configured, mira_leitung):
@@ -274,7 +285,7 @@ def test_bridge_works_for_klient_role(client, bridge_configured, vater):
     mock.set_response(200, b"{}")
     with mock.patch_async_client():
         res = client.get(
-            "/api/v1/bridge/kita/anwesenheit",
+            "/api/v1/bridge/kita/identity",
             headers=_auth_for(vater),
         )
     assert res.status_code == 200

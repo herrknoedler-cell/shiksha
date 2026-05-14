@@ -38,14 +38,14 @@ router = APIRouter()
 # pro-Modul-Port aus dieser Liste streichen werden.
 #
 # Bereits portiert (NICHT mehr in der Whitelist):
-#   /kita/children  → shiksha_core.persons (kind=kind),  Schritt 5.5.3
-#   /kita/staff     → shiksha_core.persons (kind=staff), Schritt 5.5.3
-#   /kita/calendar  → shiksha_core.events,               Schritt 5.5.4
+#   /kita/children     → shiksha_core.persons (kind=kind),   Schritt 5.5.3
+#   /kita/staff        → shiksha_core.persons (kind=staff),  Schritt 5.5.3
+#   /kita/calendar     → shiksha_core.events,                Schritt 5.5.4
+#   /kita/anwesenheit  → shiksha_core.attendance_records,    Schritt 5.5.5
 ALLOWED_PREFIXES = (
-    "/kita/anwesenheit",
-    "/kita/identity",
-    "/kita/push",
-    "/kita/compliance",
+    "/kita/identity",    # → schließt in 5.5.6
+    "/kita/push",        # → schließt in 5.5.7
+    "/kita/compliance",  # → bleibt offen oder schließt in 5.5.8
 )
 
 # Header, die wir NICHT durchreichen — Auth ist neu, Host wird httpx setzen.
