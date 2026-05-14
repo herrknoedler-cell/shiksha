@@ -344,6 +344,17 @@ def test_live_counts(client, mira_token, krummelus_kid_id):
     assert body["ratio_status"] in ("green", "yellow", "red")
 
 
+def test_live_counts_empty_day_is_green(client, mira_token):
+    """Bei 0 Kindern + 0 Päd. ist der Personalschlüssel trivial erfüllt = grün."""
+    r = client.get(
+        "/api/v1/attendance/live_counts",
+        headers={"Authorization": f"Bearer {mira_token}"},
+    )
+    body = r.json()
+    if body["kids_present_count"] == 0:
+        assert body["ratio_status"] == "green", f"Empty day must be green, got {body}"
+
+
 def test_week_summary(client, mira_token):
     r = client.get(
         "/api/v1/attendance/week_summary",
