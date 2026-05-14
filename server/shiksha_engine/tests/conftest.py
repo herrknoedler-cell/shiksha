@@ -295,6 +295,67 @@ def developer_token_no_org(db_session):
     )
 
 
+# ---------------------------------------------------------- Attendance-Fixtures
+# Gebraucht von tests/test_attendance.py (Spec §6.2).
+# Alle Personen leben im calendar_mira-Tenant ('krummelus_cal'),
+# damit JWT-org_id == tenant_org_id (Cross-Tenant-Vermeidung).
+
+
+@pytest.fixture
+def krummelus_kid_id(db_session, calendar_mira) -> int:
+    """Ein Kind in calendar_mira's Tenant."""
+    from datetime import date, datetime
+    from shiksha_engine.models.person import Person
+    p = Person(
+        tenant_org_id=calendar_mira.org_id, kind="kind",
+        given_name="Lina", family_name="Krummelus",
+        birth_date=date(2022, 3, 14), active=True,
+        operator_id=calendar_mira.id,
+        created_at=datetime.now(), updated_at=datetime.now(),
+    )
+    db_session.add(p)
+    db_session.commit()
+    return p.id
+
+
+@pytest.fixture
+def three_krummelus_kids(db_session, calendar_mira) -> list[int]:
+    """Drei Kinder in calendar_mira's Tenant (für Sweepline-Tests)."""
+    from datetime import date, datetime
+    from shiksha_engine.models.person import Person
+    ids = []
+    for name in ("Anna", "Ben", "Clara"):
+        p = Person(
+            tenant_org_id=calendar_mira.org_id, kind="kind",
+            given_name=name, family_name="K",
+            birth_date=date(2022, 1, 1), active=True,
+            operator_id=calendar_mira.id,
+            created_at=datetime.now(), updated_at=datetime.now(),
+        )
+        db_session.add(p)
+        db_session.flush()
+        ids.append(p.id)
+    db_session.commit()
+    return ids
+
+
+@pytest.fixture
+def mira_person_id(db_session, calendar_mira) -> int:
+    """Mira als Person (Staff-Person) in calendar_mira's Tenant."""
+    from datetime import date, datetime
+    from shiksha_engine.models.person import Person
+    p = Person(
+        tenant_org_id=calendar_mira.org_id, kind="staff",
+        given_name="Mira", family_name="Leitung",
+        birth_date=date(1985, 6, 1), active=True,
+        operator_id=calendar_mira.id,
+        created_at=datetime.now(), updated_at=datetime.now(),
+    )
+    db_session.add(p)
+    db_session.commit()
+    return p.id
+
+
 @pytest.fixture
 def krummelus_with_birthdays(db_session, calendar_mira):
     """Stellt sicher dass mindestens ein Kind mit birth_date heute existiert."""
