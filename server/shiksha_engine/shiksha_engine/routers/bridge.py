@@ -40,8 +40,8 @@ router = APIRouter()
 # Bereits portiert (NICHT mehr in der Whitelist):
 #   /kita/children  → shiksha_core.persons (kind=kind),  Schritt 5.5.3
 #   /kita/staff     → shiksha_core.persons (kind=staff), Schritt 5.5.3
+#   /kita/calendar  → shiksha_core.events,               Schritt 5.5.4
 ALLOWED_PREFIXES = (
-    "/kita/calendar",
     "/kita/anwesenheit",
     "/kita/identity",
     "/kita/push",
