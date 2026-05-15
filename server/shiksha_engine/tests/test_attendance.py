@@ -344,6 +344,42 @@ def test_live_counts(client, mira_token, krummelus_kid_id):
     assert body["ratio_status"] in ("green", "yellow", "red")
 
 
+def test_attendance_summary_uses_tenant_tz(client, mira_token, krummelus_kid_id, db_session):
+    """Provider muss in Tenant-TZ rechnen, nicht UTC — sonst zeigt Heim
+    morgens vorgestrige Stats."""
+    from datetime import datetime, timezone
+    from zoneinfo import ZoneInfo
+    from shiksha_engine.models.attendance import AttendanceRecord
+
+    # Record für heute (in Tenant-TZ = Europe/Vienna) anlegen
+    today_vienna = datetime.now(tz=ZoneInfo("Europe/Vienna")).date()
+    now = datetime.now(tz=timezone.utc)
+    r = AttendanceRecord(
+        tenant_org_id="krummelus_cal",
+        person_id=krummelus_kid_id,
+        date=today_vienna,
+        status="anwesend",
+        check_in_at=now,
+        operator_id="krummelus_mira_cal",
+        active=True,
+        created_at=now,
+        updated_at=now,
+    )
+    db_session.add(r)
+    db_session.commit()
+
+    # Heim-Karte abfragen
+    response = client.get(
+        "/api/v1/heim",
+        headers={"Authorization": f"Bearer {mira_token}"},
+    )
+    cards = {c["id"]: c for c in response.json()["cards"]}
+    wer_ist_da = cards.get("wer_ist_da")
+    assert wer_ist_da is not None
+    # Sollte mindestens 1 anwesendes Kind sehen (das gerade angelegte)
+    assert "1 Kinder" in wer_ist_da["subtitle"] or "1 Kind" in wer_ist_da["subtitle"]
+
+
 def test_live_counts_empty_day_is_green(client, mira_token):
     """Bei 0 Kindern + 0 Päd. ist der Personalschlüssel trivial erfüllt = grün."""
     r = client.get(

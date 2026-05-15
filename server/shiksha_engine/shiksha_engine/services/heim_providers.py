@@ -179,12 +179,16 @@ def _attendance_summary(operator: Operator, db: DBSession) -> dict:
 
     Tenant aus operator.org_id. Ruft load_day intern für heute auf und
     extrahiert live_counts (Sweepline-Ergebnis: kids/staff present + ratio).
+    'heute' wird in Tenant-TZ (Organization.timezone) berechnet — sonst
+    zeigt das Heim morgens (vor 02:00 Vienna im Sommer) vorgestrige Stats.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
     from shiksha_engine.services.attendance_query import load_day
     if not operator.org_id:
         return {"visible": False}
-    today = datetime.now(tz=timezone.utc).date()
+    tz_name = operator.organization.timezone if operator.organization else "UTC"
+    today = datetime.now(tz=ZoneInfo(tz_name)).date()
     data = load_day(db, operator.org_id, today, operator)
     lc = data["live_counts"]
     return {
