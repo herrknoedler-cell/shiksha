@@ -139,6 +139,120 @@ Die Liste wird beim Onboarding eines neuen Build-Schritts kurz quergelesen — w
 
 ---
 
+## T-009 — Tenant-TZ-Drift in time-of-day-Logik
+
+**Status:** partially resolved. **Eröffnet:** 5.5.5.6.a (Live-Smoke). **Schwere:** mittel — silent-fail, kein User-sichtbarer Crash, aber falsche Daten in der 2-Stunden-Mitternachts-Lücke.
+
+**Was:** Provider- und Query-Funktionen, die "today" mit `datetime.now(tz=timezone.utc).date()` berechnen, liefern in der 2-Stunden-Lücke nach Mitternacht (00:00–02:00 Vienna im Sommer / 00:00–01:00 im Winter) das Vortags-Datum, obwohl Tenants außerhalb von UTC liegen. Konsequenz: Anwesenheits-Cards zeigen morgens den Vortag, Calendar-Summary zeigt gestern statt heute.
+
+**Stand pro Stelle:**
+
+| Stelle | Status | Commit |
+|---|---|---|
+| `heim_providers.attendance_summary` | resolved | `eb9c851` |
+| `heim_providers.attendance_week` | resolved | `eb9c851` |
+| `calendar_query.py` Lines 232/233 | pending | siehe `bundle_calendar_tz_fix.md` |
+| `calendar_query.py` Lines 281/282 | pending | siehe `bundle_calendar_tz_fix.md` |
+
+**Konkrete Lösung:** Pattern-Migration auf Tenant-Timezone-Lookup via `operator.organization.timezone`:
+
+```python
+# vorher
+now = datetime.now(tz=timezone.utc)
+today_start = datetime.combine(now.date(), time(0, 0), tzinfo=timezone.utc)
+
+# nachher
+tz = ZoneInfo(operator.organization.timezone or "UTC")
+now = datetime.now(tz=tz)
+today_start = datetime.combine(now.date(), time(0, 0), tzinfo=tz)
+```
+
+**Pattern-Pflicht:** Vor jedem neuen Service, der "today" für Tenant-bezogene Zeitfenster berechnet (Identity-Authorization-Validity-Check, Push-Scheduling, Compliance-Reporting): Pattern aus `heim_providers.attendance_summary` übernehmen oder gemeinsamen Helper `shiksha_engine/lib/timezones.py::today_in_tenant_tz(operator)` extrahieren wenn ≥4 Aufrufer.
+
+**Wann fällig:** `bundle_calendar_tz_fix.md` deployed + Identity-Modul (5.5.6.2) nutzt das Pattern von Anfang an.
+
+---
+
+## T-010 — Legacy Identity-Code archivieren
+
+**Status:** open, wartet auf 5.5.6.6.b. **Eröffnet:** 5.5.6.0-Spec-Lieferung. **Schwere:** niedrig — Legacy lebt parallel, blockiert nichts, aber Konfusion bei zukünftigen Lesern und doppelte Code-Pfade in Suchen.
+
+**Was:** Nach Abschluss von 5.5.6 (Identity-Modul portiert, Bridge-Trim live) bleibt der legacy Identity-Code unbenutzt im Repo liegen:
+
+```
+server/identity_router.py            ~600 LOC
+server/identity_migration.sql        ~111 LOC
+server/identity_ui/wizard.html       ~672 LOC
+server/identity_ui/manifest.json      ~16 LOC
+server/paedagogen_ui/shiksha-avatar.js   ~157 LOC (wird in 5.5.6.5 nach frontend/ verschoben)
+```
+
+Grep nach `identity_persons`, `identity_router` etc. findet doppelte Treffer (alt-Welt + neue Welt). `shiksha-avatar.js` wird sowieso refactor-moved in 5.5.6.5, betrifft den Punkt also nur teilweise.
+
+**Konkrete Lösung:** Drei Optionen, in der Reihenfolge der Empfehlung:
+
+1. **Move nach `legacy/identity/` mit `README.md`-Verweis auf Spec.** 6-Monats-Übergangszeit nach 5.5.6.6.b, danach Re-Evaluation. Maximale Reversibilität wenn beim Live-Betrieb Lücken auffallen.
+2. **Branch-Archiv:** Code in einen `archive/identity-pre-1.5`-Branch verschieben, im main delete. Schwerer aufzufinden für Devs, aber sauberer trunk.
+3. **Hard-Delete + Reference-Note** im Tech-Debt-Eintrag. Aggressivster Pfad, nur sinnvoll wenn die neue Implementation 2+ Monate problemlos läuft.
+
+Empfehlung: Option 1 (Move nach `legacy/`).
+
+**Wann fällig:** 5.5.6.6.b (Bridge-Trim) deployed + 2 Wochen ohne Identity-bezogene Rollbacks.
+
+---
+
+## T-011 — Three-Tier-Cleanup-Job für Identity-Auto-Löschung
+
+**Status:** open, wartet auf 5.5.6.2. **Eröffnet:** DSFA-Erstellung 5.5.6.0. **Schwere:** hoch — DSGVO-Pflicht. Ohne funktionierenden Cleanup-Job verletzt das System Art. 5(1)(e) DSGVO (Speicherbegrenzung) und Art. 17 DSGVO.
+
+**Was:** Drei verschiedene Aufbewahrungs-Tiers (siehe `docs/dsfa/identity-modul-at.md` §1.5) brauchen automatisierte Cleanup-Logik:
+
+- **Tier 1 — Scan-Dateien:** max. `tenant.retention.scan_files_days` (Default 30 Tage AT) nach Verifikation, dann Hard-Delete inkl. File-System
+- **Tier 2 — Strukturierte Daten + Authorizations:** Betreuungsende-Datum des verlinkten Kindes + `tenant.retention.structured_data_after_end_years` (Default 3 AT)
+- **Tier 3 — Audit-Log:** `created_at` + `tenant.retention.audit_log_years` (Default 7 AT)
+
+Zusätzlich: Legal-Hold-Flag pausiert alle drei Tiers für betroffene Records.
+
+**Konkrete Lösung:** Nightly-Job `services/identity_cleanup.py` mit drei Tier-Methoden plus Pre-Check:
+
+```python
+def run_nightly_cleanup():
+    for tenant in active_tenants():
+        cfg = tenant.jurisdiction_yaml()["identity"]["retention"]
+        cleanup_tier_1_files(tenant, cfg["scan_files_days"])
+        cleanup_tier_2_structured(tenant, cfg["structured_data_after_end_years"])
+        cleanup_tier_3_audit_log(tenant, cfg["audit_log_years"])
+
+def cleanup_tier_1_files(tenant, days):
+    cutoff = today_in_tenant_tz(tenant) - timedelta(days=days)
+    for doc in pending_file_delete(tenant, cutoff):
+        if doc.identity_person.legal_hold:
+            continue
+        delete_filesystem_file(doc.file_ref)
+        doc.file_ref = None
+        doc.file_deleted_at = now_tenant_tz(tenant)
+        log_audit("identity_document.file_auto_deleted", doc)
+```
+
+Tier 2 und Tier 3 analog. Wichtig:
+
+1. **Legal-Hold-Check vor jeder Lösch-Operation**, nicht nur am Tier-Eintritt
+2. **Monitoring-Counter pro Tier** (`deleted_count_per_day` als Prometheus-Metric oder DB-Tabelle) für Audit-Verifikation
+3. **Alarm wenn 24h ohne Cleanup-Lauf** (Cron- oder Job-Queue-Health-Check)
+4. **Trockenlauf-Modus** (`--dry-run` Flag) für Erst-Deploy-Verifikation
+
+**Pflicht-Tests (mindestens fünf):**
+
+1. Tier-1: File älter als 30d → gelöscht
+2. Tier-1: File mit `legal_hold=true` → NICHT gelöscht
+3. Tier-2: Strukturierte Daten mit Betreuungsende +3J → gelöscht, Audit-Log bleibt
+4. Tier-3: Audit-Log älter als 7J → gelöscht
+5. Cross-Tier: Jurisdiction-Override (`at-8.yaml` setzt anderen Wert) → wird respektiert
+
+**Wann fällig:** Vor Live-Schaltung des Identity-Moduls für AT-Tenants (5.5.6.6.b für AT-Tenants ist hard-blocked auf T-011, weil die DSB-Anfrage diesen Punkt vermutlich abfragt). 5.5.6.2 (Endpoints + OCR) deployed + Cleanup-Job läuft eine Woche mit Dry-Run-Flag + ein vollständiger Tier-1-Cleanup mit Real-Delete (kontrolliert) + Monitoring zeigt erwartete Counter.
+
+---
+
 ## Schließe-Kriterien
 
 Ein Tech-Debt-Eintrag wird gelöscht (nicht "✅ erledigt" gestrichen), wenn:

@@ -1,0 +1,15 @@
+# editions/jurisdictions/at.yaml — Country-Default für alle AT-Bundesländer
+identity:
+  retention:
+    scan_files_days: 30                     # DSB-Bescheid DSB-D123.901/0002-DSB/2019
+    structured_data_after_end_years: 3      # § 1489 ABGB (kurze Verjährung)
+    audit_log_years: 7                      # WKO-Leitlinie + Art. 5(2) DSGVO
+  mrz_fields_to_store: [vorname, nachname, geburtsdatum, ausweis_typ, ausweisnummer_hash, ablauf]
+  hash_algorithm: "sha256"
+  hash_length_hex: 24                       # 96-bit
+  jurisdiction_law: "DSGVO + DSG-Austria"
+  oversight_authority: "DSB"
+  oversight_email: "dsb@dsb.gv.at"
+  pre_rollout_authority_query_required: true
+  consent_text_path: "editions/jurisdictions/at/consent_de_AT.md"
+  dsfa_required: true                       # DSFA-V der DSB

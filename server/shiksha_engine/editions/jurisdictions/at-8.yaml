@@ -1,0 +1,5 @@
+# editions/jurisdictions/at-8.yaml — Vorarlberg-Override für Krummelus
+identity:
+  regional_oversight: "Bildungsdirektion Vorarlberg"
+  # Alles andere erbt aus at.yaml via Deep-Merge.
+  # consent_text_path nur überschreiben wenn Vorarlberg-Dialect-Variante gewollt ist.
