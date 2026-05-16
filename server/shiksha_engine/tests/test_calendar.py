@@ -6,7 +6,7 @@ Spec: SHIKSHA_CALENDAR_SPEC.md §6.4 verlangt mindestens vier Berechtigungs-Test
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 
 import pytest
 
@@ -296,6 +296,41 @@ def test_today_summary(client, mira_token):
     # staff_count_today abhängig von DB-Fixture-Stand — Hauptsache Field ist da
     assert isinstance(body["staff_count_today"], int)
     assert body["next_event"] is not None
+
+
+def test_today_summary_uses_tenant_tz(client, mira_token, calendar_mira, db_session):
+    """T-009: today wird in Tenant-TZ berechnet, nicht UTC.
+
+    Event mit start_at = heute-Vienna 00:30 (= gestern-UTC 22:30 im Sommer)
+    muss als 'heute' gezählt werden, nicht als 'gestern'.
+    Lockt das Verhalten aus calendar_query._tenant_tz() ein.
+    """
+    from zoneinfo import ZoneInfo
+    today_vienna = datetime.now(tz=ZoneInfo("Europe/Vienna")).date()
+    early_vienna = datetime.combine(today_vienna, time(0, 30), tzinfo=ZoneInfo("Europe/Vienna"))
+    _create_event_via_api(
+        client, mira_token, title="heute-frueh",
+        start_at=early_vienna.isoformat(),
+    )
+    r = client.get(
+        "/api/v1/calendar/today_summary",
+        headers={"Authorization": f"Bearer {mira_token}"},
+    )
+    assert r.status_code == 200
+    assert r.json()["event_count_today"] >= 1
+
+
+def test_event_stats_uses_tenant_tz(client, mira_token, calendar_mira, db_session):
+    """T-009 Regression auf compute_event_stats — today/this_week in Tenant-TZ."""
+    r = client.get(
+        "/api/v1/calendar/stats",
+        headers={"Authorization": f"Bearer {mira_token}"},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    # Beide Felder existieren und sind int — Hauptzweck: kein TZ-Crash
+    assert isinstance(body["today"], int)
+    assert isinstance(body["this_week"], int)
 
 
 # ---------------------------------------------------------- 5. Virtual Birthdays

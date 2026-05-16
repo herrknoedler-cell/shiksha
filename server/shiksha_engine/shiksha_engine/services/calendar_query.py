@@ -11,6 +11,7 @@ from __future__ import annotations
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 from uuid import uuid4
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.dialects.postgresql import JSONB
@@ -22,7 +23,14 @@ from shiksha_engine.models.event import (
     VIRTUAL_EVENT_TYPES,
 )
 from shiksha_engine.models.operator import Operator
+from shiksha_engine.models.organization import Organization
 from shiksha_engine.models.person import Person
+
+
+def _tenant_tz(db: Session, tenant_org_id: str) -> ZoneInfo:
+    """Liefert Tenant-TZ (Default UTC wenn Org unbekannt). T-009-Fix."""
+    org = db.query(Organization).filter_by(id=tenant_org_id).first()
+    return ZoneInfo(org.timezone) if org and org.timezone else ZoneInfo("UTC")
 
 
 # ---------------------------------------------------------- Berechtigung
@@ -228,15 +236,16 @@ def compute_event_stats(
 
     total = base.count()
 
-    # heute (Tenant-TZ unberücksichtigt in Phase 1 — UTC reicht für Stats)
-    now = datetime.now(tz=timezone.utc)
-    today_start = datetime.combine(now.date(), time(0, 0), tzinfo=timezone.utc)
+    # heute (Tenant-TZ — T-009-Fix, vorher UTC mit 2h-Drift-Window nach Mitternacht)
+    tz = _tenant_tz(db, tenant_org_id)
+    now = datetime.now(tz=tz)
+    today_start = datetime.combine(now.date(), time(0, 0), tzinfo=tz)
     today_end = today_start + timedelta(days=1)
     today = base.filter(
         Event.start_at >= today_start, Event.start_at < today_end
     ).count()
 
-    # Diese Woche (Mo–So, UTC)
+    # Diese Woche (Mo–So, in Tenant-TZ)
     monday = today_start - timedelta(days=now.weekday())
     sunday_end = monday + timedelta(days=7)
     this_week = base.filter(
@@ -278,8 +287,9 @@ def compute_today_summary(
     db: Session, tenant_org_id: str, operator: Operator
 ) -> dict[str, Any]:
     """TodaySummary — Provider-Quelle für Heim-Karte 'Heute'."""
-    now = datetime.now(tz=timezone.utc)
-    today_start = datetime.combine(now.date(), time(0, 0), tzinfo=timezone.utc)
+    tz = _tenant_tz(db, tenant_org_id)
+    now = datetime.now(tz=tz)
+    today_start = datetime.combine(now.date(), time(0, 0), tzinfo=tz)
     today_end = today_start + timedelta(days=1)
 
     base = apply_read_filter(db, db.query(Event), operator, tenant_org_id)
