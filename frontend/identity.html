@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="de-AT" data-edition="kita">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>SHIKSHA · Identität erfassen</title>
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('shiksha-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="./shiksha-ui.v1.0.0.css">
+  <link rel="stylesheet" href="./editions-css/kita.v1.0.0.css">
+
+  <style>
+    /* ===========================================
+       Holi-Look-Tokens (1:1 aus Legacy-Wizard
+       server/identity_ui/wizard.html übernommen)
+       =========================================== */
+    :root {
+      --holi-pink:      #ff4d8d;
+      --holi-turquoise: #00d4d4;
+      --holi-yellow:    #ffd93d;
+      --holi-purple:    #a855f7;
+      --holi-orange:    #ff8c42;
+      --holi-green:     #6dd47e;
+
+      --holi-gradient:  linear-gradient(135deg, var(--holi-pink) 0%, var(--holi-purple) 100%);
+      --holi-success:   linear-gradient(135deg, var(--holi-turquoise) 0%, var(--holi-green) 100%);
+    }
+
+    .id-wizard-shell {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: var(--shk-space-md);
+    }
+
+    /* ---- Header + Progress ---- */
+    .id-progress {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+      padding: 0;
+      margin: var(--shk-space-md) 0 var(--shk-space-lg);
+    }
+    .id-progress li {
+      flex: 1;
+      text-align: center;
+      padding: 10px 6px;
+      border-radius: 8px;
+      background: rgba(168, 85, 247, 0.10);
+      color: var(--shk-color-text-soft);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .id-progress li[data-state="active"] {
+      background: var(--holi-gradient);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 77, 141, 0.25);
+    }
+    .id-progress li[data-state="done"] {
+      background: var(--holi-success);
+      color: #fff;
+    }
+
+    /* ---- Step-Container ---- */
+    .id-step { display: none; }
+    .id-step[data-active] { display: block; }
+    .id-step h2 {
+      background: linear-gradient(120deg, var(--holi-pink), var(--holi-purple));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: 24px;
+      margin: 0 0 var(--shk-space-sm);
+    }
+    .id-step .lede { color: var(--shk-color-text-soft); margin: 0 0 var(--shk-space-lg); }
+
+    /* ---- Form (Step 1) ---- */
+    .id-field { display: block; margin-bottom: var(--shk-space-md); }
+    .id-field label {
+      display: block; font-weight: 500; font-size: 14px;
+      margin-bottom: 6px; color: var(--shk-color-text);
+    }
+    .id-field input[type="text"], .id-field input[type="date"] {
+      width: 100%; padding: 12px;
+      border: 2px solid var(--shk-color-border);
+      border-radius: 8px; font-size: 16px;
+      background: var(--shk-color-surface);
+      color: var(--shk-color-text);
+    }
+    .id-field input:focus {
+      outline: none; border-color: var(--holi-pink);
+    }
+
+    .id-consent-block {
+      background: #fffbf0;
+      border: 2px dashed var(--holi-yellow);
+      border-radius: 10px;
+      padding: var(--shk-space-md);
+      margin: var(--shk-space-md) 0;
+    }
+    [data-theme="dark"] .id-consent-block { background: rgba(255, 217, 61, 0.08); }
+    .id-consent-block summary {
+      cursor: pointer; font-weight: 600;
+      color: var(--holi-orange);
+    }
+    .id-consent-text {
+      max-height: 240px; overflow-y: auto;
+      margin-top: var(--shk-space-sm);
+      font-size: 13px; line-height: 1.55;
+      color: var(--shk-color-text);
+    }
+    .id-consent-toggle {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: var(--shk-space-md);
+      border: 2px solid var(--shk-color-border);
+      border-radius: 10px; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .id-consent-toggle.checked {
+      border-color: var(--holi-green); background: #f0fff5;
+    }
+    [data-theme="dark"] .id-consent-toggle.checked {
+      background: rgba(109, 212, 126, 0.08);
+    }
+    .id-consent-toggle input[type="checkbox"] { margin-top: 2px; }
+
+    /* ---- Capture-Cards (Step 2) ---- */
+    .id-capture-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--shk-space-md);
+    }
+    @media (min-width: 600px) {
+      .id-capture-row { grid-template-columns: 1fr 1fr; }
+    }
+    .id-capture-card {
+      background: var(--shk-color-surface);
+      border: 2px solid var(--shk-color-border);
+      border-radius: 12px;
+      padding: var(--shk-space-md);
+      text-align: center;
+    }
+    .id-capture-card[data-uploaded="true"] {
+      border-color: var(--holi-green);
+    }
+    .id-capture-card h3 { margin: 0 0 var(--shk-space-sm); font-size: 16px; }
+    .id-capture-preview {
+      width: 100%; aspect-ratio: 1.586;       /* ID-Card-Verhältnis */
+      background: #f4eef9;
+      border-radius: 8px; margin-bottom: var(--shk-space-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--shk-color-text-soft); font-size: 13px;
+      overflow: hidden;
+    }
+    [data-theme="dark"] .id-capture-preview { background: rgba(168, 85, 247, 0.12); }
+    .id-capture-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .id-capture-preview .check {
+      position: absolute; right: 8px; top: 8px;
+      color: var(--holi-green); font-size: 24px;
+    }
+
+    /* ---- Camera-Modal ---- */
+    .id-camera-modal {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    .id-camera-modal[data-open="true"] { display: flex; }
+    .id-camera-modal video {
+      max-width: 95vw; max-height: 70vh;
+      border-radius: 8px;
+    }
+    .id-camera-modal .id-camera-actions {
+      display: flex; gap: var(--shk-space-md);
+      margin-top: var(--shk-space-md);
+    }
+
+    /* ---- OCR-Status ---- */
+    .id-ocr-status {
+      margin-top: var(--shk-space-md);
+      padding: var(--shk-space-sm) var(--shk-space-md);
+      background: rgba(168, 85, 247, 0.08);
+      border-radius: 8px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px;
+    }
+    .id-ocr-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--holi-purple);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .id-ocr-warning {
+      background: rgba(255, 140, 66, 0.10);
+      border: 1px solid var(--holi-orange);
+      color: var(--holi-orange);
+    }
+
+    /* ---- Review (Step 3) ---- */
+    .id-review {
+      background: var(--shk-color-surface);
+      border: 2px solid var(--shk-color-border);
+      border-radius: 12px;
+      padding: var(--shk-space-md);
+    }
+    .id-review dl { margin: 0; }
+    .id-review dt {
+      font-size: 12px; text-transform: uppercase;
+      color: var(--shk-color-text-soft);
+      letter-spacing: 0.05em; margin-top: var(--shk-space-sm);
+    }
+    .id-review dd {
+      margin: 0; font-size: 16px; font-weight: 500;
+    }
+
+    /* ---- Footer (Buttons) ---- */
+    .id-footer {
+      display: flex; justify-content: space-between;
+      gap: var(--shk-space-md);
+      margin-top: var(--shk-space-lg);
+    }
+    .id-footer button {
+      padding: 12px 24px; font-size: 15px;
+      border-radius: 8px; cursor: pointer;
+      border: none; font-weight: 600;
+    }
+    .id-btn-primary {
+      background: var(--holi-gradient); color: #fff;
+    }
+    .id-btn-primary:disabled {
+      background: var(--shk-color-border); cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .id-btn-secondary {
+      background: transparent; color: var(--shk-color-text-soft);
+      border: 1px solid var(--shk-color-border);
+    }
+    .id-btn-danger {
+      background: transparent; color: var(--holi-pink);
+      border: 1px solid var(--holi-pink);
+    }
+    .id-btn-success {
+      background: var(--holi-success); color: #fff;
+    }
+
+    /* ---- Toast ---- */
+    .id-toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px; border-radius: 8px;
+      background: var(--shk-color-text);
+      color: var(--shk-color-surface);
+      font-size: 14px; opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none; z-index: 10000;
+    }
+    .id-toast[data-show="true"] { opacity: 0.95; }
+    .id-toast[data-kind="error"] { background: var(--holi-pink); color: #fff; }
+    .id-toast[data-kind="success"] { background: var(--holi-green); color: #fff; }
+  </style>
+</head>
+<body>
+
+<div class="shk-shell">
+
+  <!-- ===== Header + Brotkrumen ===== -->
+  <header class="shk-header">
+    <nav class="shk-breadcrumb shk-fade-in">
+      <a href="./heim.html">Heim</a>
+      <span class="shk-breadcrumb__separator">·</span>
+      <span>Identität erfassen</span>
+    </nav>
+
+    <div class="shk-row shk-fade-in" style="justify-content: space-between; align-items: flex-end; gap: var(--shk-space-md);">
+      <div>
+        <h1 class="shk-heading">Identität erfassen</h1>
+        <p class="shk-subtitle" id="id-stats" style="margin-top: var(--shk-space-xs);">
+          Drei Schritte — Person, Ausweis-Scan, Bestätigung.
+        </p>
+      </div>
+      <div class="shk-row" style="gap: var(--shk-space-sm); flex-shrink: 0;">
+        <button class="shk-theme-toggle"
+                data-shk-theme-toggle
+                aria-label="Theme umschalten">
+          <svg class="shk-icon shk-icon--sm">
+            <use href="./shiksha-icons.v1.0.0.svg#icon-weather-sun"/>
+          </svg>
+          <span data-shk-theme-label>Modus</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Wizard ===== -->
+  <main class="id-wizard-shell shk-fade-in">
+
+    <ol class="id-progress" id="id-progress">
+      <li data-step="1" data-state="active">Person &amp; Einwilligung</li>
+      <li data-step="2">Ausweis-Scan</li>
+      <li data-step="3">Bestätigung</li>
+    </ol>
+
+    <!-- ===== Step 1 ===== -->
+    <section id="step-1" class="id-step" data-step="1" data-active>
+      <h2>Wer wird erfasst?</h2>
+      <p class="lede">Stammdaten und schriftliche Einwilligung der abholberechtigten Person.</p>
+
+      <form id="step-1-form" novalidate>
+        <div class="id-field">
+          <label for="f-name">Vollständiger Name</label>
+          <input type="text" id="f-name" name="full_name" required autocomplete="name"
+                 placeholder="z.B. Maria Großmutter">
+        </div>
+
+        <div class="id-field">
+          <label for="f-birth">Geburtsdatum</label>
+          <input type="date" id="f-birth" name="birth_date" required>
+        </div>
+
+        <details class="id-consent-block">
+          <summary>Einwilligungstext (vollständig lesen)</summary>
+          <div class="id-consent-text" id="id-consent-text">
+            <em>Wird beim Öffnen geladen…</em>
+          </div>
+        </details>
+
+        <label class="id-consent-toggle" id="id-consent-toggle">
+          <input type="checkbox" id="f-consent" name="consent_given" required>
+          <span>Die Person hat die Einwilligung schriftlich unterschrieben und ich bestätige dies hiermit.</span>
+        </label>
+      </form>
+    </section>
+
+    <!-- ===== Step 2 ===== -->
+    <section id="step-2" class="id-step" data-step="2">
+      <h2>Ausweis scannen</h2>
+      <p class="lede">Bitte sowohl Vorder- als auch Rückseite erfassen. Bei niedriger Bild-Qualität bitte wiederholen.</p>
+
+      <div class="id-capture-row">
+        <div class="id-capture-card" data-doc-kind="id_front">
+          <h3>Vorderseite</h3>
+          <div class="id-capture-preview" id="preview-id_front">
+            <span>Noch nicht erfasst</span>
+          </div>
+          <button type="button" class="id-btn-primary" data-action="capture" data-doc-kind="id_front">
+            Foto aufnehmen
+          </button>
+          <input type="file" accept="image/*" capture="environment" hidden data-fallback="id_front">
+        </div>
+
+        <div class="id-capture-card" data-doc-kind="id_back">
+          <h3>Rückseite (mit MRZ-Zone)</h3>
+          <div class="id-capture-preview" id="preview-id_back">
+            <span>Noch nicht erfasst</span>
+          </div>
+          <button type="button" class="id-btn-primary" data-action="capture" data-doc-kind="id_back">
+            Foto aufnehmen
+          </button>
+          <input type="file" accept="image/*" capture="environment" hidden data-fallback="id_back">
+        </div>
+      </div>
+
+      <div class="id-ocr-status" id="ocr-status" hidden>
+        <div class="id-ocr-spinner"></div>
+        <span id="ocr-status-text">Auswertung läuft…</span>
+      </div>
+
+      <div class="id-ocr-status id-ocr-warning" id="ocr-warning" hidden>
+        <span>⚠ Scan ist unscharf (Qualität niedrig). Du kannst weitermachen oder neu aufnehmen.</span>
+      </div>
+    </section>
+
+    <!-- ===== Step 3 ===== -->
+    <section id="step-3" class="id-step" data-step="3">
+      <h2>Bestätigung</h2>
+      <p class="lede">Prüfe die erfassten Daten. Mit „Identität bestätigen" wird die Person als verifiziert markiert.</p>
+
+      <div class="id-review">
+        <dl>
+          <dt>Name</dt>           <dd id="review-name">—</dd>
+          <dt>Geburtsdatum</dt>   <dd id="review-birth">—</dd>
+          <dt>Ausweistyp</dt>     <dd id="review-doctype">—</dd>
+          <dt>Ablaufdatum</dt>    <dd id="review-expiry">—</dd>
+          <dt>Scan-Qualität</dt>  <dd id="review-confidence">—</dd>
+        </dl>
+      </div>
+
+      <p class="lede" style="margin-top: var(--shk-space-md); font-size: 13px;">
+        Hinweis: Vier-Augen-Bestätigung (zweite Mitarbeiterin) ist als Erweiterung geplant
+        (Tech-Debt&nbsp;T-012). Aktuell verifiziert eine Person allein; die Verifikation wird
+        mit Operator-ID und Zeitstempel im Audit-Log dokumentiert.
+      </p>
+    </section>
+
+    <!-- ===== Footer-Buttons ===== -->
+    <div class="id-footer">
+      <button type="button" class="id-btn-secondary" id="btn-back" hidden>← Zurück</button>
+      <div style="flex: 1;"></div>
+      <button type="button" class="id-btn-danger" id="btn-reject" hidden>Verwerfen</button>
+      <button type="button" class="id-btn-primary" id="btn-next">Weiter</button>
+      <button type="button" class="id-btn-success" id="btn-confirm" hidden>Identität bestätigen</button>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== Camera-Modal ===== -->
+<div class="id-camera-modal" id="cam-modal">
+  <video id="cam-video" autoplay playsinline></video>
+  <canvas id="cam-canvas" hidden></canvas>
+  <div class="id-camera-actions">
+    <button type="button" class="id-btn-secondary" id="cam-cancel">Abbrechen</button>
+    <button type="button" class="id-btn-primary" id="cam-shoot">Auslösen</button>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="id-toast" id="id-toast"></div>
+
+<!-- ===== ShikshaUI ===== -->
+<script src="./shiksha-ui.v1.0.0.js"></script>
+
+<!-- ===== Wizard-Logic ===== -->
+<script type="module">
+  import { ShikshaClient, ShikshaApiError, ShikshaAuthError } from './shiksha-client.js';
+
+  const client = new ShikshaClient('https://api.shiksha.world');
+
+  // Auth-Gate
+  if (!client.hasValidToken()) {
+    window.location.href = './presence_switch.html';
+  }
+
+  // ---- State ----
+  const state = {
+    currentStep: 1,
+    personId: null,
+    captures: { id_front: null, id_back: null },
+    docMetadata: { doc_type: null, doc_expiry: null, ocr_confidence: null },
+    currentDocKind: null,
+    cameraStream: null,
+  };
+
+  // ---- Element-Refs ----
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  const els = {
+    progress:    $('#id-progress'),
+    btnBack:     $('#btn-back'),
+    btnNext:     $('#btn-next'),
+    btnConfirm:  $('#btn-confirm'),
+    btnReject:   $('#btn-reject'),
+    consentText: $('#id-consent-text'),
+    consentToggle: $('#id-consent-toggle'),
+    consentCheck:$('#f-consent'),
+    ocrStatus:   $('#ocr-status'),
+    ocrStatusText: $('#ocr-status-text'),
+    ocrWarning:  $('#ocr-warning'),
+    camModal:    $('#cam-modal'),
+    camVideo:    $('#cam-video'),
+    camCanvas:   $('#cam-canvas'),
+    toast:       $('#id-toast'),
+  };
+
+  // ---- Toast-Helper ----
+  function toast(msg, kind = 'info') {
+    els.toast.textContent = msg;
+    els.toast.dataset.kind = kind;
+    els.toast.dataset.show = 'true';
+    setTimeout(() => { els.toast.dataset.show = 'false'; }, 3000);
+  }
+
+  // ---- Consent-Text laden (eingebettete Kopie aus consent_de_AT.md, gekürzt) ----
+  function loadConsentText() {
+    els.consentText.innerHTML = `
+      <p><strong>Was wir erfassen:</strong> Vorname, Nachname, Geburtsdatum, Ausweis-Foto
+      (max. 30 Tage gespeichert), Ausweistyp und Ablaufdatum. Die Ausweisnummer wird nur
+      als nicht zurückrechenbarer Code gespeichert.</p>
+      <p><strong>Wofür:</strong> Nur zur Überprüfung, ob die Person berechtigt ist,
+      Ihr Kind abzuholen. Keine andere Verwendung, kein Marketing.</p>
+      <p><strong>Speicherdauer:</strong> Ausweis-Bild max. 30 Tage. Stammdaten bis
+      Ende der Betreuung + 3 Jahre. Prüfprotokoll 7 Jahre.</p>
+      <p><strong>Rechte:</strong> Auskunft, Berichtigung, Löschung, Widerruf — formlos
+      per E-Mail an Trägerin.</p>
+      <p style="font-size:11px; color:var(--shk-color-text-soft);">Vollständiger Text:
+      <code>editions/jurisdictions/at/consent_de_AT.md</code></p>
+    `;
+  }
+  loadConsentText();
+
+  // ---- Consent-Toggle UI ----
+  els.consentCheck.addEventListener('change', () => {
+    els.consentToggle.classList.toggle('checked', els.consentCheck.checked);
+    updateNextButton();
+  });
+
+  // ---- Step-Wechsel ----
+  function goToStep(n) {
+    state.currentStep = n;
+    $$('.id-step').forEach(s => {
+      const step = parseInt(s.dataset.step, 10);
+      if (step === n) s.setAttribute('data-active', '');
+      else s.removeAttribute('data-active');
+    });
+    $$('#id-progress li').forEach(li => {
+      const step = parseInt(li.dataset.step, 10);
+      if (step < n) li.dataset.state = 'done';
+      else if (step === n) li.dataset.state = 'active';
+      else li.removeAttribute('data-state');
+    });
+
+    // Footer-Buttons
+    els.btnBack.hidden = (n === 1);
+    els.btnNext.hidden = (n === 3);
+    els.btnConfirm.hidden = (n !== 3);
+    els.btnReject.hidden = (n !== 3);
+    updateNextButton();
+  }
+
+  function updateNextButton() {
+    const n = state.currentStep;
+    let enabled = false;
+    if (n === 1) {
+      enabled = $('#f-name').value.trim().length > 0
+             && $('#f-birth').value.length > 0
+             && els.consentCheck.checked;
+    } else if (n === 2) {
+      enabled = state.captures.id_front !== null && state.captures.id_back !== null;
+    }
+    els.btnNext.disabled = !enabled;
+  }
+
+  // ---- Step 1 → 2: createPerson ----
+  async function submitStep1() {
+    const payload = {
+      full_name: $('#f-name').value.trim(),
+      birth_date: $('#f-birth').value,
+      consent_text: 'Einwilligung gemäß editions/jurisdictions/at/consent_de_AT.md v1.0',
+      consent_given: true,
+    };
+    els.btnNext.disabled = true;
+    try {
+      const person = await client.createIdentityPerson(payload);
+      state.personId = person.id;
+      goToStep(2);
+      toast('Person angelegt — bitte jetzt Ausweis scannen.', 'success');
+    } catch (err) {
+      toast(err.message || 'Anlegen fehlgeschlagen', 'error');
+      els.btnNext.disabled = false;
+    }
+  }
+
+  // ---- Step 2: Camera-Capture mit Fallback ----
+  async function openCamera(docKind) {
+    state.currentDocKind = docKind;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      // Direkt Fallback
+      document.querySelector(`input[data-fallback="${docKind}"]`).click();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+      });
+      state.cameraStream = stream;
+      els.camVideo.srcObject = stream;
+      els.camModal.dataset.open = 'true';
+    } catch (err) {
+      // Permission verweigert oder kein Camera-Device → Fallback
+      toast('Kamera nicht verfügbar — bitte Datei wählen.', 'info');
+      document.querySelector(`input[data-fallback="${docKind}"]`).click();
+    }
+  }
+
+  function closeCamera() {
+    if (state.cameraStream) {
+      state.cameraStream.getTracks().forEach(t => t.stop());
+      state.cameraStream = null;
+    }
+    els.camVideo.srcObject = null;
+    els.camModal.dataset.open = 'false';
+  }
+
+  function shootPhoto() {
+    const video = els.camVideo;
+    const canvas = els.camCanvas;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob(
+      (blob) => {
+        closeCamera();
+        if (blob) uploadCapture(state.currentDocKind, blob);
+      },
+      'image/jpeg',
+      0.85,
+    );
+  }
+
+  async function uploadCapture(docKind, blob) {
+    els.ocrStatus.hidden = false;
+    els.ocrStatusText.textContent = docKind === 'id_back'
+      ? 'Auswertung läuft (OCR + MRZ)…'
+      : 'Wird hochgeladen…';
+    els.ocrWarning.hidden = true;
+
+    try {
+      const doc = await client.uploadIdentityDocument(state.personId, docKind, blob);
+      state.captures[docKind] = doc;
+
+      // Preview
+      const preview = $(`#preview-${docKind}`);
+      preview.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="${docKind}">`;
+      preview.parentElement.dataset.uploaded = 'true';
+
+      // Confidence-Warnung
+      if (typeof doc.ocr_confidence === 'number' && doc.ocr_confidence < 60) {
+        els.ocrWarning.hidden = false;
+      }
+
+      // Wenn id_back: MRZ-Metadata für Review merken
+      if (docKind === 'id_back') {
+        // Person-Detail neu laden — Backend hat doc_kind/doc_expiry evtl. autofilled
+        const updated = await client.getIdentityPerson(state.personId);
+        state.docMetadata.doc_type = updated.doc_kind;
+        state.docMetadata.doc_expiry = updated.doc_expiry;
+        state.docMetadata.ocr_confidence = doc.ocr_confidence;
+      }
+
+      updateNextButton();
+      toast(`${docKind === 'id_front' ? 'Vorderseite' : 'Rückseite'} erfasst.`, 'success');
+    } catch (err) {
+      toast(err.message || 'Upload fehlgeschlagen', 'error');
+    } finally {
+      els.ocrStatus.hidden = true;
+    }
+  }
+
+  // ---- Step 3: Review-Anzeige + Verify ----
+  function populateReview() {
+    $('#review-name').textContent = $('#f-name').value.trim();
+    $('#review-birth').textContent = $('#f-birth').value;
+    $('#review-doctype').textContent = state.docMetadata.doc_type || '(nicht ermittelt)';
+    $('#review-expiry').textContent = state.docMetadata.doc_expiry || '(nicht ermittelt)';
+    const conf = state.docMetadata.ocr_confidence;
+    $('#review-confidence').textContent = (typeof conf === 'number')
+      ? `${conf.toFixed(0)} %` + (conf < 60 ? ' (niedrig)' : '')
+      : '—';
+  }
+
+  async function confirmIdentity() {
+    els.btnConfirm.disabled = true;
+    try {
+      const result = await client.verifyIdentityPerson(state.personId);
+      toast('Identität verifiziert ✓', 'success');
+      setTimeout(() => {
+        window.location.href = `./personen.html?highlight=${result.linked_person_id || ''}`;
+      }, 1200);
+    } catch (err) {
+      toast(err.message || 'Verifikation fehlgeschlagen', 'error');
+      els.btnConfirm.disabled = false;
+    }
+  }
+
+  async function rejectIdentity() {
+    const reason = prompt('Grund für Verwerfung (Pflicht):');
+    if (!reason || !reason.trim()) return;
+    els.btnReject.disabled = true;
+    try {
+      await client.rejectIdentityPerson(state.personId, reason.trim());
+      toast('Erfassung verworfen.', 'info');
+      setTimeout(() => { window.location.href = './heim.html'; }, 1200);
+    } catch (err) {
+      toast(err.message || 'Verwerfung fehlgeschlagen', 'error');
+      els.btnReject.disabled = false;
+    }
+  }
+
+  // ---- Event-Bindings ----
+
+  $('#f-name').addEventListener('input', updateNextButton);
+  $('#f-birth').addEventListener('input', updateNextButton);
+
+  els.btnBack.addEventListener('click', () => {
+    if (state.currentStep > 1) goToStep(state.currentStep - 1);
+  });
+
+  els.btnNext.addEventListener('click', () => {
+    if (state.currentStep === 1) submitStep1();
+    else if (state.currentStep === 2) { populateReview(); goToStep(3); }
+  });
+
+  els.btnConfirm.addEventListener('click', confirmIdentity);
+  els.btnReject.addEventListener('click', rejectIdentity);
+
+  // Capture-Buttons
+  $$('button[data-action="capture"]').forEach(btn => {
+    btn.addEventListener('click', () => openCamera(btn.dataset.docKind));
+  });
+
+  // File-Input-Fallback
+  $$('input[data-fallback]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) uploadCapture(input.dataset.fallback, file);
+      input.value = '';  // reset für erneute Selektion
+    });
+  });
+
+  // Camera-Modal
+  $('#cam-cancel').addEventListener('click', closeCamera);
+  $('#cam-shoot').addEventListener('click', shootPhoto);
+
+  // Init
+  goToStep(1);
+</script>
+
+</body>
+</html>

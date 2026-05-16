@@ -253,6 +253,26 @@ Tier 2 und Tier 3 analog. Wichtig:
 
 ---
 
+## T-012 — Vier-Augen-Bestätigung bei Identity-Verifikation
+
+**Status:** open, deferred aus 5.5.6.4. **Eröffnet:** 5.5.6.4-Pre-Flight. **Schwere:** mittel — DSFA §4.2 nennt Vier-Augen-Prinzip als organisatorische Maßnahme; aktuell verifiziert in der Implementation eine Person allein, was traceable via Audit-Log ist aber nicht das in der DSFA dokumentierte Pattern.
+
+**Was:** Spec §5.1 (3-Step-Wizard) und DSFA §4.2 sehen vor, dass eine zweite leitende oder pädagogische Person die Verifikation gegenzeichnet. 5.5.6.4-Bundle schlug einen PIN-basierten Ansatz vor (`/api/v1/operators/verify-pin`), aber im Repo existiert kein PIN-System — Operator-Auth läuft ausschließlich über WebAuthn/Passkey. Ein PIN-Sub-Feature wäre kein Mini-Add, sondern ein eigenständiger Sprint (DB-Spalte + Migration + Mint-UI + Verify-Endpoint + Operator-Schulung). Für 5.5.6.4 wurde die Vier-Augen-Pflicht daher zurückgestellt; die Verifikation läuft mit single-operator-Klick, der Audit-Log dokumentiert Operator-ID und Zeitstempel.
+
+**Praktischer Kontext:** Krummelus hat aktuell genau eine Leitung (Mira). Ein hartes Vier-Augen-Constraint würde den Workflow blockieren, wenn keine zweite leitende Person vor Ort ist — was im Pilot der Normalfall ist. Bei Multi-Leitungs-Tenants wird der Need real.
+
+**Konkrete Lösung:** Drei Optionen, in der Reihenfolge der Empfehlung:
+
+1. **Zweiter Passkey-Inline-Login.** Im Step-3-UI ein Button "Zweite Mitarbeiterin bestätigt jetzt" — startet WebAuthn-Flow mit `operator_id` der zweiten Person; bei Erfolg wird ein zweiter JWT im `X-Second-Operator-Token`-Header an `/persons/{id}/verify` mitgeschickt. Backend prüft: beide Tokens valide, gleicher Tenant, beide Rolle `leitung`/`padagoge`, beide Operator-IDs ≠. Saubere Auth-Wiederverwendung, kein PIN-System nötig. Aufwand: ~2-3h.
+2. **PIN-System bauen.** Komplettes Sub-Feature wie oben beschrieben. Bessere UX am Tablet, aber deutlich mehr Code. Aufwand: ~4-6h.
+3. **Bei single-operator bleiben, DSFA §4.2 anpassen.** Audit-Log-Pflicht ist DSGVO-konform; Vier-Augen war eine empfohlene aber nicht zwingende Maßnahme. Begründung im DSFA-Text: "Bei Single-Leitungs-Tenants ist Vier-Augen-Constraint impraktikabel; Audit-Log mit Operator-ID + Zeitstempel + Konsens-Text deckt Rechenschaftspflicht ab."
+
+**Empfehlung:** Option 1 nach Krummelus-Live-Go, sobald ein zweiter Tenant mit mehreren Leitungen onboardet wird. Bis dahin Option 3 (DSFA-Text anpassen). Optionen 2 ist über-engineered.
+
+**Wann fällig:** Vor Onboarding des zweiten AT-Tenants ODER vor 5.5.6.6.b-Live-Schaltung, falls die DSB-Antwort Vier-Augen explizit fordert.
+
+---
+
 ## Schließe-Kriterien
 
 Ein Tech-Debt-Eintrag wird gelöscht (nicht "✅ erledigt" gestrichen), wenn:

@@ -134,7 +134,14 @@ export class ShikshaClient {
 
   _headers(extra = {}) {
     const token = this.getToken();
-    const headers = { 'Content-Type': 'application/json', ...extra };
+    // Bei multipart (FormData) darf KEIN Content-Type gesetzt sein —
+    // der Browser baut den boundary-Header selbst.
+    const isMultipart = extra && extra.__multipart === true;
+    const cleanExtra = { ...extra };
+    delete cleanExtra.__multipart;
+    const headers = isMultipart
+      ? { ...cleanExtra }
+      : { 'Content-Type': 'application/json', ...cleanExtra };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -623,6 +630,116 @@ export class ShikshaClient {
 
   async getAttendanceWeekSummary() {
     return this._fetch('/api/v1/attendance/week_summary');
+  }
+
+  // -----------------------------------------------------------------
+  // IDENTITY
+  // -----------------------------------------------------------------
+
+  async createIdentityPerson({ full_name, birth_date, consent_text, consent_given = true }) {
+    return this._fetch('/api/v1/identity/persons', {
+      method: 'POST',
+      body: JSON.stringify({ full_name, birth_date, consent_text, consent_given }),
+    });
+  }
+
+  async listIdentityPersons({ status, linked } = {}) {
+    const params = new URLSearchParams();
+    if (status) params.set('status', status);
+    if (linked !== undefined) params.set('linked', String(linked));
+    const qs = params.toString();
+    return this._fetch(`/api/v1/identity/persons${qs ? '?' + qs : ''}`);
+  }
+
+  async getIdentityPerson(id) {
+    return this._fetch(`/api/v1/identity/persons/${id}`);
+  }
+
+  async patchIdentityPerson(id, payload) {
+    return this._fetch(`/api/v1/identity/persons/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteIdentityPerson(id) {
+    return this._fetch(`/api/v1/identity/persons/${id}`, { method: 'DELETE' });
+  }
+
+  async verifyIdentityPerson(id) {
+    return this._fetch(`/api/v1/identity/persons/${id}/verify`, { method: 'POST' });
+  }
+
+  async rejectIdentityPerson(id, reason) {
+    return this._fetch(`/api/v1/identity/persons/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async uploadIdentityDocument(personId, docKind, fileBlob) {
+    const formData = new FormData();
+    formData.append('file', fileBlob);
+    return this._fetch(
+      `/api/v1/identity/persons/${personId}/upload?doc_kind=${encodeURIComponent(docKind)}`,
+      {
+        method: 'POST',
+        body: formData,
+        headers: { __multipart: true },
+      },
+    );
+  }
+
+  async listIdentityDocuments(personId) {
+    return this._fetch(`/api/v1/identity/persons/${personId}/documents`);
+  }
+
+  async getIdentityDocumentFileURL(docId) {
+    // Hint für UI — Browser baut Bild-Tag, Auth-Header geht NICHT mit.
+    // Für File-Anzeige braucht man fetch+blob; siehe getIdentityDocumentBlob.
+    return `${this.baseUrl}/api/v1/identity/documents/${docId}/file`;
+  }
+
+  async getIdentityDocumentBlob(docId) {
+    const url = `${this.baseUrl}/api/v1/identity/documents/${docId}/file`;
+    const res = await fetch(url, { headers: this._headers() });
+    if (!res.ok) throw new ShikshaApiError(`HTTP ${res.status}`, res.status, {});
+    return res.blob();
+  }
+
+  async listIdentityAuthorizations({ subject, target_type, target_id } = {}) {
+    const params = new URLSearchParams();
+    if (subject) params.set('subject', subject);
+    if (target_type) params.set('target_type', target_type);
+    if (target_id !== undefined) params.set('target_id', String(target_id));
+    const qs = params.toString();
+    return this._fetch(`/api/v1/identity/authorizations${qs ? '?' + qs : ''}`);
+  }
+
+  async createIdentityAuthorization(payload) {
+    return this._fetch('/api/v1/identity/authorizations', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async revokeIdentityAuthorization(id, revoke_reason) {
+    return this._fetch(`/api/v1/identity/authorizations/${id}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ revoke_reason }),
+    });
+  }
+
+  async getIdentityAuditLog({ target_kind, target_id, actor_operator_id, from, to, limit } = {}) {
+    const params = new URLSearchParams();
+    if (target_kind) params.set('target_kind', target_kind);
+    if (target_id !== undefined) params.set('target_id', String(target_id));
+    if (actor_operator_id) params.set('actor_operator_id', actor_operator_id);
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    if (limit) params.set('limit', String(limit));
+    const qs = params.toString();
+    return this._fetch(`/api/v1/identity/audit-log${qs ? '?' + qs : ''}`);
   }
 
   // -----------------------------------------------------------------
