@@ -38,6 +38,7 @@ def create_app() -> FastAPI:
             {"name": "persons",  "description": "Persons — Stammdaten (Kinder, Mitarbeiter, später Teilnehmer/Gäste)"},
             {"name": "calendar", "description": "Calendar — Events, Stats, Geburtstage, Repeat-Reihen"},
             {"name": "attendance", "description": "Attendance — Anwesenheit, Live-Counts, Personalschlüssel"},
+            {"name": "identity", "description": "Identity — Abholer-Verifikation, OCR/MRZ, Authorizations, DSGVO-Audit"},
             {"name": "dev",      "description": "Developer-Only — Stats, Persona-Editor, Operator-Liste, Audit-Logs"},
             {"name": "meta",     "description": "Meta — Health, Root"},
         ],
@@ -60,7 +61,7 @@ def create_app() -> FastAPI:
     app.add_middleware(RateLimitMiddleware)
 
     # ---- Router ----
-    from .routers import attendance, auth, bridge, calendar, chat, dev, heim, memory, persons, sessions, tools  # noqa: E402
+    from .routers import attendance, auth, bridge, calendar, chat, dev, heim, identity, memory, persons, sessions, tools  # noqa: E402
 
     app.include_router(auth.router,       prefix="/api/v1/auth",       tags=["auth"])
     app.include_router(chat.router,       prefix="/api/v1/chat",       tags=["chat"])
@@ -72,6 +73,7 @@ def create_app() -> FastAPI:
     app.include_router(persons.router,    prefix="/api/v1/persons",    tags=["persons"])
     app.include_router(calendar.router,   prefix="/api/v1/calendar",   tags=["calendar"])
     app.include_router(attendance.router, prefix="/api/v1/attendance", tags=["attendance"])
+    app.include_router(identity.router,   prefix="/api/v1/identity",   tags=["identity"])
     app.include_router(dev.router,        prefix="/api/v1/dev",        tags=["dev"])
 
     # ---- Health-Check ----

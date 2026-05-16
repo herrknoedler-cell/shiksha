@@ -51,6 +51,11 @@ class Settings(BaseSettings):
     # ---- Editions ----
     editions_dir: str = Field(default="editions")
 
+    # ---- Identity / Upload-Storage ----
+    identity_upload_root: str = Field(default="uploads/identity")
+    tesseract_timeout_seconds: int = Field(default=30)
+    tesseract_languages: str = Field(default="deu+eng")
+
     # ---- Email (Phase 2 — OTP-Notausgang) ----
     smtp_host: str = Field(default="")
     smtp_port: int = Field(default=587)
