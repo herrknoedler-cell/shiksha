@@ -4,6 +4,10 @@ from .attendance import AttendanceRecord, AttendanceSettings
 from .audit import AuditLog
 from .event import Event
 from .friction import FrictionPoint
+from .identity_audit_log import IdentityAuditLog
+from .identity_authorization import IdentityAuthorization
+from .identity_document import IdentityDocument
+from .identity_person import IdentityPerson
 from .memory import MemoryEntry
 from .message import Message
 from .observation import Observation
@@ -21,6 +25,10 @@ __all__ = [
     "AuditLog",
     "Event",
     "FrictionPoint",
+    "IdentityAuditLog",
+    "IdentityAuthorization",
+    "IdentityDocument",
+    "IdentityPerson",
     "MemoryEntry",
     "Message",
     "Observation",
