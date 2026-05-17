@@ -52,8 +52,36 @@ def main(argv: list[str] | None = None) -> int:
             result = {"tier_3": cleanup_tier_3_audit_log(db, tenant_org_id=args.tenant, dry_run=dry_run)}
 
     mode_label = "DRY-RUN" if dry_run else "EXECUTED"
-    print(f"[{mode_label}] result:")
-    print(json.dumps(result, indent=2, default=str))
+    print(f"=== Identity-Cleanup {mode_label} ===")
+
+    # Wenn run_all_tiers: nutze das strukturierte Summary für lesbare Ausgabe
+    if args.all and isinstance(result, dict) and "tiers" in result:
+        for tier_name, tier_result in result["tiers"].items():
+            label = {
+                "tier_1_files": "Tier 1 (Scan-Dateien)",
+                "tier_2_structured": "Tier 2 (Strukturierte Daten)",
+                "tier_3_audit_log": "Tier 3 (Audit-Log)",
+            }.get(tier_name, tier_name)
+            if tier_result.get("status") == "ok":
+                print(f"\n{label}: {tier_result['total_deleted']} {'würden gelöscht' if dry_run else 'gelöscht'}")
+                for tenant_id, n in tier_result["deleted_per_tenant"].items():
+                    print(f"  {tenant_id}: {n}")
+            else:
+                print(f"\n{label}: FEHLER — {tier_result['error']}")
+
+        if result["errors"]:
+            print(f"\nStatus: {len(result['errors'])} Tier-Fehler — siehe oben.")
+            return 1
+        else:
+            print(f"\nStatus: alle Tiers ok, keine Fehler. Dauer {result['duration_seconds']}s.")
+    else:
+        # Einzel-Tier-Lauf: nur JSON
+        print(json.dumps(result, indent=2, default=str))
+
+    # Detail-JSON immer am Ende für maschinen-lesbares Parsing
+    if args.all:
+        print(f"\n--- JSON-Summary ---\n{json.dumps(result, default=str)}")
+
     return 0
 
 

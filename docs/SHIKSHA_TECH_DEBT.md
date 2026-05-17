@@ -203,7 +203,14 @@ Empfehlung: Option 1 (Move nach `legacy/`).
 
 ## T-011 — Three-Tier-Cleanup-Job für Identity-Auto-Löschung
 
-**Status:** open, wartet auf 5.5.6.2. **Eröffnet:** DSFA-Erstellung 5.5.6.0. **Schwere:** hoch — DSGVO-Pflicht. Ohne funktionierenden Cleanup-Job verletzt das System Art. 5(1)(e) DSGVO (Speicherbegrenzung) und Art. 17 DSGVO.
+**Status:** RESOLVED 2026-05-17 (Commit folgt). **Eröffnet:** DSFA-Erstellung 5.5.6.0. **Schwere war:** hoch — DSGVO-Pflicht. Ohne funktionierenden Cleanup-Job hätte das System Art. 5(1)(e) DSGVO (Speicherbegrenzung) und Art. 17 DSGVO verletzt.
+
+**Resolution:** alle drei Tier-Funktionen ausimplementiert in `services/identity_cleanup.py` (inkl. Legal-Hold-Check auf Tier 3 via Subquery), strukturiertes JSON-Summary mit Error-Isolation in `run_all_tiers`, CLI `scripts/identity_cleanup_cli.py` mit lesbarem Tier-Report, systemd-Timer-Unit `deploy/systemd/shiksha-identity-cleanup.timer` läuft täglich 03:00 UTC auf 88.99.174.186 (verkabelt + enabled). Live-Dry-Run + scharfer Lauf gegen Krummelus durchgelaufen (0 Löschungen, alle Tiers ok, 0.22s). 9 Pflicht-Tests grün.
+
+**Bug während Setup gefangen (Phase-7-T-002-Klasse erneut):**
+systemd `EnvironmentFile=` parst KEINE `Environment="KEY=VAL"`-Drop-In-Syntax — der ExecStart braucht einen bash-Wrapper, der die Drop-Ins zur Laufzeit sourct. Plus: `/etc/systemd/system/shiksha-engine.service.d/database.conf` war `0600 root:shiksha-app` (nur root lesbar) — auf `0640 root:shiksha-app` geändert (Group-Lesbar für shiksha-app, der den Cleanup-Job ausführt). Beides dokumentiert im service-Unit-Kommentar und in deploy/systemd/-Install-Notes. Bei jeder Secret-Rotation gilt damit: chmod-Permission beibehalten, sonst bricht der Cleanup-Job still.
+
+**Schließe-Kriterien aus 5.5.6.2 (Soll-Stand):**
 
 **Was:** Drei verschiedene Aufbewahrungs-Tiers (siehe `docs/dsfa/identity-modul-at.md` §1.5) brauchen automatisierte Cleanup-Logik:
 
@@ -255,9 +262,11 @@ Tier 2 und Tier 3 analog. Wichtig:
 
 ## T-012 — Vier-Augen-Bestätigung bei Identity-Verifikation
 
-**Status:** open, deferred aus 5.5.6.4. **Eröffnet:** 5.5.6.4-Pre-Flight. **Schwere:** mittel — DSFA §4.2 nennt Vier-Augen-Prinzip als organisatorische Maßnahme; aktuell verifiziert in der Implementation eine Person allein, was traceable via Audit-Log ist aber nicht das in der DSFA dokumentierte Pattern.
+**Status:** open, Schema-Hook vorhanden seit 5.5.6.4-Folge, Backend-Implementierung ausstehend. **Eröffnet:** 5.5.6.4-Pre-Flight. **Schwere:** mittel — DSFA §4.2 nennt das Vier-Augen-Prinzip als optionale organisatorische Maßnahme pro Tenant; aktuell verifiziert in der Implementation eine Person allein, was traceable via Audit-Log ist und für Single-Leitungs-Tenants korrekt, aber für Multi-Leitungs-Tenants noch nicht aktivierbar.
 
-**Was:** Spec §5.1 (3-Step-Wizard) und DSFA §4.2 sehen vor, dass eine zweite leitende oder pädagogische Person die Verifikation gegenzeichnet. 5.5.6.4-Bundle schlug einen PIN-basierten Ansatz vor (`/api/v1/operators/verify-pin`), aber im Repo existiert kein PIN-System — Operator-Auth läuft ausschließlich über WebAuthn/Passkey. Ein PIN-Sub-Feature wäre kein Mini-Add, sondern ein eigenständiger Sprint (DB-Spalte + Migration + Mint-UI + Verify-Endpoint + Operator-Schulung). Für 5.5.6.4 wurde die Vier-Augen-Pflicht daher zurückgestellt; die Verifikation läuft mit single-operator-Klick, der Audit-Log dokumentiert Operator-ID und Zeitstempel.
+**Was:** Spec §5.1 (3-Step-Wizard) und DSFA §4.2 sehen vor, dass eine zweite leitende oder pädagogische Person die Verifikation gegenzeichnen kann. Schema-Hook ist seit 17.05.2026 in `editions/jurisdictions/at.yaml` als `four_eyes_required: false` vorhanden (Default für AT-Träger, auf `true` setzbar wenn Einrichtung dauerhaft zwei Leitungspersonen hat). Backend-Reader für diesen Wert + UI-Flow für den zweiten Bestätigungs-Schritt existieren noch nicht.
+
+5.5.6.4-Bundle schlug einen PIN-basierten Ansatz vor (`/api/v1/operators/verify-pin`), aber im Repo existiert kein PIN-System — Operator-Auth läuft ausschließlich über WebAuthn/Passkey. Ein PIN-Sub-Feature wäre kein Mini-Add, sondern ein eigenständiger Sprint (DB-Spalte + Migration + Mint-UI + Verify-Endpoint + Operator-Schulung). Für 5.5.6.4 wurde die Vier-Augen-Pflicht daher zurückgestellt; die Verifikation läuft mit single-operator-Klick, der Audit-Log dokumentiert Operator-ID und Zeitstempel.
 
 **Praktischer Kontext:** Krummelus hat aktuell genau eine Leitung (Mira). Ein hartes Vier-Augen-Constraint würde den Workflow blockieren, wenn keine zweite leitende Person vor Ort ist — was im Pilot der Normalfall ist. Bei Multi-Leitungs-Tenants wird der Need real.
 

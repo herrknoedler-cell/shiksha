@@ -12,6 +12,7 @@ from shiksha_engine.models import (
 )
 from shiksha_engine.services.identity_cleanup import (
     cleanup_tier_1_files, cleanup_tier_2_structured, cleanup_tier_3_audit_log,
+    run_all_tiers,
 )
 
 
@@ -238,3 +239,73 @@ def test_cleanup_tier_3_deletes_old_audit_entries(db, krummelus_org):
     db.expire_all()
     assert db.query(IdentityAuditLog).filter_by(target_id=999).first() is None
     assert db.query(IdentityAuditLog).filter_by(target_id=1000).first() is not None
+
+
+def test_cleanup_tier_3_respects_legal_hold_on_target(db, krummelus_org):
+    """Audit-Eintrag älter als 7J wird NICHT gelöscht wenn die referenzierte
+    IdentityPerson noch existiert UND legal_hold=True hat."""
+    held_person = IdentityPerson(
+        tenant_org_id=krummelus_org.id, full_name="Held",
+        consent_given=True, legal_hold=True,
+        created_at=_now(), updated_at=_now(),
+    )
+    db.add(held_person)
+    db.flush()
+
+    old_audit_protected = IdentityAuditLog(
+        tenant_org_id=krummelus_org.id, actor_kind="system",
+        action="identity_person.create",
+        target_kind="identity_person", target_id=held_person.id,
+        created_at=_now() - timedelta(days=365 * 8),
+    )
+    # Kontroll-Eintrag: gleiche Person, anderer target_kind → KEIN Legal-Hold-Schutz
+    # weil Legal-Hold-Subquery nur bei target_kind='identity_person' greift
+    old_audit_doc_kind = IdentityAuditLog(
+        tenant_org_id=krummelus_org.id, actor_kind="system",
+        action="identity_document.upload",
+        target_kind="identity_document", target_id=held_person.id,
+        created_at=_now() - timedelta(days=365 * 8),
+    )
+    db.add_all([old_audit_protected, old_audit_doc_kind])
+    db.commit()
+
+    result = cleanup_tier_3_audit_log(db, tenant_org_id=krummelus_org.id, dry_run=False)
+    assert result == {"krummelus": 1}  # nur das document-kind wird gelöscht
+
+    db.expire_all()
+    # Protected bleibt (target_kind='identity_person' + Person mit legal_hold)
+    assert db.query(IdentityAuditLog).filter_by(target_id=held_person.id, target_kind="identity_person").first() is not None
+    # Doc-Kind weg (Legal-Hold-Check greift dort nicht)
+    assert db.query(IdentityAuditLog).filter_by(target_id=held_person.id, target_kind="identity_document").first() is None
+
+
+# ============================================================ run_all_tiers
+
+
+def test_run_all_tiers_returns_structured_summary(db, krummelus_org):
+    """Summary enthält started_at/finished_at/duration + tiers + errors."""
+    result = run_all_tiers(db, tenant_org_id=krummelus_org.id, dry_run=True)
+    assert "started_at" in result
+    assert "finished_at" in result
+    assert "duration_seconds" in result
+    assert "tiers" in result
+    assert set(result["tiers"].keys()) == {"tier_1_files", "tier_2_structured", "tier_3_audit_log"}
+    assert all(t["status"] == "ok" for t in result["tiers"].values())
+    assert result["errors"] == []
+
+
+def test_run_all_tiers_continues_on_partial_failure(db, krummelus_org, monkeypatch):
+    """Wenn ein Tier crasht, laufen die anderen weiter; summary listet den Fehler."""
+    from shiksha_engine.services import identity_cleanup as ic
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("simulated tier-1 failure")
+
+    monkeypatch.setattr(ic, "cleanup_tier_1_files", boom)
+
+    result = ic.run_all_tiers(db, tenant_org_id=krummelus_org.id, dry_run=True)
+    assert result["tiers"]["tier_1_files"]["status"] == "error"
+    assert "simulated tier-1 failure" in result["tiers"]["tier_1_files"]["error"]
+    assert result["tiers"]["tier_2_structured"]["status"] == "ok"
+    assert result["tiers"]["tier_3_audit_log"]["status"] == "ok"
+    assert len(result["errors"]) == 1

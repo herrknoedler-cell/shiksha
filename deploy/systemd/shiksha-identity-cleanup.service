@@ -1,0 +1,28 @@
+[Unit]
+Description=SHIKSHA Identity-Cleanup-Job (Tier 1+2+3 DSGVO-Retention)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=oneshot
+User=shiksha-app
+Group=shiksha-app
+WorkingDirectory=/opt/shiksha-engine
+# WICHTIG: systemd EnvironmentFile= parst KEINE Environment="KEY=VAL"-Drop-In-
+# Syntax. Die Drop-Ins von shiksha-engine.service haben aber genau dieses
+# Format. Daher: Shell-Wrapper im ExecStart, der die Drop-Ins zur Laufzeit
+# sourct. Pattern analog Phase-7-cron.d-env-Insel-Lerneffekt (T-002-Klasse).
+# Bei Secret-Rotation greift der nächste Cleanup-Lauf automatisch die
+# rotierten Werte ohne Service-Anpassung.
+ExecStart=/bin/bash -c 'set -a; \
+  for f in /etc/systemd/system/shiksha-engine.service.d/database.conf \
+           /etc/systemd/system/shiksha-engine.service.d/app.conf; do \
+    [ -r "$f" ] && source <(grep "^Environment=" "$f" | sed "s/Environment=//; s/^/export /"); \
+  done; \
+  set +a; \
+  /opt/shiksha-engine/.venv/bin/python -m scripts.identity_cleanup_cli --all --execute'
+StandardOutput=journal
+StandardError=journal
+# Cleanup ist nicht zeit-kritisch — wenn ein einzelner Lauf länger braucht,
+# das nächste Timer-Trigger einfach warten lassen.
+TimeoutStartSec=600

@@ -7,20 +7,22 @@ Drei Tiers, je tenant pro jurisdiction-Config:
   Tier 2 — IdentityPersons älter als structured_delete_at (AT: 3 Jahre)
   Tier 3 — Audit-Log älter als audit_log_years (AT: 7 Jahre)
 
-Legal-Hold-Flag pausiert Tier 1 + 2 für betroffene Records. Tier 3 wird
-durch legal_hold der referenzierten Records gestoppt (zur Read-Zeit
-geprüft — komplex, MVP-Implementation respektiert nur Tier-2-Hold).
+Legal-Hold-Flag pausiert alle drei Tiers für betroffene Records:
+  Tier 1/2 — direkt via identity_persons.legal_hold
+  Tier 3 — via Subquery auf referenzierte identity_persons.legal_hold
+           (nur für audit-entries mit target_kind='identity_person')
 
-Dry-Run-Modus für Erst-Deploy-Verifikation. Cron-Verkabelung kommt
-nach 5.5.6.6.b als systemd-Timer-Unit.
+Dry-Run-Modus für Erst-Deploy-Verifikation. systemd-Timer-Unit unter
+deploy/systemd/ verkabelt täglichen Lauf (03:00 UTC).
 """
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from sqlalchemy import or_
+from sqlalchemy import and_, exists, or_, select
 from sqlalchemy.orm import Session
 
 from shiksha_engine.models.identity_audit_log import IdentityAuditLog
@@ -185,10 +187,15 @@ def cleanup_tier_3_audit_log(
 ) -> dict[str, int]:
     """Löscht Audit-Log-Einträge älter als jurisdiction.retention.audit_log_years.
 
-    Note: kein Legal-Hold-Cross-Check zu target-Records (target könnte schon
-    gelöscht sein, dann ist legal_hold nicht mehr aufflösbar). Wenn ein Tenant
-    gerichtlich verpflichtet ist Audit-Logs länger zu halten, eigener
-    Tenant-Override in jurisdiction-Config (audit_log_years: 10).
+    Legal-Hold-Cross-Check: Audit-Einträge mit target_kind='identity_person'
+    werden NICHT gelöscht, wenn die referenzierte Person noch existiert UND
+    legal_hold=True hat. Wenn die Person bereits in Tier 2 gelöscht wurde,
+    greift der Check nicht mehr — dann ist der Audit-Eintrag frei für
+    Tier-3-Löschung nach Ablauf der retention.audit_log_years.
+
+    Wenn ein Tenant gerichtlich verpflichtet ist Audit-Logs länger zu
+    halten: eigener Tenant-Override in jurisdiction-Config
+    (audit_log_years: 10).
     """
     counts: dict[str, int] = {}
     tenants = _resolve_tenants(db, tenant_org_id)
@@ -198,9 +205,30 @@ def cleanup_tier_3_audit_log(
         years = config.get("identity", {}).get("retention", {}).get("audit_log_years", 7)
         cutoff = datetime.now(tz=timezone.utc) - timedelta(days=years * 365)
 
+        # Subquery: existiert eine noch-lebende Person mit legal_hold=True
+        # die der Audit-Eintrag referenziert?
+        legal_hold_subq = (
+            select(IdentityPerson.id)
+            .where(
+                IdentityPerson.id == IdentityAuditLog.target_id,
+                IdentityPerson.legal_hold.is_(True),
+            )
+            .correlate(IdentityAuditLog)
+        )
+
+        # NICHT löschen wenn:
+        #   target_kind == 'identity_person' UND existiert noch UND legal_hold
+        skip_filter = ~(
+            and_(
+                IdentityAuditLog.target_kind == "identity_person",
+                exists(legal_hold_subq),
+            )
+        )
+
         q = db.query(IdentityAuditLog).filter(
             IdentityAuditLog.tenant_org_id == tenant.id,
             IdentityAuditLog.created_at < cutoff,
+            skip_filter,
         )
 
         if dry_run:
@@ -231,10 +259,49 @@ def run_all_tiers(
     *,
     tenant_org_id: str | None = None,
     dry_run: bool = False,
-) -> dict[str, dict[str, int]]:
-    """Convenience: alle drei Tiers nacheinander."""
-    return {
-        "tier_1": cleanup_tier_1_files(db, tenant_org_id=tenant_org_id, dry_run=dry_run),
-        "tier_2": cleanup_tier_2_structured(db, tenant_org_id=tenant_org_id, dry_run=dry_run),
-        "tier_3": cleanup_tier_3_audit_log(db, tenant_org_id=tenant_org_id, dry_run=dry_run),
+) -> dict[str, Any]:
+    """Alle drei Tiers nacheinander mit Error-Isolation.
+
+    Fehler in einem Tier blockiert die anderen NICHT — die nächste Tier
+    läuft trotzdem. Resultat-Struktur ist JSON-serialisierbar und wird
+    ans Service-Log als eine Zeile geschrieben (journalctl-greppable).
+    """
+    started_at = datetime.now(tz=timezone.utc)
+    summary: dict[str, Any] = {
+        "started_at": started_at.isoformat(),
+        "dry_run": dry_run,
+        "tenant_filter": tenant_org_id,
+        "tiers": {},
+        "errors": [],
     }
+
+    for tier_name, tier_func in (
+        ("tier_1_files", cleanup_tier_1_files),
+        ("tier_2_structured", cleanup_tier_2_structured),
+        ("tier_3_audit_log", cleanup_tier_3_audit_log),
+    ):
+        try:
+            result = tier_func(db, tenant_org_id=tenant_org_id, dry_run=dry_run)
+            summary["tiers"][tier_name] = {
+                "status": "ok",
+                "deleted_per_tenant": result,
+                "total_deleted": sum(result.values()),
+            }
+        except Exception as exc:
+            log.exception("Cleanup tier %s failed", tier_name)
+            summary["tiers"][tier_name] = {"status": "error", "error": str(exc)[:300]}
+            summary["errors"].append({"tier": tier_name, "error": str(exc)[:300]})
+            try:
+                db.rollback()
+            except Exception:
+                log.exception("Rollback after tier %s failure also failed", tier_name)
+
+    summary["finished_at"] = datetime.now(tz=timezone.utc).isoformat()
+    summary["duration_seconds"] = round(
+        (datetime.fromisoformat(summary["finished_at"]) - started_at).total_seconds(),
+        2,
+    )
+
+    # Strukturierte JSON-Zeile fürs Service-Log
+    log.info("identity_cleanup_summary %s", json.dumps(summary, default=str))
+    return summary

@@ -1,0 +1,13 @@
+[Unit]
+Description=Täglicher SHIKSHA Identity-Cleanup-Job
+Requires=shiksha-identity-cleanup.service
+
+[Timer]
+# 03:00 UTC = 04:00 Vienna (Winter) bzw. 05:00 Vienna (Sommer).
+# Nicht zeit-kritisch — Cleanup-Job greift Retention-Cutoff zur Lauf-Zeit.
+OnCalendar=*-*-* 03:00:00
+RandomizedDelaySec=300
+Persistent=true
+
+[Install]
+WantedBy=timers.target
