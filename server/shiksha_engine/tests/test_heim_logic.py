@@ -203,6 +203,63 @@ def test_verlauf_count_only_closed_sessions(db, mira_leitung):
     assert result["count"] == 1
 
 
+def test_identity_summary_counts_pending_and_expiring(db, mira_leitung):
+    """Provider zählt pending IdentityPersons + verified mit doc_expiry < 30d."""
+    from datetime import date, timedelta
+    from shiksha_engine.models import IdentityPerson
+    from shiksha_engine.services.heim_providers import _identity_summary
+
+    now = datetime.now(timezone.utc)
+    today = date.today()
+
+    # 3× pending
+    for i in range(3):
+        db.add(IdentityPerson(
+            tenant_org_id=mira_leitung.org_id,
+            full_name=f"Pending {i}",
+            consent_given=True,
+            verification_status="pending",
+            created_at=now, updated_at=now,
+        ))
+    # 1× verified mit doc_expiry in 14d (zählt als expiring)
+    db.add(IdentityPerson(
+        tenant_org_id=mira_leitung.org_id,
+        full_name="Expiring Bald",
+        consent_given=True,
+        verification_status="verified",
+        verified_at=now,
+        doc_expiry=today + timedelta(days=14),
+        created_at=now, updated_at=now,
+    ))
+    # 1× verified mit doc_expiry in 90d (NICHT expiring)
+    db.add(IdentityPerson(
+        tenant_org_id=mira_leitung.org_id,
+        full_name="Expiring Spät",
+        consent_given=True,
+        verification_status="verified",
+        verified_at=now,
+        doc_expiry=today + timedelta(days=90),
+        created_at=now, updated_at=now,
+    ))
+    db.commit()
+
+    result = _identity_summary(mira_leitung, db)
+    assert result["pending_count"] == 3
+    assert result["expiring_soon_count"] == 1
+    assert "3 zu prüfen" in result["subtitle"]
+    assert "1 läuft ab" in result["subtitle"]
+    assert result["visible"] is True
+
+
+def test_identity_summary_empty_state(db, mira_leitung):
+    """Bei nichts zu tun: subtitle = 'Alles geprüft'."""
+    from shiksha_engine.services.heim_providers import _identity_summary
+    result = _identity_summary(mira_leitung, db)
+    assert result["pending_count"] == 0
+    assert result["expiring_soon_count"] == 0
+    assert result["subtitle"] == "Alles geprüft"
+
+
 # ===================================================================
 # load_heim — Integrations-Test mit echten Edition-YAMLs
 # ===================================================================

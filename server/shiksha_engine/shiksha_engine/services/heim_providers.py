@@ -216,6 +216,72 @@ def _attendance_week(operator: Operator, db: DBSession) -> dict:
 
 
 # ===================================================================
+# Identity-Provider (5.5.6.6.a)
+# ===================================================================
+
+# Schwelle für "läuft bald ab" — Default 30 Tage, in T-014 als
+# jurisdiction-Override (identity.expiring_warning_days) konfigurierbar.
+_EXPIRING_WARNING_DAYS = 30
+
+
+def _format_identity_subtitle(pending: int, expiring: int) -> str:
+    """UX-freundliche Subtitle-Variation für leere Zustände."""
+    if pending == 0 and expiring == 0:
+        return "Alles geprüft"
+    parts = []
+    if pending > 0:
+        parts.append(f"{pending} zu prüfen")
+    if expiring > 0:
+        parts.append(f"{expiring} läuft ab")
+    return " · ".join(parts)
+
+
+@register_provider("identity_summary")
+def _identity_summary(operator: Operator, db: DBSession) -> dict:
+    """Provider für Heim-Karte 'Abholer prüfen'.
+
+    Zählt pending IdentityPersons (zu verifizieren) und verified Identities
+    mit doc_expiry im 30-Tage-Fenster. 'today' wird in Tenant-TZ berechnet
+    (T-009-Pattern, sonst Drift in der Mitternachts-Lücke).
+    """
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+    from sqlalchemy import func, select
+    from shiksha_engine.models.identity_person import IdentityPerson
+
+    if not operator.org_id:
+        return {"visible": False}
+
+    tz_name = operator.organization.timezone if operator.organization else "UTC"
+    today = datetime.now(tz=ZoneInfo(tz_name)).date()
+    cutoff = today + timedelta(days=_EXPIRING_WARNING_DAYS)
+
+    pending = db.execute(
+        select(func.count(IdentityPerson.id)).where(
+            IdentityPerson.tenant_org_id == operator.org_id,
+            IdentityPerson.verification_status == "pending",
+        )
+    ).scalar_one()
+
+    expiring = db.execute(
+        select(func.count(IdentityPerson.id)).where(
+            IdentityPerson.tenant_org_id == operator.org_id,
+            IdentityPerson.verification_status == "verified",
+            IdentityPerson.doc_expiry.is_not(None),
+            IdentityPerson.doc_expiry >= today,
+            IdentityPerson.doc_expiry <= cutoff,
+        )
+    ).scalar_one()
+
+    return {
+        "pending_count":       pending,
+        "expiring_soon_count": expiring,
+        "subtitle":            _format_identity_subtitle(pending, expiring),
+        "visible":             True,
+    }
+
+
+# ===================================================================
 # Visibility-Rule-Auswerter
 # ===================================================================
 

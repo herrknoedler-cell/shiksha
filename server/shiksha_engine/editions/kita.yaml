@@ -158,14 +158,20 @@ heim_cards:
 
   - id: abholer_pruefen
     title: "Abholer prüfen"
-    subtitle_template: "Wenn jemand Neues kommt"
+    subtitle_template: "{subtitle}"
     icon: shield
-    action_url: "/pickup_check.html"
+    action_url: "/identity.html?filter=pending"
     edition_scope: ["kita"]
     role_scope: ["padagoge", "leitung", "developer"]
+    data_provider: identity_summary
     time_priority:
       morning: 5
       afternoon: 3
       evening: 4
       night: 8
     category: tools
+    # Konzept-Vorbereitung (SHIKSHA_DESIGN_KONZEPT.md §3.3 + §10) —
+    # vom aktuellen heim_loader.py via .get() ignoriert, vorwärtskompatibel
+    # für späteren heim.html-Refactor.
+    size: "2x2"
+    holi_border: "tuerkis"
