@@ -170,8 +170,105 @@ heim_cards:
       evening: 4
       night: 8
     category: tools
-    # Konzept-Vorbereitung (SHIKSHA_DESIGN_KONZEPT.md §3.3 + §10) —
-    # vom aktuellen heim_loader.py via .get() ignoriert, vorwärtskompatibel
-    # für späteren heim.html-Refactor.
+    # Konzept-Vorbereitung (SHIKSHA_HEIM_LAYOUT_SPEC §3) — vom
+    # heim_loader durchgereicht, im 4x6-Grid via heim_layouts platziert.
     size: "2x2"
     holi_border: "tuerkis"
+
+
+# ---------------------------------------------------------------------
+# Heim-Layouts — feste Page-Strukturen pro Rolle (5.5.D.5)
+# Spec: docs/specs/SHIKSHA_HEIM_LAYOUT_SPEC.md
+# Grid: 4 Spalten × 6 Reihen, position [col, row] ist 0-basiert.
+# Karten-Types die hier auftauchen aber keinen Provider haben:
+# werden als Placeholder-Tile gerendert ("Karte noch nicht implementiert").
+# ---------------------------------------------------------------------
+heim_layouts:
+  schema_version: 1
+
+  leitung:
+    - page_id: heute
+      label: "Heute"
+      cards:
+        - {type: wer_ist_da,            size: "4x2", position: [0, 0]}
+        - {type: dayclock,              size: "4x3", position: [0, 2]}
+        - {type: abholer_pruefen,       size: "2x2", position: [0, 5]}
+        - {type: action_neue_erfassung, size: "1x1", position: [2, 5],
+           title: "Erfassung",     icon: shield, accent: "warm",
+           url: "/identity.html"}
+        - {type: action_anwesenheit,    size: "1x1", position: [3, 5],
+           title: "Anwesenheit",   icon: presence, accent: "cool",
+           url: "/anwesenheit.html"}
+
+    - page_id: wochenplan
+      label: "Wochenplan"
+      cards:
+        - {type: diese_woche,           size: "4x3", position: [0, 0]}
+        - {type: anwesenheit_woche,     size: "2x2", position: [0, 3]}
+        - {type: geburtstage_woche,     size: "2x2", position: [2, 3]}
+        - {type: action_kalender,       size: "4x1", position: [0, 5],
+           title: "Kalender öffnen", icon: calendar, accent: "warm",
+           url: "/kalender.html"}
+
+    - page_id: verwaltung
+      label: "Verwaltung"
+      cards:
+        - {type: stammdaten,            size: "2x2", position: [0, 0]}
+        - {type: personal_heute,        size: "2x2", position: [2, 0]}
+        - {type: lizenzen,              size: "2x2", position: [0, 2]}
+        - {type: operatoren_status,     size: "2x2", position: [2, 2]}
+        - {type: tech_schuld,           size: "4x2", position: [0, 4]}
+
+    - page_id: gespraeche
+      label: "Gespräche"
+      cards:
+        - {type: gespraeche_modul,      size: "4x6", position: [0, 0]}
+
+  padagoge:
+    - page_id: meine_gruppe_heute
+      label: "Meine Gruppe heute"
+      cards:
+        - {type: wer_ist_da,            size: "4x2", position: [0, 0]}
+        - {type: dayclock,              size: "4x3", position: [0, 2]}
+        - {type: abholer_pruefen,       size: "2x2", position: [0, 5]}
+        - {type: action_anwesenheit,    size: "2x1", position: [2, 5],
+           title: "Anwesenheit",   icon: presence, accent: "cool",
+           url: "/anwesenheit.html"}
+
+    - page_id: kinder_eltern
+      label: "Kinder und Eltern"
+      cards:
+        - {type: kinder_liste_gruppe,   size: "4x3", position: [0, 0]}
+        - {type: eltern_kontakte,       size: "2x2", position: [0, 3]}
+        - {type: abholberechtigte,      size: "2x2", position: [2, 3]}
+        - {type: action_neue_notiz,     size: "1x1", position: [0, 5],
+           title: "Notiz",         icon: pencil, accent: "warm",
+           url: "/personen.html"}
+        - {type: action_eltern_msg,     size: "1x1", position: [1, 5],
+           title: "Eltern-Nachricht", icon: chat, accent: "cool",
+           url: "/personen.html"}
+
+    - page_id: gespraeche
+      label: "Gespräche"
+      cards:
+        - {type: gespraeche_modul,      size: "4x6", position: [0, 0]}
+
+  # Eltern-Layout kommt mit Phase-2-Onboarding (Eltern-App via Bridge,
+  # Eltern-Token-Mechanik). Bewusst leer.
+  eltern: []
+
+  developer:
+    # Developer erbt das Leitungs-Layout (gleiche Sicht).
+    # Wenn später Developer-spezifische Pages nötig: hier ergänzen.
+    - page_id: heute
+      label: "Heute (developer)"
+      cards:
+        - {type: wer_ist_da,            size: "4x2", position: [0, 0]}
+        - {type: dayclock,              size: "4x3", position: [0, 2]}
+        - {type: abholer_pruefen,       size: "2x2", position: [0, 5]}
+        - {type: action_neue_erfassung, size: "1x1", position: [2, 5],
+           title: "Erfassung",     icon: shield, accent: "warm",
+           url: "/identity.html"}
+        - {type: action_anwesenheit,    size: "1x1", position: [3, 5],
+           title: "Anwesenheit",   icon: presence, accent: "cool",
+           url: "/anwesenheit.html"}

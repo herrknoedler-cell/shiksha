@@ -23,7 +23,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session as DBSession
 
 from ..models import Operator, TenantHeimConfig
-from ..schemas.heim import HeimCard, HeimResponse
+from ..schemas.heim import HeimCard, HeimPage, HeimPageCard, HeimResponse
 from .edition_config import get_edition_config
 from .heim_providers import call_provider, evaluate_visibility, render_subtitle
 
@@ -180,9 +180,172 @@ def load_heim(operator: Operator, db: DBSession) -> HeimResponse:
     rendered.sort(key=lambda c: (c.priority, c.id))
 
     greeting = _greeting_for(slot, operator.display_name)
+
+    # ---- Pages (5.5.D.5) ----
+    # Wenn editions/<edition>.yaml ein heim_layouts.<role> definiert,
+    # bauen wir die strukturierte Page-Liste. Sonst pages=[] und das
+    # Frontend nutzt die flache cards-Liste.
+    pages = _build_heim_pages(
+        operator=operator,
+        db=db,
+        edition_cfg=cfg or {},
+        core_cfg=core_cfg or {},
+        card_pool=raw_cards,
+    )
+
     return HeimResponse(
         greeting=greeting,
         role=operator.role,
         tenant=operator.org_id,
         cards=rendered,
+        pages=pages,
+        schema_version=1,
+    )
+
+
+# ===================================================================
+# Pages-Builder (5.5.D.5)
+# Spec: docs/specs/SHIKSHA_HEIM_LAYOUT_SPEC.md
+# ===================================================================
+
+
+def _build_heim_pages(
+    *,
+    operator: Operator,
+    db: DBSession,
+    edition_cfg: dict,
+    core_cfg: dict,
+    card_pool: list[dict],
+) -> list[HeimPage]:
+    """Baut die Pages-Liste für die Rolle des Operators.
+
+    Sucht in edition-yaml und core-yaml nach heim_layouts.<role>.
+    Edition gewinnt über core (Edition-Override-Pattern).
+
+    Für jede Karte: versucht Provider via type-string, fällt zurück
+    auf card_pool-Lookup (heim_cards mit id == type), sonst Placeholder.
+    """
+    layouts_edition = (edition_cfg.get("heim_layouts") or {})
+    layouts_core    = (core_cfg.get("heim_layouts") or {})
+
+    role_layout = layouts_edition.get(operator.role)
+    if role_layout is None:
+        role_layout = layouts_core.get(operator.role)
+    if not role_layout:
+        return []
+
+    # Card-Pool als Dict für schnellen Lookup
+    pool_by_id = {c["id"]: c for c in card_pool if c.get("id")}
+
+    pages: list[HeimPage] = []
+    for page_def in role_layout:
+        cards: list[HeimPageCard] = []
+        for card_def in page_def.get("cards", []):
+            cards.append(
+                _build_page_card(
+                    card_def=card_def,
+                    operator=operator,
+                    db=db,
+                    pool_by_id=pool_by_id,
+                )
+            )
+        pages.append(HeimPage(
+            page_id=page_def["page_id"],
+            label=page_def.get("label", page_def["page_id"]),
+            cards=cards,
+        ))
+    return pages
+
+
+def _build_page_card(
+    *,
+    card_def: dict,
+    operator: Operator,
+    db: DBSession,
+    pool_by_id: dict[str, dict],
+) -> HeimPageCard:
+    """Eine einzelne Page-Karte bauen.
+
+    Resolution-Reihenfolge:
+      1. action_* → Tile-Button mit Inline-Properties aus dem Layout (title,
+         icon, accent, url) — kein Provider-Lookup
+      2. type == 'dayclock' → Komponente, kein Provider
+      3. type in pool_by_id → nutze Pool-Eintrag (title, icon, action_url,
+         data_provider) plus optional Provider-Call
+      4. sonst → Placeholder-Tile
+    """
+    type_str = card_def["type"]
+    size = card_def.get("size", "1x1")
+    position = card_def.get("position", [0, 0])
+
+    # Action-Tile
+    if type_str.startswith("action_"):
+        return HeimPageCard(
+            type=type_str,
+            size=size,
+            position=position,
+            title=card_def.get("title"),
+            icon=card_def.get("icon"),
+            url=card_def.get("url"),
+            accent=card_def.get("accent", "warm"),
+            placeholder=False,
+        )
+
+    # Dayclock-Komponente
+    if type_str == "dayclock":
+        return HeimPageCard(
+            type=type_str,
+            size=size,
+            position=position,
+            title="Tages-Uhr",
+            placeholder=False,
+        )
+
+    # Pool-Lookup
+    pool_entry = pool_by_id.get(type_str)
+    if pool_entry is None:
+        return HeimPageCard(
+            type=type_str,
+            size=size,
+            position=position,
+            title=type_str,
+            subtitle="Karte noch nicht implementiert",
+            placeholder=True,
+        )
+
+    # Provider-Call (falls vorhanden)
+    provider_name = pool_entry.get("data_provider")
+    data: dict[str, Any] = {}
+    subtitle = pool_entry.get("subtitle_template") or pool_entry.get("subtitle")
+    if provider_name:
+        try:
+            data = call_provider(provider_name, operator, db) or {}
+            if data.get("visible") is False:
+                # Auch placeholder-mäßig anzeigen, damit Grid-Layout stabil bleibt
+                return HeimPageCard(
+                    type=type_str,
+                    size=size,
+                    position=position,
+                    title=pool_entry.get("title", type_str),
+                    subtitle="—",
+                    icon=pool_entry.get("icon"),
+                    url=pool_entry.get("action_url"),
+                    placeholder=False,
+                )
+            if subtitle:
+                subtitle = render_subtitle(subtitle, data)
+        except Exception:
+            log.exception("Page-card provider %s raised", provider_name)
+            subtitle = "—"
+
+    return HeimPageCard(
+        type=type_str,
+        size=size,
+        position=position,
+        title=pool_entry.get("title", type_str),
+        subtitle=subtitle,
+        icon=pool_entry.get("icon"),
+        url=pool_entry.get("action_url"),
+        data=data or None,
+        placeholder=False,
     )

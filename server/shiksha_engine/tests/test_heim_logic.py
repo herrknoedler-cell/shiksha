@@ -295,6 +295,52 @@ def test_load_heim_passes_size_and_holi_border(db, pedagogin):
     assert abholer.holi_border == "tuerkis"
 
 
+def test_load_heim_returns_pages_for_leitung(db, mira_leitung):
+    """5.5.D.5: heim_layouts.leitung definiert 4 Pages (Heute, Wochenplan,
+    Verwaltung, Gespräche) — alle 4 müssen in HeimResponse.pages auftauchen."""
+    result = load_heim(mira_leitung, db)
+    assert result.schema_version == 1
+    assert len(result.pages) == 4
+    page_ids = [p.page_id for p in result.pages]
+    assert page_ids == ["heute", "wochenplan", "verwaltung", "gespraeche"]
+    # Heute hat 5 Karten (wer_ist_da, dayclock, abholer_pruefen, 2 actions)
+    heute = result.pages[0]
+    assert heute.label == "Heute"
+    assert len(heute.cards) == 5
+
+
+def test_load_heim_page_card_resolves_provider_and_placeholders(db, mira_leitung):
+    """Karten mit Pool-Match + Provider werden befüllt; unbekannte types
+    werden als Placeholder gerendert."""
+    result = load_heim(mira_leitung, db)
+    heute = result.pages[0]
+
+    # abholer_pruefen ist im Pool + hat identity_summary-Provider
+    abholer = next(c for c in heute.cards if c.type == "abholer_pruefen")
+    assert abholer.placeholder is False
+    assert abholer.title == "Abholer prüfen"
+    assert abholer.size == "2x2"
+    assert abholer.position == [0, 5]
+
+    # action_neue_erfassung ist ein Tile mit Inline-Properties
+    action = next(c for c in heute.cards if c.type == "action_neue_erfassung")
+    assert action.placeholder is False
+    assert action.accent == "warm"
+    assert action.url == "/identity.html"
+
+    # dayclock ist System-Komponente
+    clock = next(c for c in heute.cards if c.type == "dayclock")
+    assert clock.placeholder is False
+    assert clock.title == "Tages-Uhr"
+
+    # Verwaltung hat tech_schuld, lizenzen etc. — die sind als Placeholder
+    verwaltung = result.pages[2]
+    placeholders = [c for c in verwaltung.cards if c.placeholder]
+    assert len(placeholders) >= 2
+    tech = next(c for c in placeholders if c.type == "tech_schuld")
+    assert tech.subtitle == "Karte noch nicht implementiert"
+
+
 def test_load_heim_for_padagoge_excludes_leitung_only(db, pedagogin):
     """personal_heute ist role_scope=['leitung'] — Pädagogin sieht das nicht."""
     result = load_heim(pedagogin, db)

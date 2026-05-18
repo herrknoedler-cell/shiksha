@@ -19,100 +19,43 @@
     })();
   </script>
 
-  <!-- Design-System: Basis + KITA-Edition-Overrides -->
-  <link rel="stylesheet" href="./shiksha-ui.v1.0.0.css">
+  <!-- Design-System v1.1 (Card-Size-Modifier, Heim-Slider, shk-action) -->
+  <link rel="stylesheet" href="./shiksha-ui.v1.1.0.css">
   <link rel="stylesheet" href="./editions-css/kita.v1.0.0.css">
-
-  <style>
-    /* =====================================================
-       Heim — Karten-Größen + Holi-Border-Akzente (T-013)
-       Lebendig macht die Konzept-Felder size + holi_border
-       aus editions/<edition>.yaml. Wird vom Heim-Loader
-       in HeimCard.size / HeimCard.holi_border durchgereicht
-       und vom renderCard() in heim.html als CSS-Modifier-
-       Klasse gesetzt.
-       Bewusst inline in heim.html (Lifecycle-Spur), damit
-       das Design-System v1.0 stabil bleibt — ein eigenes
-       Konzept-Doc wird die Tokens später hochziehen.
-       ===================================================== */
-
-    /* Karten-Größen — Grid-Span auf .shk-grid */
-    .shk-card.shk-card--size-2x1 { grid-column: span 2; }
-    .shk-card.shk-card--size-1x2 { grid-row:    span 2; }
-    .shk-card.shk-card--size-2x2 { grid-column: span 2; grid-row: span 2; }
-
-    /* Holi-Border-Akzente — farbiger linker Border */
-    .shk-card.shk-card--holi-pink      { border-left: 4px solid #ff4d8d; }
-    .shk-card.shk-card--holi-tuerkis,
-    .shk-card.shk-card--holi-turquoise { border-left: 4px solid #00d4d4; }
-    .shk-card.shk-card--holi-yellow,
-    .shk-card.shk-card--holi-gelb      { border-left: 4px solid #ffd93d; }
-    .shk-card.shk-card--holi-purple,
-    .shk-card.shk-card--holi-lila      { border-left: 4px solid #a855f7; }
-    .shk-card.shk-card--holi-orange    { border-left: 4px solid #ff8c42; }
-    .shk-card.shk-card--holi-green,
-    .shk-card.shk-card--holi-gruen     { border-left: 4px solid #6dd47e; }
-
-    /* Auf Mobile (< 600px) keine Grid-Span — Single-Column-Stack */
-    @media (max-width: 599px) {
-      .shk-card.shk-card--size-2x1,
-      .shk-card.shk-card--size-1x2,
-      .shk-card.shk-card--size-2x2 {
-        grid-column: auto;
-        grid-row:    auto;
-      }
-    }
-  </style>
 </head>
-<body>
+<body data-context="heim">
 
-  <!-- ========================================================
-       Icon-Sprite — einmal referenziert, von allen Karten genutzt
-       ======================================================== -->
+  <!-- Icon-Sprite-Referenz -->
   <svg style="display:none" aria-hidden="true">
     <use href="./shiksha-icons.v1.0.0.svg#icon-default"/>
   </svg>
 
-  <div class="shk-shell">
-
-    <!-- ========================================================
-         HEADER  —  Greeting + Theme-Toggle
-         ======================================================== -->
-    <header class="shk-header">
-      <div class="shk-row" style="justify-content: space-between; align-items: flex-start;">
-        <div>
-          <h1 class="shk-display shk-fade-in" id="greeting">&nbsp;</h1>
-          <p class="shk-subtitle shk-fade-in" id="context" style="margin-top: var(--shk-space-sm);"></p>
-        </div>
-        <button class="shk-theme-toggle shk-fade-in"
-                data-shk-theme-toggle
-                aria-label="Theme umschalten">
-          <svg class="shk-icon shk-icon--sm">
-            <use href="./shiksha-icons.v1.0.0.svg#icon-weather-sun"/>
-          </svg>
-          <span data-shk-theme-label>Modus</span>
-        </button>
+  <!-- Header bleibt minimal — Greeting + Theme-Toggle, kompakt am oberen Rand -->
+  <header class="shk-header" style="padding: var(--shk-space-md);">
+    <div class="shk-row" style="justify-content: space-between; align-items: flex-start;">
+      <div>
+        <h1 class="shk-display shk-fade-in" id="greeting">&nbsp;</h1>
       </div>
-    </header>
+      <button class="shk-theme-toggle shk-fade-in"
+              data-shk-theme-toggle
+              aria-label="Theme umschalten">
+        <svg class="shk-icon shk-icon--sm">
+          <use href="./shiksha-icons.v1.0.0.svg#icon-weather-sun"/>
+        </svg>
+        <span data-shk-theme-label>Modus</span>
+      </button>
+    </div>
+  </header>
 
-    <!-- ========================================================
-         KARTEN-GRID
-         ======================================================== -->
-    <main class="shk-grid" id="cards-grid">
-      <div class="shk-loading" id="loading">Einen Moment.</div>
-    </main>
-
-    <footer style="margin-top: auto; padding-top: var(--shk-space-lg); text-align: center;">
-      <span class="shk-text-tiny shk-text-faint" style="letter-spacing: var(--shk-tracking-wide);">SHIKSHA</span>
-    </footer>
-  </div>
+  <!-- Heim-Slider — wird per JS mit Pages befüllt -->
+  <main class="shk-heim-slider" id="heim-slider" role="main">
+    <div class="shk-loading" id="loading" style="padding: var(--shk-space-lg);">Einen Moment.</div>
+  </main>
 
 
-  <!-- ========================================================
-       Karten-Template — wird per JS geklont
-       ======================================================== -->
+  <!-- ===== Card-Template (klassische Karte) ===== -->
   <template id="card-template">
-    <a class="shk-card" href="#">
+    <article class="shk-card">
       <div class="shk-card__icon">
         <svg><use href=""/></svg>
       </div>
@@ -120,60 +63,64 @@
         <h2 class="shk-card__title"></h2>
         <p class="shk-card__subtitle"></p>
       </div>
-    </a>
+    </article>
+  </template>
+
+  <!-- ===== Action-Template (Tile-Button) ===== -->
+  <template id="action-template">
+    <button class="shk-action" type="button">
+      <svg class="shk-action__icon"><use href=""/></svg>
+      <span class="shk-action__label"></span>
+    </button>
+  </template>
+
+  <!-- ===== Dayclock-Template ===== -->
+  <template id="dayclock-template">
+    <article class="shk-card">
+      <div class="shk-card__body" style="display:flex; align-items:center; justify-content:center;">
+        <div data-dayclock-mount></div>
+      </div>
+    </article>
   </template>
 
 
-  <!-- ========================================================
-       Anwendungs-Skript
-       ======================================================== -->
+  <!-- ===== Anwendungs-Skript ===== -->
   <script type="module">
     import { ShikshaClient, ShikshaAuthError } from './shiksha-client.js';
     import {
       initShikshaUI,
-      avatarInitials,
-    } from './shiksha-ui.v1.0.0.js';
+      initHeimSlider,
+      renderDayClock,
+    } from './shiksha-ui.v1.1.0.js';
 
     // -------------------------------------------------------------
-    // Auth-Gate — vor allem anderen
+    // Auth-Gate
     // -------------------------------------------------------------
     const client = new ShikshaClient();
-
     if (!client.hasValidToken()) {
       const nextParam = encodeURIComponent(location.pathname + location.search);
       location.replace(`./presence_switch.html?next=${nextParam}`);
     }
 
-    // -------------------------------------------------------------
-    // Design-System initialisieren
-    //   - Theme aus localStorage wiederherstellen
-    //   - Theming-Engine starten (data-time/data-season/data-context)
-    //   - Auto-bind aller [data-shk-theme-toggle], Modals, Tabs
-    // -------------------------------------------------------------
     initShikshaUI({ context: 'heim' });
 
     // -------------------------------------------------------------
-    // Rendering
+    // Refs
     // -------------------------------------------------------------
-    const greetingEl = document.getElementById('greeting');
-    const contextEl  = document.getElementById('context');
-    const gridEl     = document.getElementById('cards-grid');
-    const cardTpl    = document.getElementById('card-template');
+    const greetingEl  = document.getElementById('greeting');
+    const sliderEl    = document.getElementById('heim-slider');
+    const cardTpl     = document.getElementById('card-template');
+    const actionTpl   = document.getElementById('action-template');
+    const dayclockTpl = document.getElementById('dayclock-template');
 
     const ICON_FALLBACK = 'default';
     const KNOWN_ICONS = new Set([
-      // Heim-Karten
-      'candle', 'bookmark', 'presence', 'team', 'shield', 'clock',
-      // Navigation
-      'home', 'calendar', 'chat', 'history', 'settings', 'gear',
-      // Aktionen
-      'plus', 'pencil', 'trash', 'check', 'share',
-      // Status
-      'info', 'warning', 'error', 'ok',
-      // Wetter
+      'candle', 'bookmark', 'presence', 'team', 'shield', 'shield-check',
+      'clock', 'home', 'calendar', 'calendar-week', 'chat', 'history',
+      'settings', 'gear', 'plus', 'pencil', 'trash', 'check', 'share',
+      'info', 'warning', 'error', 'ok', 'default',
       'weather-sun', 'weather-cloud', 'weather-rain', 'weather-snow', 'weather-fog',
-      // Personen
-      'person', 'users', 'parent-child', 'baby',
+      'person', 'users', 'parent-child', 'baby', 'book', 'sun',
     ]);
 
     function iconRef(iconName) {
@@ -181,75 +128,158 @@
       return `./shiksha-icons.v1.0.0.svg#icon-${name}`;
     }
 
-    function renderCard(card) {
+    // -------------------------------------------------------------
+    // Card-Rendering
+    // -------------------------------------------------------------
+
+    function applyGridSlot(el, card) {
+      // size = "WxH", position = [col, row], beide 0-basiert
+      const [col, row] = card.position || [0, 0];
+      const [w, h] = (card.size || '1x1').split('x').map(s => parseInt(s, 10) || 1);
+      // CSS Grid ist 1-basiert
+      el.style.gridColumn = `${col + 1} / span ${w}`;
+      el.style.gridRow    = `${row + 1} / span ${h}`;
+      el.classList.add(`shk-card--size-${card.size || '1x1'}`);
+    }
+
+    function renderClassicCard(card) {
       const node = cardTpl.content.firstElementChild.cloneNode(true);
+      node.setAttribute('data-type', card.type);
 
-      node.setAttribute('href', card.action_url || '#');
-      node.setAttribute('data-id', card.id);
-
-      // Kategorie als Modifier-Klasse (admin wird dezenter dargestellt)
-      if (card.category === 'admin') {
-        node.classList.add('shk-card--admin');
-      }
-      if (card.category === 'feature') {
-        node.classList.add('shk-card--feature');
+      if (card.placeholder) {
+        node.classList.add('shk-card--placeholder');
       }
 
-      // Konzept-Felder (5.5.6.6.a Pre-Sale, lebendig seit T-013):
-      // size = "2x1" | "1x2" | "2x2" → Grid-Span-Klasse
-      // holi_border = "pink" | "tuerkis" | "yellow" | ... → Border-Akzent
-      if (card.size && /^[12]x[12]$/.test(card.size)) {
-        node.classList.add(`shk-card--size-${card.size}`);
-      }
-      if (card.holi_border) {
-        const safe = card.holi_border.toLowerCase().replace(/[^a-z]/g, '');
-        if (safe) node.classList.add(`shk-card--holi-${safe}`);
-      }
-
-      // Icon einsetzen
-      const use = node.querySelector('.shk-card__icon use');
-      use.setAttribute('href', iconRef(card.icon));
+      // Icon
+      const useEl = node.querySelector('.shk-card__icon use');
+      useEl.setAttribute('href', iconRef(card.icon));
 
       // Texte
       node.querySelector('.shk-card__title').textContent = card.title || '';
-      const sub = node.querySelector('.shk-card__subtitle');
+      const subEl = node.querySelector('.shk-card__subtitle');
       if (card.subtitle) {
-        sub.textContent = card.subtitle;
+        subEl.textContent = card.subtitle;
       } else {
-        sub.remove();
+        subEl.remove();
+      }
+
+      // Tap-Ziel
+      if (card.url && !card.placeholder) {
+        node.style.cursor = 'pointer';
+        node.addEventListener('click', () => { window.location.href = card.url; });
       }
 
       return node;
     }
 
-    function renderHeim(heim) {
-      greetingEl.textContent = heim.greeting || '';
-      contextEl.textContent = '';
+    function renderAction(card) {
+      const node = actionTpl.content.firstElementChild.cloneNode(true);
+      node.setAttribute('data-type', card.type);
 
-      gridEl.innerHTML = '';
-      if (!heim.cards || heim.cards.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'shk-empty';
-        empty.textContent = 'Hier wird Dein Zugang gleich vorbereitet.';
-        gridEl.appendChild(empty);
-        return;
+      // Akzent-Variante
+      const accent = (card.accent || 'warm').toLowerCase();
+      const accentMap = {
+        warm: 'accent-warm',
+        cool: 'accent-cool',
+        info: 'status-info',
+        warn: 'status-warn',
+      };
+      const cls = accentMap[accent] || 'accent-warm';
+      node.classList.add(`shk-action--${cls}`);
+
+      node.querySelector('.shk-action__icon use').setAttribute('href', iconRef(card.icon));
+      node.querySelector('.shk-action__label').textContent = card.title || '';
+
+      if (card.url) {
+        node.addEventListener('click', () => { window.location.href = card.url; });
       }
 
-      const frag = document.createDocumentFragment();
-      heim.cards.forEach(card => frag.appendChild(renderCard(card)));
-      gridEl.appendChild(frag);
+      return node;
     }
 
-    function renderError(text) {
-      gridEl.innerHTML = '';
-      const err = document.createElement('div');
-      err.className = 'shk-error-block';
-      err.textContent = text;
-      gridEl.appendChild(err);
+    function renderDayclockTile(card) {
+      const node = dayclockTpl.content.firstElementChild.cloneNode(true);
+      const mount = node.querySelector('[data-dayclock-mount]');
+      // Defensive: wenn renderDayClock crash, Card bleibt sichtbar
+      try {
+        renderDayClock(mount, { size: 220 });
+      } catch (err) {
+        console.warn('Dayclock-Render fehlgeschlagen', err);
+        mount.textContent = 'Tages-Uhr';
+      }
+      return node;
+    }
+
+    function renderCard(card) {
+      let el;
+      if ((card.type || '').startsWith('action_')) {
+        el = renderAction(card);
+      } else if (card.type === 'dayclock') {
+        el = renderDayclockTile(card);
+      } else {
+        el = renderClassicCard(card);
+      }
+      applyGridSlot(el, card);
+      return el;
     }
 
     // -------------------------------------------------------------
-    // Ladevorgang
+    // Page + Slider-Rendering
+    // -------------------------------------------------------------
+
+    function renderPage(page) {
+      const section = document.createElement('section');
+      section.className = 'shk-heim-page';
+      section.dataset.pageId = page.page_id;
+      section.setAttribute('aria-label', page.label || page.page_id);
+
+      (page.cards || []).forEach(card => {
+        section.appendChild(renderCard(card));
+      });
+
+      return section;
+    }
+
+    function renderHeim(heim) {
+      greetingEl.textContent = heim.greeting || '';
+      sliderEl.innerHTML = '';
+
+      // Pages-Pfad (5.5.D.5)
+      if (Array.isArray(heim.pages) && heim.pages.length > 0) {
+        const frag = document.createDocumentFragment();
+        heim.pages.forEach(page => frag.appendChild(renderPage(page)));
+        sliderEl.appendChild(frag);
+        initHeimSlider(sliderEl);
+        return;
+      }
+
+      // Fallback: flache cards-Liste in einer einzelnen Page rendern
+      const fallback = document.createElement('section');
+      fallback.className = 'shk-heim-page';
+      fallback.setAttribute('aria-label', 'Heim');
+      (heim.cards || []).forEach((card, i) => {
+        // Synthetische Position: 2-spaltig, automatischer Stack
+        const synth = {
+          type: card.id,
+          size: card.size || '2x2',
+          position: [(i % 2) * 2, Math.floor(i / 2) * 2],
+          title: card.title,
+          subtitle: card.subtitle,
+          icon: card.icon,
+          url: card.action_url,
+          placeholder: false,
+        };
+        fallback.appendChild(renderCard(synth));
+      });
+      sliderEl.appendChild(fallback);
+    }
+
+    function renderError(text) {
+      sliderEl.innerHTML = `<div class="shk-error-block" style="padding: var(--shk-space-lg);">${text}</div>`;
+    }
+
+    // -------------------------------------------------------------
+    // Laden
     // -------------------------------------------------------------
     async function load() {
       try {
