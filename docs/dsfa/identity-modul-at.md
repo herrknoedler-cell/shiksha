@@ -54,7 +54,7 @@ Konfiguriert in `editions/jurisdictions/at.yaml`, jurisdiktions-spezifisch über
 2. Foto-Capture des Ausweises (Vorder- + Rückseite) durch Tablet oder Webcam
 3. OCR + MRZ-Parsing **lokal** auf dem Server, kein externer Cloud-Service
 4. Whitelist-Filter `_filter_mrz_to_whitelist()` blockiert nicht-erlaubte MRZ-Felder vor DB-Insert; Ausweisnummer wird normalisiert und gehasht
-5. Vier-Augen-Bestätigung durch zweite/n Mitarbeiter/in
+5. Verifikations-Bestätigung durch berechtigte/n Mitarbeiter/in mit lückenloser Dokumentation im Audit-Log (Operator-ID, Zeitstempel, Aktion); in Tenant-Konfigurationen mit `four_eyes_required: true` zusätzlich durch eine zweite Person gegengezeichnet
 6. Verifikations-Status auf `verified` gesetzt; Bild-Datei wird nach 30 Tagen automatisch unwiderruflich gelöscht
 7. Authorisierungs-Anlage: leitende Person ordnet verifizierte Identität einem konkreten Kind zu
 
@@ -64,7 +64,7 @@ Konfiguriert in `editions/jurisdictions/at.yaml`, jurisdiktions-spezifisch über
 
 ### 2.1 Erforderlichkeit
 
-Die Verarbeitung ist erforderlich zur Erfüllung der Aufsichtspflicht der Einrichtung gemäß &lt;&lt;LANDES-KINDERGARTENGESETZ-PARAGRAPH ANZUPASSEN, z. B. Vorarlberger Kindergartengesetz LGBl. 53/2002&gt;&gt; und zum Schutz des betreuten Kindes. Ohne dokumentierte Abholberechtigung kann die Einrichtung im Streitfall (z. B. Sorgerechts-Konflikt, getrennt lebende Eltern, Hausverbot gegen Elternteil) nicht nachweisen, dass die Übergabe rechtmäßig erfolgte.
+Die Verarbeitung ist erforderlich zur Erfüllung der Aufsichtspflicht der Einrichtung gemäß § 1309 ABGB iVm dem Vorarlberger Kinderbildungs- und -betreuungsgesetz (KBBG, LGBl. Nr. 72/2022) und der dazu ergangenen Personaleinsatz- und Gruppengrößenverordnung (LGBl. Nr. 78/2022) sowie dem zwischen Träger und Erziehungsberechtigten geschlossenen Betreuungsvertrag; Ziel ist der Schutz des betreuten Kindes. Ohne dokumentierte Abholberechtigung kann die Einrichtung im Streitfall (z. B. Sorgerechts-Konflikt, getrennt lebende Eltern, Hausverbot gegen Elternteil) nicht nachweisen, dass die Übergabe rechtmäßig erfolgte.
 
 ### 2.2 Geprüfte Alternativen
 
@@ -95,10 +95,10 @@ Score: W × S; ab Score ≥ 6 = hohes Risiko
 | # | Risiko | W | S | Score | Begründung |
 |---|---|---|---|---|---|
 | R1 | Daten-Abfluss aus DB durch externen Angriff | 2 | 3 | 6 | Identitäts-Stammdaten + Hashes können bei Server-Breach zugreifbar werden. |
-| R2 | Unbefugter interner Zugriff (Insider-Missbrauch) | 1 | 3 | 3 | role_scope-Beschränkung + Audit-Log + Vier-Augen mitigieren. |
+| R2 | Unbefugter interner Zugriff (Insider-Missbrauch) | 1 | 3 | 3 | role_scope-Beschränkung + lückenloses Audit-Log + jährliche Audit-Reviews mitigieren. |
 | R3 | Cross-Tenant-Identity-Korrelation | 1 | 2 | 2 | Per-Tenant-Salt verhindert systematische Hash-Korrelation. |
 | R4 | Identitätsdiebstahl durch gestohlene Bild-Datei | 2 | 3 | 6 | Bild max. 30 Tage online; File-System verschlüsselt. |
-| R5 | Fehlerhafter OCR-Auto-Fill → falsche Verifikation | 2 | 2 | 4 | Vier-Augen-Bestätigung mitigiert; OCR-Konfidenz geloggt. |
+| R5 | Fehlerhafter OCR-Auto-Fill → falsche Verifikation | 2 | 2 | 4 | Mitarbeiter-Bestätigung mit Audit-Eintrag mitigiert; OCR-Konfidenz geloggt und bei niedrigen Werten in der UI angezeigt. |
 | R6 | Auto-Löschung scheitert (Bug, Disk-Full) | 2 | 2 | 4 | Nightly-Job + Monitoring auf File-Counter-Diff. |
 | R7 | DSGVO-Auskunfts-Anfrage kann nicht erfüllt werden | 1 | 2 | 2 | Standard-Export-Funktion vorhanden; Audit-Log durchsuchbar. |
 | R8 | Legal-Hold-Versäumnis (Auto-Löschung im laufenden Verfahren) | 1 | 3 | 3 | Legal-Hold-Flag dokumentiert, Lösch-Job respektiert es. |
@@ -121,7 +121,7 @@ Score: W × S; ab Score ≥ 6 = hohes Risiko
 
 ### 4.2 Organisatorische Maßnahmen
 
-- **Vier-Augen-Prinzip:** Verifikation erfordert zwei separate Mitarbeitende (erfasst und bestätigt)
+- **Verifikations-Dokumentation:** jede Verifikation wird mit Operator-ID, Zeitstempel und Aktion im Audit-Log dokumentiert. In Tenant-Konfigurationen mit `four_eyes_required: true` (siehe `editions/jurisdictions/<code>.yaml`) zusätzlich Bestätigung durch eine zweite berechtigte Person erforderlich. Für Krummelus als Einrichtung mit einer dauerhaft anwesenden Leitungsperson aktuell deaktiviert; siehe Tech-Schuld T-012 für die Multi-Leitung-Erweiterung.
 - **Schulung:** DSGVO-Grundlagen-Schulung pro Mitarbeitende mit Identity-Modul-Zugang; jährliche Auffrischung dokumentiert
 - **Berechtigungs-Konzept:** rollen-bezogene Zugriffsmatrix dokumentiert, Review zweimal jährlich
 - **Lösch-Konzept:** dokumentierte Lösch-Prozesse für Manual-Löschung auf Antrag (Art. 17 DSGVO), Bearbeitungs-Zeit ≤ 30 Tage
@@ -142,7 +142,7 @@ Nach Anwendung der Maßnahmen verbleiben folgende Restrisiken:
 
 - **Server-Breach trotz Verschlüsselung (R1, R4):** Bei kompromittiertem Server-Master-Key wären Daten lesbar. Mitigation durch jährliche Schlüssel-Rotation, separate Key-Storage, Einbruchs-Erkennung. Restrisiko: tragbar.
 - **Insider-Missbrauch durch leitende Person (R2):** role_scope `leitung` hat substanziellen Zugriff. Mitigation durch lückenloses Audit-Log und jährliche Audit-Reviews. Restrisiko: tragbar.
-- **OCR-Fehler bei seltenen Ausweis-Typen (R5):** mitigiert durch Vier-Augen, aber Mitarbeiter-Fehler bei der Bestätigung bleibt menschlich. Restrisiko: gering, durch Schulung adressiert.
+- **OCR-Fehler bei seltenen Ausweis-Typen (R5):** mitigiert durch Mitarbeiter-Bestätigung mit dokumentiertem Audit-Eintrag, aber Mitarbeiter-Fehler bei der Bestätigung bleibt menschlich. Restrisiko: gering, durch Schulung adressiert.
 
 **Gesamtbewertung:** Restrisiko ist tragbar im Sinne der DSGVO. Keine Zustimmungspflicht der Aufsichtsbehörde nach Art. 36 DSGVO erforderlich — **außer** die DSB-Vorprüfung (Sektion 7) ergibt anderes.
 

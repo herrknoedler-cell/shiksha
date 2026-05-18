@@ -930,6 +930,74 @@ Vorgeschlagene Reihenfolge (nach T-009 Mini-Sprint):
 
 ---
 
+## 12.x — Modul-Schluss-Inventar (5.5.6 komplett, 2026-05-18)
+
+```
+✅ 5.5.6.0   Spec v0.3-DRAFT + DSFA + Consent + DSB-Anschreiben +
+             Edition-Configs (at.yaml, at-8.yaml) + Tech-Debt
+             (commit 0286490, danach v0.3-Verfeinerungen uncommitted)
+✅ 5.5.6.1   DB + Models + Schemas + Jurisdiction-Layer
+             Migration 0010_identity (4 Tabellen + organizations-Erweiterung),
+             services/jurisdiction.py mit Deep-Merge-Loader
+             (commit 85edc5a)
+✅ 5.5.6.2   Endpoints + OCR + Cleanup-Skelett
+             14 REST-Endpoints, services/identity_ocr.py (Tesseract + MRZ
+             TD1/TD3 + Whitelist-Filter + Hash mit Tenant-Salt),
+             services/identity_query.py (Audit + File-Storage + Resolver),
+             services/identity_cleanup.py-Skelett, scripts/identity_cleanup_cli.py
+             (commit e95351d)
+⏭️ 5.5.6.3   Greenfield-Import — übersprungen (Krummelus ohne Legacy-Daten)
+✅ 5.5.6.4   Frontend Surface — identity.html mit 3-Step-Wizard,
+             Camera-API + File-Fallback, shiksha-client.js um 14 Methoden
+             erweitert. Vier-Augen-Bestätigung deferred (T-012)
+             (commit f47be05)
+⏭️ 5.5.6.5   Avatar-Engine-Refactor — bewusst nicht in 5.5.6-Block
+             gezogen; bleibt Polish-Sub-Drop nach Modul-Schluss
+✅ 5.5.6.6.a Heim-Karte + identity_summary-Provider
+             abholer_pruefen-Karte aktualisiert, neue Heim-Provider-
+             Funktion zählt pending + expiring (commit 40b42f2)
+✅ 5.5.6.6.b Bridge-Whitelist-Trim — kita/identity raus,
+             Reject-Regression-Test in tests/test_bridge.py
+             (commit dieser Lieferung)
+```
+
+**Pre-Sprint-Sweep (zwischenliegende Schritte, die das Modul ermöglicht haben):**
+
+```
+✅ T-009     Tenant-TZ-Drift in calendar_query.py gefixt — Pattern-Vorlage
+             für identity_summary's Tenant-TZ-Berechnung (commit f9d7d15)
+✅ T-011     Three-Tier-Cleanup-Job verkabelt — Voraussetzung für
+             5.5.6.6.b in AT-Tenants. Läuft täglich 03:00 UTC via systemd-
+             Timer auf 88.99.174.186 (commit 73a2053)
+```
+
+**Offene Tech-Debt-Punkte (nicht 5.5.6.6.b-blockierend):**
+
+```
+□ T-010     Legacy server/identity_*-Code archivieren (Move nach
+            legacy/identity/ + README-Verweis, 6-Monats-Übergangsfrist)
+□ T-012     Vier-Augen-Backend für Multi-Leitung-Tenants
+            (Schema-Hook four_eyes_required: false ist in at.yaml,
+            Backend-Reader + zweiter Passkey-Login fehlen)
+□ T-013     YAML-Schema-Erweiterung um size + holi_border formalisieren
+            (heim_loader nutzt .get(), Felder werden silent ignoriert)
+□ T-014     Expiring-Warning-Days aus jurisdiction-Yaml lesen statt
+            Modul-Konstante in heim_providers.py (aktuell hardcoded 30)
+□ T-015     compute_structured_delete_at um linked_person.exit_date+N
+            Re-Compute beim Cleanup erweitern (aktuell wird der Wert
+            nur einmalig beim Verify gesetzt)
+```
+
+**Pending Process-Items (außerhalb Code):**
+
+```
+□ DSB-Anfrage rausschicken (DSFA + Consent + Anschreiben sind als
+  v1.0-DRAFT bereit, Träger-Platzhalter müssen befüllt werden)
+□ Spec v0.4-DRAFT → v1.0 nach DSB-Antwort und Mira-Review der DSFA
+```
+
+---
+
 ## 13. Forward-Compat — Phase 2
 
 ### 13.1 Passkey-Authorization

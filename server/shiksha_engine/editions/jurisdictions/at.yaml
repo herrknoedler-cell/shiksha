@@ -13,3 +13,6 @@ identity:
   pre_rollout_authority_query_required: true
   consent_text_path: "editions/jurisdictions/at/consent_de_AT.md"
   dsfa_required: true                       # DSFA-V der DSB
+  four_eyes_required: false                 # Default für AT-Träger; auf true wenn
+                                            # Einrichtung dauerhaft zwei Leitungspersonen
+                                            # hat. Backend-Implementierung in T-012.

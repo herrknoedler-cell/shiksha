@@ -42,8 +42,8 @@ router = APIRouter()
 #   /kita/staff        → shiksha_core.persons (kind=staff),  Schritt 5.5.3
 #   /kita/calendar     → shiksha_core.events,                Schritt 5.5.4
 #   /kita/anwesenheit  → shiksha_core.attendance_records,    Schritt 5.5.5
+#   /kita/identity     → shiksha_core.identity_persons,      Schritt 5.5.6
 ALLOWED_PREFIXES = (
-    "/kita/identity",    # → schließt in 5.5.6
     "/kita/push",        # → schließt in 5.5.7
     "/kita/compliance",  # → bleibt offen oder schließt in 5.5.8
 )
