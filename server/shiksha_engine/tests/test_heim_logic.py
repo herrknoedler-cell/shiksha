@@ -284,6 +284,17 @@ def test_load_heim_for_padagoge_includes_abholer(db, pedagogin):
     assert "abholer_pruefen" in card_ids
 
 
+def test_load_heim_passes_size_and_holi_border(db, pedagogin):
+    """T-013: size + holi_border aus YAML kommen in der HeimCard an
+    (für CSS-Modifier im Frontend). abholer_pruefen hat size='2x2'
+    und holi_border='tuerkis' aus 5.5.6.6.a-Pre-Sale."""
+    result = load_heim(pedagogin, db)
+    abholer = next((c for c in result.cards if c.id == "abholer_pruefen"), None)
+    assert abholer is not None
+    assert abholer.size == "2x2"
+    assert abholer.holi_border == "tuerkis"
+
+
 def test_load_heim_for_padagoge_excludes_leitung_only(db, pedagogin):
     """personal_heute ist role_scope=['leitung'] — Pädagogin sieht das nicht."""
     result = load_heim(pedagogin, db)

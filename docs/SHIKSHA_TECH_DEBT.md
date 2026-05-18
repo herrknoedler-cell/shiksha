@@ -282,6 +282,28 @@ Tier 2 und Tier 3 analog. Wichtig:
 
 ---
 
+## T-013 — Heim-Karten-Konzept-Felder lebendig (`size` + `holi_border`)
+
+**Status:** RESOLVED 2026-05-18 (Commit folgt). **Eröffnet:** 5.5.6.6.a-Pre-Sale. **Schwere war:** niedrig — kein Funktions-Bug, aber YAML-Felder die der Service ignorierte und die nichts zur UI beitrugen.
+
+**Was:** Die `size: "2x2"` und `holi_border: "tuerkis"` Felder, die 5.5.6.6.a in `editions/kita.yaml` als Vorbereitung für ein späteres Heim-Layout-Konzept eingetragen hatte, wurden vom `heim_loader.py` via `.get()` silent ignoriert — kamen nie ans Frontend, machten keinen Unterschied. T-013 hat das als Tech-Debt notiert und auf "späteren heim.html-Refactor" verwiesen.
+
+**Resolution:** Minimal-invasiver Pass-Through ohne Design-System-Anfassung:
+
+1. `schemas/heim.py`: `HeimCard` um `size: str | None` und `holi_border: str | None` erweitert.
+2. `services/heim_loader.py`: `_build_card()` liest beide Felder via `card_def.get()` aus YAML und reicht sie in `HeimCard` durch.
+3. `frontend/heim.html`: inline-CSS-Block für `.shk-card--size-2x1/1x2/2x2` (Grid-Span) und `.shk-card--holi-pink/tuerkis/yellow/purple/orange/green` (linker Border-Akzent). `renderCard()` liest `card.size`/`card.holi_border` und setzt die Modifier-Klassen.
+4. `tests/test_heim_logic.py`: 1 neuer Test prüft Durchreichung der Werte aus `abholer_pruefen`.
+5. Mobile-Fallback: bei `< 600px` Single-Column-Stack (Grid-Span aufgehoben).
+
+**Bewusst nicht im Scope:**
+- Kein Anfassen von `shiksha-ui.v1.0.0.css` (Design-System v1.0 bleibt stabil — eigene Lifecycle-Spur).
+- Kein 4×6-Grid, kein Screen-Slider, keine Glasmorphism-Inszenierung — das gehört in einen späteren `SHIKSHA_DESIGN_KONZEPT.md`-getriebenen Sprint mit eigenen Tokens und Versions-Bump.
+
+**Wann fällig war:** als Folge-Polish zu 5.5.6.6.a.
+
+---
+
 ## Schließe-Kriterien
 
 Ein Tech-Debt-Eintrag wird gelöscht (nicht "✅ erledigt" gestrichen), wenn:

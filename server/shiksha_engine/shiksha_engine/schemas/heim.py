@@ -7,13 +7,18 @@ from pydantic import BaseModel, Field
 
 class HeimCard(BaseModel):
     """Eine fertig gerenderte Karte für das Heim-Frontend."""
-    id:         str
-    title:      str
-    subtitle:   str | None = None
-    icon:       str | None = None
-    action_url: str
-    category:   str | None = None
-    priority:   int = 5
+    id:          str
+    title:       str
+    subtitle:    str | None = None
+    icon:        str | None = None
+    action_url:  str
+    category:    str | None = None
+    priority:    int = 5
+    # Konzept-Felder (5.5.6.6.a Pre-Sale, lebendig seit T-013):
+    # CSS-Klassen werden frontend-seitig als shk-card--size-{value}
+    # und shk-card--holi-{value} angewendet.
+    size:        str | None = None
+    holi_border: str | None = None
 
 
 class HeimResponse(BaseModel):

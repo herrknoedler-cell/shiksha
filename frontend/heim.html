@@ -22,6 +22,47 @@
   <!-- Design-System: Basis + KITA-Edition-Overrides -->
   <link rel="stylesheet" href="./shiksha-ui.v1.0.0.css">
   <link rel="stylesheet" href="./editions-css/kita.v1.0.0.css">
+
+  <style>
+    /* =====================================================
+       Heim — Karten-Größen + Holi-Border-Akzente (T-013)
+       Lebendig macht die Konzept-Felder size + holi_border
+       aus editions/<edition>.yaml. Wird vom Heim-Loader
+       in HeimCard.size / HeimCard.holi_border durchgereicht
+       und vom renderCard() in heim.html als CSS-Modifier-
+       Klasse gesetzt.
+       Bewusst inline in heim.html (Lifecycle-Spur), damit
+       das Design-System v1.0 stabil bleibt — ein eigenes
+       Konzept-Doc wird die Tokens später hochziehen.
+       ===================================================== */
+
+    /* Karten-Größen — Grid-Span auf .shk-grid */
+    .shk-card.shk-card--size-2x1 { grid-column: span 2; }
+    .shk-card.shk-card--size-1x2 { grid-row:    span 2; }
+    .shk-card.shk-card--size-2x2 { grid-column: span 2; grid-row: span 2; }
+
+    /* Holi-Border-Akzente — farbiger linker Border */
+    .shk-card.shk-card--holi-pink      { border-left: 4px solid #ff4d8d; }
+    .shk-card.shk-card--holi-tuerkis,
+    .shk-card.shk-card--holi-turquoise { border-left: 4px solid #00d4d4; }
+    .shk-card.shk-card--holi-yellow,
+    .shk-card.shk-card--holi-gelb      { border-left: 4px solid #ffd93d; }
+    .shk-card.shk-card--holi-purple,
+    .shk-card.shk-card--holi-lila      { border-left: 4px solid #a855f7; }
+    .shk-card.shk-card--holi-orange    { border-left: 4px solid #ff8c42; }
+    .shk-card.shk-card--holi-green,
+    .shk-card.shk-card--holi-gruen     { border-left: 4px solid #6dd47e; }
+
+    /* Auf Mobile (< 600px) keine Grid-Span — Single-Column-Stack */
+    @media (max-width: 599px) {
+      .shk-card.shk-card--size-2x1,
+      .shk-card.shk-card--size-1x2,
+      .shk-card.shk-card--size-2x2 {
+        grid-column: auto;
+        grid-row:    auto;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -152,6 +193,17 @@
       }
       if (card.category === 'feature') {
         node.classList.add('shk-card--feature');
+      }
+
+      // Konzept-Felder (5.5.6.6.a Pre-Sale, lebendig seit T-013):
+      // size = "2x1" | "1x2" | "2x2" → Grid-Span-Klasse
+      // holi_border = "pink" | "tuerkis" | "yellow" | ... → Border-Akzent
+      if (card.size && /^[12]x[12]$/.test(card.size)) {
+        node.classList.add(`shk-card--size-${card.size}`);
+      }
+      if (card.holi_border) {
+        const safe = card.holi_border.toLowerCase().replace(/[^a-z]/g, '');
+        if (safe) node.classList.add(`shk-card--holi-${safe}`);
       }
 
       // Icon einsetzen

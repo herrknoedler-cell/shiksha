@@ -137,6 +137,8 @@ def _render_card(
         action_url=card_def["action_url"],
         category=card_def.get("category"),
         priority=priority,
+        size=card_def.get("size"),
+        holi_border=card_def.get("holi_border"),
     )
 
 
